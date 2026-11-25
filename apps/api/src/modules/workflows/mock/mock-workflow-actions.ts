@@ -18,6 +18,7 @@ import {
   DomainError,
   NotFoundError,
 } from "../../../common/domain-error.js";
+import { RunningPayments } from "../running-payments.js";
 import { RunningTaskActions } from "../running-task-actions.js";
 import { WorkflowReadModel } from "../workflow-read-model.js";
 import { MockDecisionOverlay } from "./mock-decision-overlay.js";
@@ -45,7 +46,8 @@ function assertCompletable(task: WorkflowTask): void {
  * audit comes first, so a failed write leaves nothing behind. Only the
  * permission on the route and the inbox the task sits in decide who may act.
  * SPR decisions have left this class for the state machine, and so has a task
- * whose order the machine runs: `RunningTaskActions` takes it. The rest follow.
+ * whose order the machine runs: `RunningTaskActions` takes it, and its payments
+ * go to `RunningPayments`. The rest follow.
  */
 @Injectable()
 export class MockWorkflowActions {
@@ -58,6 +60,9 @@ export class MockWorkflowActions {
     @Optional()
     @Inject(RunningTaskActions)
     private readonly running?: RunningTaskActions,
+    @Optional()
+    @Inject(RunningPayments)
+    private readonly runningPayments?: RunningPayments,
   ) {}
 
   async completeTask(
@@ -121,6 +126,10 @@ export class MockWorkflowActions {
     info: ActionInfo,
   ): Promise<PaymentResult> {
     return this.oneAtATime(`payment:${orderNo}`, async () => {
+      const payments = this.runningPayments;
+      if (payments && (await payments.runs(orderNo))) {
+        return payments.confirm(orderNo, input, auth, info);
+      }
       const repeated = this.overlay
         .paymentsOf(orderNo)
         .some(
@@ -175,6 +184,10 @@ export class MockWorkflowActions {
     info: ActionInfo,
   ): Promise<PaymentUndoResult> {
     return this.oneAtATime(`payment:${orderNo}`, async () => {
+      const payments = this.runningPayments;
+      if (payments && (await payments.runs(orderNo))) {
+        return payments.undo(orderNo, paymentId, auth, info);
+      }
       const known = this.overlay
         .paymentsOf(orderNo)
         .some((record) => record.id === paymentId);

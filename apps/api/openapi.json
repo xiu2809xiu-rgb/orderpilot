@@ -2998,6 +2998,70 @@
                             ],
                             "additionalProperties": false
                           }
+                        },
+                        "pi": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "recordNo": {
+                              "type": "string",
+                              "pattern": "^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"
+                            },
+                            "issue": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            },
+                            "sentAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "sentBy": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "reversals": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "issue": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "reason": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  "by": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": ["issue", "reason", "at", "by"],
+                                "additionalProperties": false
+                              }
+                            },
+                            "reissuable": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "recordNo",
+                            "issue",
+                            "sentAt",
+                            "sentBy",
+                            "reversals",
+                            "reissuable"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -3013,8 +3077,7 @@
                       "type": "object",
                       "properties": {
                         "mock": {
-                          "type": "boolean",
-                          "enum": [true]
+                          "type": "boolean"
                         }
                       },
                       "required": ["mock"],
@@ -3028,7 +3091,7 @@
             }
           }
         },
-        "summary": "An order's steps and timeline (mock data)",
+        "summary": "An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock",
         "tags": ["Workflows"]
       }
     },
@@ -3154,7 +3217,7 @@
             }
           }
         },
-        "summary": "Confirm a payment, with its type. Kept in the mock overlay, audited",
+        "summary": "Confirm a payment, with its type. Audited. On an order the state machine runs it is stored, and once the prepayment is covered the order moves to the warehouse; on a sample it is kept in the mock overlay",
         "tags": ["Workflows"]
       }
     },
@@ -3237,6 +3300,221 @@
           }
         },
         "summary": "Undo a payment confirmation. Audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/pi/reissue": {
+      "post": {
+        "operationId": "Workflows_reissuePi",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": ["reason"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "recordNo": {
+                          "type": "string",
+                          "pattern": "^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"
+                        },
+                        "issue": {
+                          "type": "integer",
+                          "minimum": 2,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "applied",
+                        "message",
+                        "orderNo",
+                        "recordNo",
+                        "issue"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/sales-approval": {
+      "post": {
+        "operationId": "Workflows_approveSale",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": ["comment"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "approved": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["applied", "message", "orderNo", "approved"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Approve a sales order before its PI, while SALES_APPROVAL is on (#251, off by default). Area 4's policy says who may; never the person who raised it. Audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/sales-approval/undo": {
+      "post": {
+        "operationId": "Workflows_undoSaleApproval",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "approved": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["applied", "message", "orderNo", "approved"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Undo a sales approval; only its approver may. Audited",
         "tags": ["Workflows"]
       }
     },
@@ -11893,6 +12171,285 @@
           }
         },
         "summary": "Close a hold as the second approver, accepting the new details or keeping the stored ones. Audited",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/notices": {
+      "get": {
+        "operationId": "GovernanceNotice_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": ["admin-role-widened"]
+                          },
+                          "actorName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "permissions": {
+                            "minItems": 1,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "users.read",
+                                "users.manage",
+                                "roles.read",
+                                "roles.manage",
+                                "settings.manage",
+                                "audit.read",
+                                "aiUsage.read",
+                                "documents.read",
+                                "documents.upload",
+                                "orders.read",
+                                "orders.create",
+                                "orders.edit",
+                                "tracker.read",
+                                "exceptions.read",
+                                "insights.read",
+                                "approvals.decide",
+                                "payments.confirm",
+                                "payments.post",
+                                "workflows.read",
+                                "spr.read",
+                                "workflows.inboxes.any",
+                                "tasks.complete",
+                                "masking.customerNote",
+                                "spr.route"
+                              ]
+                            }
+                          },
+                          "fromRole": {
+                            "nullable": true,
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "read": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "actorName",
+                          "permissions",
+                          "fromRole",
+                          "createdAt",
+                          "read"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "unread": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["page", "pageSize", "total", "unread"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "What the administrator's role gained, newest first, for the management approvers",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/notices/{id}/read": {
+      "post": {
+        "operationId": "GovernanceNotice_read",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": ["admin-role-widened"]
+                        },
+                        "actorName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "permissions": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "orders.create",
+                              "orders.edit",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post",
+                              "workflows.read",
+                              "spr.read",
+                              "workflows.inboxes.any",
+                              "tasks.complete",
+                              "masking.customerNote",
+                              "spr.route"
+                            ]
+                          }
+                        },
+                        "fromRole": {
+                          "nullable": true,
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "kind",
+                        "actorName",
+                        "permissions",
+                        "fromRole",
+                        "createdAt",
+                        "read"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Mark a notice read, for the person asking",
         "tags": ["Governance"]
       }
     },

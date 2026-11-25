@@ -330,7 +330,7 @@ describe("OrderWorkflowService, applying a transition", () => {
 
     const relaxed = await setUp({
       stored: shortfall,
-      rules: { sprRequiredOnShortfall: false },
+      rules: { ...DEFAULT_ORDER_FLOW_RULES, sprRequiredOnShortfall: false },
     }).service.apply("SO-0001", { type: "PI_SENT" }, support, INFO, AT);
     expect(relaxed.state.status).toBe("AwaitingPayment");
   });

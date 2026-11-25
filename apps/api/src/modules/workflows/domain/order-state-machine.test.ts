@@ -9,6 +9,7 @@ import { DomainError } from "../../../common/domain-error.js";
 import { STARTER_SALES_STEPS } from "./sales-flow.js";
 import {
   currentStepOf,
+  DEFAULT_ORDER_FLOW_RULES,
   holdKeyOf,
   navisionStatusOf,
   TRANSITION_EVENTS,
@@ -22,6 +23,11 @@ import {
 const AT = new Date("2026-11-05T02:00:00.000Z");
 
 const machine = new OrderStateMachine();
+/** With the sales approval on, which is off by default (#251, point 9). */
+const SALES_MACHINE = new OrderStateMachine({
+  ...DEFAULT_ORDER_FLOW_RULES,
+  salesApprovalRequired: true,
+});
 
 function person(role: Role): OrderActor {
   return { kind: "user", userId: "user-1", name: `Test ${role}`, role };
@@ -50,6 +56,8 @@ interface CommandCase {
   readonly facts?: Partial<OrderSnapshot>;
   /** Every status the event is legal from, with the status it leads to. */
   readonly legal: Partial<Record<OrderStatus, OrderStatus>>;
+  /** A machine with other rules, for an event only some rules allow. */
+  readonly machine?: OrderStateMachine;
 }
 
 // Written out by hand, not read from the machine's table: a test that derived
@@ -91,6 +99,19 @@ const CASES: readonly CommandCase[] = [
     legal: { SprApproved: "AwaitingSpr", StockChecked: "AwaitingSpr" },
   },
   {
+    command: { type: "SALES_APPROVED", byUserId: "user-1" },
+    actor: person("APPROVER"),
+    machine: SALES_MACHINE,
+    legal: { StockChecked: "StockChecked", SprApproved: "SprApproved" },
+  },
+  {
+    command: { type: "SALES_APPROVAL_UNDONE" },
+    actor: person("APPROVER"),
+    machine: SALES_MACHINE,
+    facts: { salesApproved: true, salesApprovedByUserId: "user-1" },
+    legal: { StockChecked: "StockChecked", SprApproved: "SprApproved" },
+  },
+  {
     command: { type: "PI_SENT" },
     actor: person("SUPPORT"),
     legal: { StockChecked: "AwaitingPayment", SprApproved: "AwaitingPayment" },
@@ -105,10 +126,25 @@ const CASES: readonly CommandCase[] = [
     legal: { AwaitingPayment: "Paid" },
   },
   {
+    command: { type: "PI_SEND_UNDONE" },
+    actor: person("SUPPORT"),
+    legal: { AwaitingPayment: "StockChecked" },
+  },
+  {
+    command: { type: "PAYMENT_UNDONE" },
+    actor: person("FINANCE"),
+    legal: { Paid: "AwaitingPayment" },
+  },
+  {
     command: { type: "PACKING_STARTED" },
     actor: person("WAREHOUSE"),
     facts: { prepaymentDue: null },
     legal: { AwaitingPayment: "Packing", Paid: "Packing" },
+  },
+  {
+    command: { type: "PACKING_UNDONE" },
+    actor: person("WAREHOUSE"),
+    legal: { Packing: "Paid" },
   },
   {
     command: { type: "INVOICED" },
@@ -198,12 +234,13 @@ describe("every status against every event", () => {
 
   it.each(every)(
     "$command.type from $status does what the list says",
-    ({ command, actor, facts, legal, status }) => {
+    ({ command, actor, facts, legal, status, machine: own }) => {
       const state = frozen(snapshot(status, facts));
       const to = legal[status];
+      const m = own ?? machine;
 
       if (to) {
-        const result = machine.apply(state, command, actor, AT);
+        const result = m.apply(state, command, actor, AT);
         expect(result.state.status).toBe(to);
         expect(result.event).toMatchObject({
           type: command.type,
@@ -213,7 +250,7 @@ describe("every status against every event", () => {
           at: AT,
         });
       } else {
-        const error = refusal(() => machine.apply(state, command, actor, AT));
+        const error = refusal(() => m.apply(state, command, actor, AT));
         expect(error.code).toBe("CONFLICT");
         expect(error.httpStatus).toBe(409);
         expect(error.message).toContain(status);
@@ -229,7 +266,7 @@ describe("every status against every event", () => {
 
   it("covers every status and every event in the machine", () => {
     expect(ORDER_STATUSES).toHaveLength(14);
-    expect(every).toHaveLength(14 * 17);
+    expect(every).toHaveLength(14 * 22);
   });
 });
 
@@ -238,7 +275,13 @@ describe("who may make each transition", () => {
     Object.keys(c.legal)[0] as OrderStatus;
 
   // Who may decide an SPR reaches beyond one role, so area 4's policy says, not the table.
-  const BY_POLICY = ["SPR_APPROVED", "SPR_REJECTED", "SPR_DECISION_UNDONE"];
+  const BY_POLICY = [
+    "SPR_APPROVED",
+    "SPR_REJECTED",
+    "SPR_DECISION_UNDONE",
+    "SALES_APPROVED",
+    "SALES_APPROVAL_UNDONE",
+  ];
 
   it.each(BY_POLICY)(
     "lets any person try %s, for the policy to judge",
@@ -247,7 +290,12 @@ describe("who may make each transition", () => {
       if (!c) throw new Error(type);
       for (const role of ROLES) {
         expect(() =>
-          machine.apply(snapshot(firstLegal(c)), c.command, person(role), AT),
+          (c.machine ?? machine).apply(
+            snapshot(firstLegal(c), c.facts),
+            c.command,
+            person(role),
+            AT,
+          ),
         ).not.toThrow();
       }
     },
@@ -266,7 +314,7 @@ describe("who may make each transition", () => {
     ({ command, facts, role, ...c }) => {
       const state = snapshot(firstLegal({ command, facts, ...c }), facts);
       const error = refusal(() =>
-        machine.apply(state, command, person(role), AT),
+        (c.machine ?? machine).apply(state, command, person(role), AT),
       );
       expect(error.code).toBe("FORBIDDEN");
     },
@@ -276,7 +324,9 @@ describe("who may make each transition", () => {
     "refuses $command.type by the system, because a person must do it",
     (c) => {
       const state = snapshot(firstLegal(c), c.facts);
-      const error = refusal(() => machine.apply(state, c.command, SYSTEM, AT));
+      const error = refusal(() =>
+        (c.machine ?? machine).apply(state, c.command, SYSTEM, AT),
+      );
       expect(error.code).toBe("FORBIDDEN");
     },
   );
@@ -308,6 +358,8 @@ describe("order transitions (the state machine)", () => {
       holds: [],
       resumeTo: null,
       enteredAt: AT.toISOString(),
+      // The person who starts it raised it (#251, point 9).
+      raisedByUserId: "user-1",
     });
     expect(event).toEqual({
       type: "ORDER_STARTED",
@@ -356,7 +408,12 @@ describe("order transitions (the state machine)", () => {
   it("refuses a transition out of a closed order", () => {
     for (const c of CASES) {
       const error = refusal(() =>
-        machine.apply(snapshot("Closed"), c.command, c.actor, AT),
+        (c.machine ?? machine).apply(
+          snapshot("Closed"),
+          c.command,
+          c.actor,
+          AT,
+        ),
       );
       expect(error.code).toBe("CONFLICT");
     }
@@ -365,7 +422,12 @@ describe("order transitions (the state machine)", () => {
   it("refuses a transition out of a cancelled order", () => {
     for (const c of CASES) {
       const error = refusal(() =>
-        machine.apply(snapshot("Cancelled"), c.command, c.actor, AT),
+        (c.machine ?? machine).apply(
+          snapshot("Cancelled"),
+          c.command,
+          c.actor,
+          AT,
+        ),
       );
       expect(error.code).toBe("CONFLICT");
     }
@@ -435,7 +497,10 @@ describe("order transitions (the state machine)", () => {
   });
 
   it("lets configuration turn the SPR requirement off, since the rule is still open (A-21)", () => {
-    const relaxed = new OrderStateMachine({ sprRequiredOnShortfall: false });
+    const relaxed = new OrderStateMachine({
+      ...DEFAULT_ORDER_FLOW_RULES,
+      sprRequiredOnShortfall: false,
+    });
     const { state } = relaxed.apply(
       snapshot("StockChecked", { stockCoversOrder: false }),
       { type: "PI_SENT" },
@@ -675,6 +740,180 @@ describe("the payment gate", () => {
       ),
     );
     expect(error.code).toBe("CONFLICT");
+  });
+});
+
+describe("the sales approval, off by default (#251, point 9)", () => {
+  const approver = person("APPROVER");
+  const ready = snapshot("StockChecked", { stockCoversOrder: true });
+
+  it("asks for none while the rule is off: the PI goes, and an approval is refused", () => {
+    expect(
+      machine.apply(ready, { type: "PI_SENT" }, person("SUPPORT"), AT).state
+        .status,
+    ).toBe("AwaitingPayment");
+    const error = refusal(() =>
+      machine.apply(
+        ready,
+        { type: "SALES_APPROVED", byUserId: "a" },
+        approver,
+        AT,
+      ),
+    );
+    expect(error.message).toContain("no sales approval is asked for");
+  });
+
+  it("holds the PI until an approver approves, and waits on the approvers meanwhile", () => {
+    const blocked = refusal(() =>
+      SALES_MACHINE.apply(ready, { type: "PI_SENT" }, person("SUPPORT"), AT),
+    );
+    expect(blocked.message).toContain("sales approval");
+    expect(
+      waitingOnOf(ready, {
+        ...DEFAULT_ORDER_FLOW_RULES,
+        salesApprovalRequired: true,
+      }),
+    ).toEqual({ step: "pi-sent", role: "APPROVER" });
+
+    const approved = SALES_MACHINE.apply(
+      ready,
+      { type: "SALES_APPROVED", byUserId: "approver-1" },
+      approver,
+      AT,
+    ).state;
+    expect(approved).toMatchObject({
+      status: "StockChecked",
+      salesApproved: true,
+      salesApprovedByUserId: "approver-1",
+    });
+    expect(
+      SALES_MACHINE.apply(approved, { type: "PI_SENT" }, person("SUPPORT"), AT)
+        .state.status,
+    ).toBe("AwaitingPayment");
+  });
+
+  it("refuses a second approval, and undoing one takes its approver with it", () => {
+    const approved = SALES_MACHINE.apply(
+      ready,
+      { type: "SALES_APPROVED", byUserId: "approver-1" },
+      approver,
+      AT,
+    ).state;
+    expect(
+      refusal(() =>
+        SALES_MACHINE.apply(
+          approved,
+          { type: "SALES_APPROVED", byUserId: "approver-2" },
+          approver,
+          AT,
+        ),
+      ).message,
+    ).toContain("already approved");
+
+    const undone = SALES_MACHINE.apply(
+      approved,
+      { type: "SALES_APPROVAL_UNDONE" },
+      approver,
+      AT,
+    ).state;
+    expect(undone.salesApproved).toBe(false);
+    expect(undone.salesApprovedByUserId).toBeUndefined();
+    expect(
+      refusal(() =>
+        SALES_MACHINE.apply(
+          undone,
+          { type: "SALES_APPROVAL_UNDONE" },
+          approver,
+          AT,
+        ),
+      ).message,
+    ).toContain("no sales approval to undo");
+  });
+
+  it("records who raised the order, the person who starts it, and its total when given", () => {
+    const started = machine.start(person("SUPPORT"), AT, {
+      prepaymentDue: null,
+      total: "1200.00",
+    });
+    expect(started.state).toMatchObject({
+      raisedByUserId: "user-1",
+      orderTotal: "1200.00",
+    });
+    expect(
+      machine.start(SYSTEM, AT, { prepaymentDue: null }).state.raisedByUserId,
+    ).toBeUndefined();
+  });
+});
+
+describe("undoing a payment or the packing", () => {
+  it("closes the gate again when Finance undoes the payment, and reopens it on a fresh confirmation", () => {
+    const paid = snapshot("Paid", { prepaymentDue: "100.00" });
+
+    const undone = machine.apply(
+      paid,
+      { type: "PAYMENT_UNDONE" },
+      person("FINANCE"),
+      AT,
+    );
+
+    expect(undone.state.status).toBe("AwaitingPayment");
+    const packing = refusal(() =>
+      machine.apply(
+        undone.state,
+        { type: "PACKING_STARTED" },
+        person("WAREHOUSE"),
+        AT,
+      ),
+    );
+    expect(packing.message).toContain("prepayment");
+  });
+
+  it("refuses to take back a payment once the warehouse has started packing", () => {
+    const error = refusal(() =>
+      machine.apply(
+        snapshot("Packing"),
+        { type: "PAYMENT_UNDONE" },
+        person("FINANCE"),
+        AT,
+      ),
+    );
+    expect(error.code).toBe("CONFLICT");
+  });
+
+  it("returns packing to Paid, or to waiting for payment when no prepayment was due", () => {
+    const back = machine.apply(
+      snapshot("Packing", { prepaymentDue: "100.00" }),
+      { type: "PACKING_UNDONE" },
+      person("WAREHOUSE"),
+      AT,
+    );
+    expect(back.state.status).toBe("Paid");
+
+    const noPrepayment = machine.apply(
+      snapshot("Packing", { prepaymentDue: null }),
+      { type: "PACKING_UNDONE" },
+      person("WAREHOUSE"),
+      AT,
+    );
+    expect(noPrepayment.state.status).toBe("AwaitingPayment");
+  });
+
+  it("takes a PI back to where it was sent from: the stock check, or the approved SPR of a short order", () => {
+    const covered = machine.apply(
+      snapshot("AwaitingPayment", { stockCoversOrder: true }),
+      { type: "PI_SEND_UNDONE" },
+      person("SUPPORT"),
+      AT,
+    );
+    expect(covered.state.status).toBe("StockChecked");
+
+    const short = machine.apply(
+      snapshot("AwaitingPayment", { stockCoversOrder: false }),
+      { type: "PI_SEND_UNDONE" },
+      person("SUPPORT"),
+      AT,
+    );
+    expect(short.state.status).toBe("SprApproved");
   });
 });
 
@@ -1122,6 +1361,7 @@ describe("what an order waits on", () => {
     ).toEqual({ step: "spr-approval", role: "PRODUCT_MANAGER" });
     expect(
       waitingOnOf(snapshot("StockChecked", { stockCoversOrder: false }), {
+        ...DEFAULT_ORDER_FLOW_RULES,
         sprRequiredOnShortfall: false,
       }),
     ).toEqual({ step: "pi-sent", role: "SUPPORT" });
@@ -1140,7 +1380,10 @@ describe("what an order waits on", () => {
   });
 
   it("reports the step on each transition, with the machine's own rules", () => {
-    const relaxed = new OrderStateMachine({ sprRequiredOnShortfall: false });
+    const relaxed = new OrderStateMachine({
+      ...DEFAULT_ORDER_FLOW_RULES,
+      sprRequiredOnShortfall: false,
+    });
     const command: OrderCommand = {
       type: "STOCK_CHECKED",
       stockCoversOrder: false,
