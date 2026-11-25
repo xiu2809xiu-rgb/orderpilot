@@ -352,9 +352,14 @@ test.describe("on a phone with a touch screen", () => {
     await page.getByRole("button", { name: "Open navigation menu" }).click();
     const button = dot(page);
     await expect(button).toBeVisible();
-    const box = await button.boundingBox();
-    expect(box?.width).toBeGreaterThanOrEqual(43.5);
-    expect(box?.height).toBeGreaterThanOrEqual(43.5);
+    // Read by polling: the shell swaps its stand-in button for the real one
+    // once the menu's code has arrived, and a read in between finds no box.
+    await expect
+      .poll(async () => (await button.boundingBox())?.width ?? 0)
+      .toBeGreaterThanOrEqual(43.5);
+    await expect
+      .poll(async () => (await button.boundingBox())?.height ?? 0)
+      .toBeGreaterThanOrEqual(43.5);
     await button.tap();
     await expect(pill(page)).toBeVisible();
     for (const item of await pill(page).getByRole("menuitemradio").all()) {
