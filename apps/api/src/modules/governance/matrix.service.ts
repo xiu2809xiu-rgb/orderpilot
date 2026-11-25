@@ -17,6 +17,7 @@ import { RolePermissionRepository } from "../../auth/role-permission.repository.
 import { Database } from "../../database/database.js";
 import type { RequestInfo } from "../../users/users.service.js";
 import { DataScopeRepository } from "./data-scope.repository.js";
+import { GovernanceNoticeRepository } from "./governance-notice.repository.js";
 import {
   MatrixRuleRefusedError,
   assertCanGrant,
@@ -42,11 +43,31 @@ export class MatrixService {
     @Inject(DataScopeRepository) private readonly scopes: DataScopeRepository,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(Database) private readonly database: Database,
+    @Inject(GovernanceNoticeRepository)
+    private readonly notices: GovernanceNoticeRepository,
   ) {}
 
   private async grant(role: Role, permission: Permission): Promise<void> {
     await this.permissions.grant(role, permission);
     await this.revoked.forget(role, permission);
+  }
+
+  /**
+   * Tells the management approvers what the administrator's role gained
+   * (#383). Called inside the change's transaction, before its audit event,
+   * so a grant never commits without its notice.
+   */
+  private tellApprovers(
+    actor: AuthContext,
+    permissions: readonly Permission[],
+    fromRole: Role | null,
+  ): Promise<{ id: string }> {
+    return this.notices.create({
+      actorUserId: actor.user.id,
+      actorName: actor.user.displayName,
+      permissions,
+      fromRole,
+    });
   }
 
   private async revoke(role: Role, permission: Permission): Promise<void> {
@@ -120,6 +141,10 @@ export class MatrixService {
       if (already !== granted) {
         if (granted) await this.grant(role, permission);
         else await this.revoke(role, permission);
+        const notice =
+          granted && role === "SYSTEM_ADMIN"
+            ? await this.tellApprovers(actor, [permission], null)
+            : null;
         await this.audit.record({
           actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
           action: granted
@@ -132,6 +157,7 @@ export class MatrixService {
             role,
             permission,
             granted: { from: already, to: granted },
+            ...(notice ? { noticeId: notice.id } : {}),
           },
           ip: info.ip,
           traceId: info.traceId,
@@ -234,6 +260,10 @@ export class MatrixService {
       for (const permission of plan.revoke) {
         await this.revoke(toRole, permission);
       }
+      const notice =
+        toRole === "SYSTEM_ADMIN" && plan.grant.length > 0
+          ? await this.tellApprovers(actor, plan.grant, fromRole)
+          : null;
       await this.audit.record({
         actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
         action: "governance.role.copied",
@@ -245,6 +275,7 @@ export class MatrixService {
           toRole,
           granted: plan.grant,
           revoked: plan.revoke,
+          ...(notice ? { noticeId: notice.id } : {}),
         },
         ip: info.ip,
         traceId: info.traceId,
