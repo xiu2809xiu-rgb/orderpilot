@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
-import { OPEN_GUARD_MS } from "./PickerOrb";
+import { OPENING_CLICK_MS, OPEN_GUARD_MS } from "./PickerOrb";
 
 loadPicker();
 
@@ -78,6 +78,26 @@ describe("picking with the pointer", () => {
     fireEvent.click(item("Focusing"), { detail: 1 });
     expect(onPick).not.toHaveBeenCalled();
     expect(screen.getByRole("menu")).toBeVisible();
+  });
+
+  it("refuses a pointer's click on a choice with no press only in the first second after the pill appears", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    await open();
+    const choice = item("Focusing");
+    const now = vi.spyOn(performance, "now");
+    const start = performance.now();
+    // The tap that opened the pill: its click lands here, 300 ms in, with no press.
+    now.mockReturnValue(start + 300);
+    fireEvent.click(choice, { detail: 1 });
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+    // An input that sends a click with no press, long after the opening.
+    now.mockReturnValue(start + OPENING_CLICK_MS + 200);
+    fireEvent.click(choice, { detail: 1 });
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(onPick).toHaveBeenCalledWith("FOCUSING");
+    now.mockRestore();
   });
 
   it("picks, once, for a finger's tap on a choice, whose pointerleave comes before its click", async () => {

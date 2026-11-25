@@ -21,6 +21,15 @@ import { availabilityLook } from "./tones";
  */
 export const OPEN_GUARD_MS = 250;
 
+/**
+ * A click made by a pointer on a choice that was not pressed is refused only
+ * this long after the pill appears: it is the click of the tap that opened the
+ * pill. A finger held longer is a long press, which sends no click, so after
+ * this an input that sends a click with no press of its own (a mobile screen
+ * reader, a browser not tried yet) picks.
+ */
+export const OPENING_CLICK_MS = 1000;
+
 /** One choice: a round orb with its mark, and its words. On a fine pointer the words are for assistive technology and the caption shows them; on a touch screen they sit under the orb. */
 export function PickerOrb({
   value,
@@ -46,8 +55,9 @@ export function PickerOrb({
   // browser sends a click to whatever lies under the finger after the release,
   // and by then the pill has grown there. A click that a pointer made (detail
   // 1 or more) is a pick only if this choice was pressed; the keyboard's
-  // click, and one made by assistive technology, have detail 0 and pass. The
-  // mark outlives the release (a touch screen's pointerleave comes before its
+  // click, and one made by assistive technology, have detail 0 and pass, and
+  // so does any click after the first second (OPENING_CLICK_MS). The mark
+  // outlives the release (a touch screen's pointerleave comes before its
   // click), and goes with a pick or a cancelled gesture.
   const armed = useRef(false);
   const release = (event: PointerEvent<HTMLElement>) => {
@@ -67,7 +77,10 @@ export function PickerOrb({
         armed.current = true;
       }}
       onClick={(event: MouseEvent<HTMLElement>) => {
-        if (event.detail > 0 && !armed.current) event.preventDefault();
+        const opening = performance.now() - shownAt.current < OPENING_CLICK_MS;
+        if (event.detail > 0 && !armed.current && opening) {
+          event.preventDefault();
+        }
       }}
       onPointerUp={release}
       onPointerLeave={() => {
