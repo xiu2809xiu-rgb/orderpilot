@@ -20,6 +20,7 @@ const SHARED = join(
 const ALLOWED_FILES = new Set([
   "lib/useAvailability.ts",
   "lib/useAvailabilityOf.ts",
+  "lib/useAvailabilityDot.ts",
   "lib/useExpiryTimer.ts",
   "app/shell/UserMenu.tsx",
   "app/shell/RoleSwitcher.tsx",
