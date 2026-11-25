@@ -609,6 +609,45 @@ describe("governance: the role-permission matrix over HTTP", () => {
       expect((await access("LOGISTICS")).permissions).toContain("tracker.read");
     });
 
+    it("gives an existing database the approver's four reads (ADR 0058 step 4), and keeps one an administrator revoked", async () => {
+      const reads = [
+        "aiUsage.read",
+        "exceptions.read",
+        "insights.read",
+        "workflows.inboxes.any",
+      ] as const;
+      // The administrator revokes one on the matrix, which records it, and
+      // the other three are taken out with no record, as a database made
+      // before this step holds none of the four for the approver.
+      const revoked = cell("APPROVER", "aiUsage.read");
+      expect(
+        (await put("SYSTEM_ADMIN", revoked, { granted: false })).status,
+      ).toBe(200);
+      for (const permission of reads)
+        await removeQuietly("APPROVER", permission);
+      expect((await access("APPROVER")).permissions).not.toContain(
+        "insights.read",
+      );
+      try {
+        await seed();
+        const held: readonly string[] = (await access("APPROVER")).permissions;
+        expect(held).toEqual(
+          expect.arrayContaining([
+            "exceptions.read",
+            "insights.read",
+            "workflows.inboxes.any",
+          ]),
+        );
+        expect(held).not.toContain("aiUsage.read");
+      } finally {
+        await put("SYSTEM_ADMIN", revoked, { granted: true });
+        await seed();
+      }
+      expect((await access("APPROVER")).permissions).toEqual(
+        expect.arrayContaining([...reads]),
+      );
+    });
+
     it("forgets a revocation once the permission is granted again", async () => {
       const path = cell("FINANCE", "tracker.read");
       for (const granted of [false, true]) {

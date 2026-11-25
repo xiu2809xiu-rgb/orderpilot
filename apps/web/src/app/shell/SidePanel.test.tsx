@@ -187,8 +187,9 @@ describe("the side panel", () => {
 
   it("asks nothing about a list the role has no entry for", async () => {
     const calls = serve({ tasks: 9, exceptions: 9 });
-    // The approver has an inbox and no right to read exceptions.
-    renderIn("APPROVER");
+    // The product manager has an inbox and no right to read exceptions. The
+    // approver stood here until ADR 0058 step 4 gave it exceptions.read.
+    renderIn("PRODUCT_MANAGER");
     expect(
       await screen.findByRole("link", { name: /^My tasks\s*9\s*waiting$/ }),
     ).toBeVisible();

@@ -114,7 +114,7 @@ export const SAMPLE_RULES: readonly MaskingRule[] = [
     label: "Item cost and amounts built from it (sample rule)",
     classification: "confidential",
     reason: "price",
-    visibleTo: ["FINANCE", "MANAGEMENT", "PRODUCT_MANAGER"],
+    visibleTo: ["FINANCE", "APPROVER", "MANAGEMENT", "PRODUCT_MANAGER"],
     sample: true,
   },
   {

@@ -41,11 +41,14 @@ const EXPECTED: Record<Role, Record<string, readonly string[]>> = {
     masterData: MASTER_DATA,
     reports: ["Order tracker", "KPIs"],
   },
+  // ADR 0058 step 4: the approver reads what Management reads, so its menu
+  // gains Exceptions, KPIs and Monitoring.
   APPROVER: {
     home: INBOX,
     sales: ["Orders"],
     masterData: MASTER_DATA,
-    reports: ["Order tracker"],
+    reports: ["Order tracker", "Exceptions", "KPIs"],
+    system: ["Monitoring"],
   },
   SUPPORT: {
     home: INBOX,

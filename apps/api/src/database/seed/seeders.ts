@@ -7,6 +7,7 @@ import { Database } from "../database.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { AuditEventRepository } from "../../audit/audit-event.repository.js";
 import { AuditService } from "../../audit/audit.service.js";
+import { MigrationMarkerAuditor } from "../../audit/migration-marker.auditor.js";
 import { seedApprovalSetups } from "../../modules/governance/approval-setup-seed.js";
 import { seedRolePermissions } from "../../modules/governance/role-permission-seed.js";
 import { seedWorkflows } from "../../modules/workflows/workflows-seed.js";
@@ -182,6 +183,19 @@ const workflowSamples: Seeder = {
 };
 
 /**
+ * The audit events of what a data migration changed, one for each marker it
+ * left (ADR 0058, decision 8). A fresh database has no markers and gets none.
+ * It runs last, so every earlier step's own events come first.
+ */
+const migrationMarkers: Seeder = {
+  name: "migration markers",
+  async run(app) {
+    const written = await app.get(MigrationMarkerAuditor).record();
+    return `${String(written)} migration changes recorded in the audit trail`;
+  },
+};
+
+/**
  * In the order they run. The audit trail starts first, so the users' creation
  * lands after its first link; later stories load the synthetic data into their
  * tables.
@@ -194,4 +208,5 @@ export const SEEDERS: readonly Seeder[] = [
   approvalSetups,
   syntheticData,
   workflowSamples,
+  migrationMarkers,
 ];

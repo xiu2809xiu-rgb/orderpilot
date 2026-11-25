@@ -88,7 +88,10 @@ describe("area 3 routes (mock data)", () => {
   it("follows the default matrix: each route needs its own permission", async () => {
     const cases = [
       ["APPROVER", `${API}/tracker/orders`, 200],
-      ["APPROVER", `${API}/exceptions`, 403],
+      // ADR 0058 step 4: the approver took Management's four reads, so this
+      // was 403 until then.
+      ["APPROVER", `${API}/exceptions`, 200],
+      ["APPROVER", `${API}/insights/kpis`, 200],
       ["SUPPORT", `${API}/insights/kpis`, 403],
       ["PRODUCT_MANAGER", `${API}/insights/kpis`, 200],
       ["PRODUCT_MANAGER", `${API}/exceptions`, 403],

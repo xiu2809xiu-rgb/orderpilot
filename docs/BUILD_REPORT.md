@@ -406,6 +406,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #333  | Remove the demo tour (#284) from main                 | `chore/platform-remove-tour`     | This pull request. The tour is off main, and later work stays as it is              |
 | #334  | The evening clock in the orders test kit              | `test/web-evening-clock`         | This pull request. The order page test passes at any hour of a Singapore day        |
 | #340  | Seven roles, step 2: Home by permission               | `feat/area1-home-by-permission`  | This pull request. Overdue orders under Needs you, refused actions under the rules  |
+| #344  | Seven roles, step 3: own inbox, then the approvers    | `feat/area2-inbox-escalation`    | This pull request. Own inbox, overdue to approvers (SPR stays), SLA move audited    |
 | #337  | The Spark orb flows faster at idle                    | `fix/platform-orb-idle-speed`    | This pull request. Idle flows 75% faster, measured in Edge before and after         |
 | #355  | Optical alignment of the shared parts                 | `feat/area1-optical-alignment`   | This pull request. Titles, card heads, icons and buttons look aligned to the eye    |
 | #351  | The order page test checks the exact wait again       | `test/web-exact-wait`            | This pull request. The wait line's count is checked again, not only its shape       |
@@ -414,6 +415,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #356  | A day-night switch replaces the theme menu            | `feat/area1-pixel-theme-switch`  | This pull request. The pixel toggle in the bar, menu and sign-in corner             |
 | #364  | Visual hierarchy and breathing room                   | `feat/area1-visual-hierarchy`    | This pull request. One rhythm in four tokens, one page stack, card padding of 24 px |
 | #384  | Scroll areas show which side has more                 | `feat/area1-scroll-edge-hint`    | This pull request. A quiet mark on each side of a scroll area that has more         |
+| #353  | Seven roles, step 4: the approver's reads             | `feat/area4-approver-reads`      | This pull request. The approver takes Management's reads and cost view              |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |

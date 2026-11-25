@@ -537,7 +537,7 @@ describe("one story across the screens", () => {
     for (const reminder of data.reminders.filter(
       (r) => r.stage === "escalated",
     )) {
-      expect(reminder.escalatedTo).toBe("MANAGEMENT");
+      expect(reminder.escalatedTo).toBe("APPROVER");
     }
   });
 

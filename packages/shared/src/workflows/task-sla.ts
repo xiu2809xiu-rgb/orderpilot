@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { pageQuerySchema } from "../envelope.js";
-import { roleSchema } from "../roles.js";
+import { roleSchema, type Role } from "../roles.js";
 import { orderNoSchema } from "./common.js";
 import { taskKindSchema, type TaskKind } from "./tasks.js";
 
@@ -37,25 +37,29 @@ const HOUR = 60;
 
 /**
  * What the seed starts from. Spectra's one stated rule is an approval not actioned
- * in 24 hours going to the management team. The rest are our drafts (A-37).
+ * in 24 hours going to management. The rest are our drafts (A-37), and they pass
+ * up to the management approvers (ADR 0058). The SPR approval is the one that
+ * still names Management, until the role cut (step 6) makes that account an
+ * approver.
  */
 const draft = (
   taskKind: TaskKind,
   dueAfterHours: number,
   remindBeforeHours: number,
   escalateAfterHours: number,
+  escalateToRole: Role = "APPROVER",
 ): TaskSla => ({
   taskKind,
   dueAfterMinutes: dueAfterHours * HOUR,
   remindBeforeMinutes: remindBeforeHours * HOUR,
   escalateAfterMinutes: escalateAfterHours * HOUR,
-  escalateToRole: "MANAGEMENT",
+  escalateToRole,
 });
 
 export const DEFAULT_TASK_SLAS: readonly TaskSla[] = [
   draft("REVIEW_FIELDS", 8, 2, 8),
   draft("RAISE_SPR", 24, 4, 24),
-  draft("APPROVE_SPR", 24, 4, 0),
+  draft("APPROVE_SPR", 24, 4, 0, "MANAGEMENT"),
   draft("PLACE_VENDOR_PO", 24, 4, 24),
   draft("SEND_PI", 24, 4, 24),
   draft("CONFIRM_PAYMENT", 48, 8, 24),

@@ -27,7 +27,7 @@ import { WorkflowNav } from "./WorkflowNav";
 /** The task inbox: a role's own, or any role's for the roles that oversee. */
 export default function WorkflowsPage() {
   const { t } = useTranslation(["workflows", "common"]);
-  const { role, mayPick, setRole } = useInboxRole();
+  const { role, mayPick, other, setRole } = useInboxRole();
   const [search, setSearch] = useSearchParams();
   const overdueOnly = search.get("overdue") === "true";
   const asked = taskKindSchema.safeParse(search.get("kind"));
@@ -59,12 +59,12 @@ export default function WorkflowsPage() {
   ];
 
   const mine = useWorkflowsMyTasks(params, {
-    query: { enabled: !mayPick && role !== undefined },
+    query: { enabled: !other && role !== undefined },
   });
   const theirs = useWorkflowsInboxTasks(role ?? "SUPPORT", params, {
-    query: { enabled: mayPick },
+    query: { enabled: other },
   });
-  const query = mayPick ? theirs : mine;
+  const query = other ? theirs : mine;
   const tasks = query.data?.data ?? [];
   const roleName = role ? t(`roles.${role}`, { ns: "common" }) : "";
 
@@ -72,9 +72,9 @@ export default function WorkflowsPage() {
     <div className="dx-sheet-wide dx-page">
       <PageHeader
         // One name for one page: the sidebar's "My tasks", unless the person looks at other roles.
-        title={t(mayPick ? "inbox.heading" : "inbox.myHeading")}
+        title={t(other ? "inbox.heading" : "inbox.myHeading")}
         description={
-          mayPick ? t("inbox.otherDescription") : t("inbox.ownDescription")
+          other ? t("inbox.otherDescription") : t("inbox.ownDescription")
         }
         meta={<MockBadges mock={query.data?.meta.mock} />}
       />
@@ -92,7 +92,7 @@ export default function WorkflowsPage() {
       ) : (
         <SectionCard
           title={
-            mayPick
+            other
               ? t("inbox.forRole", { role: roleName })
               : t("inbox.waitingOnYou")
           }

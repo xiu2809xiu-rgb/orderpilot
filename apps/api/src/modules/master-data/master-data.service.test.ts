@@ -480,12 +480,18 @@ describe("masking", () => {
     }
   });
 
-  it("shows item cost to Finance, Management and the Product Manager", async () => {
+  it("shows item cost to Finance, the approver, Management and the Product Manager", async () => {
     const no = dataset.items[0]?.no ?? "";
-    for (const role of ["FINANCE", "MANAGEMENT", "PRODUCT_MANAGER"] as const) {
+    // The approver joined at ADR 0058 step 4, taking what Management sees.
+    for (const role of [
+      "FINANCE",
+      "APPROVER",
+      "MANAGEMENT",
+      "PRODUCT_MANAGER",
+    ] as const) {
       expect((await service.item(no, role)).unitCost.masked).toBe(false);
     }
-    for (const role of ["SUPPORT", "APPROVER", "WAREHOUSE"] as const) {
+    for (const role of ["SUPPORT", "WAREHOUSE"] as const) {
       const detail = await service.item(no, role);
       expect(detail.unitCost).toMatchObject({ masked: true, reason: "price" });
     }

@@ -254,3 +254,31 @@ describe("the business rules of a role that manages settings", () => {
     ).toBeVisible();
   });
 });
+
+describe("the measures and the trend of the approver (ADR 0058 step 4)", () => {
+  it("asks for the insights, and draws the measures and the twelve-week trend under Needs you", async () => {
+    const served = serveHome({ overdue: [OVERDUE_ORDER] });
+    renderHome("APPROVER");
+    expect(
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Spectra's five measures",
+      }),
+    ).toBeVisible();
+    expect(
+      await screen.findByRole(
+        "heading",
+        { level: 2, name: "Twelve weeks of the five measures" },
+        { timeout: 15_000 },
+      ),
+    ).toBeVisible();
+    expect(served.calls).toContain("GET /api/v1/insights/kpis");
+  }, 30_000);
+
+  it("asks for no insights from a role that does not read them", async () => {
+    const served = serveHome({});
+    renderHome("SUPPORT");
+    await screen.findByRole("heading", { level: 2, name: "Needs you" });
+    expect(served.calls).not.toContain("GET /api/v1/insights/kpis");
+  });
+});

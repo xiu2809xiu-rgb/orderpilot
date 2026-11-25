@@ -36,9 +36,9 @@ describe("the feature registry", () => {
 describe("role home tiles", () => {
   const EXPECTED: Record<Role, readonly string[]> = {
     PRODUCT_MANAGER: ["myTasks", "waitingForApproval", "openOrders", "overdue"],
-    // The story lists Open exceptions too, but the default matrix gives the
-    // approver no exceptions.read, and a tile never lands on a refusal.
-    APPROVER: ["awaitingApproval", "overdue", "openOrders"],
+    // Open exceptions joined at ADR 0058 step 4, when the approver took
+    // exceptions.read; a tile never lands on a refusal.
+    APPROVER: ["awaitingApproval", "overdue", "openOrders", "openExceptions"],
     SUPPORT: [
       "myTasks",
       "documentsToConfirm",

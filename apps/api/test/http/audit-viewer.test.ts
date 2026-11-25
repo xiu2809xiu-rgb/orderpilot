@@ -9,12 +9,15 @@ import {
 import pg from "pg";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { z } from "zod";
+import { RolePermissionRepository } from "../../src/auth/role-permission.repository.js";
 import { API, call, demoSignIn, type Browser } from "../support/auth.js";
 import { resetTestData, testConfig } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
 const EVENTS = `${API}/audit/events`;
 const CHAIN = `${API}/audit/chain`;
+const FILTER_OPTIONS = `${API}/audit/filter-options`;
 
 describe("audit viewer: reading the trail over HTTP", () => {
   let t: TestApp;
@@ -89,6 +92,87 @@ describe("audit viewer: reading the trail over HTTP", () => {
         .set("Cookie", auditor.cookieHeader(EVENTS))
         .set("X-CSRF-Token", auditor.csrf);
       expect(del.status).toBe(404);
+    });
+
+    // ADR 0058 decision 2: the administrator now reads the unmasked trail and
+    // also edits users and the matrix, so the one thing it must never do is
+    // change the trail. Two checks: the routes the app registers, and a call
+    // with every verb as the administrator. Both cover the /audit routes only.
+    // Every other writer of an audit event is covered by the append-only
+    // database trigger and its own test (append-only.test.ts), not by these.
+    describe("the administrator can read the trail and never change it", () => {
+      // Express's app and its router are functions, so each is read with
+      // Reflect.get and only the stack is parsed.
+      const stackSchema = z.array(
+        z.object({
+          route: z
+            .object({
+              path: z.unknown(),
+              methods: z.record(z.string(), z.boolean()),
+            })
+            .optional(),
+        }),
+      );
+      const registeredRoutes = () =>
+        stackSchema
+          .parse(
+            Reflect.get(
+              Reflect.get(t.app.getHttpAdapter().getInstance(), "router"),
+              "stack",
+            ),
+          )
+          .flatMap((layer) =>
+            layer.route
+              ? [
+                  {
+                    path: String(layer.route.path),
+                    methods: layer.route.methods,
+                  },
+                ]
+              : [],
+          );
+
+      it("registers only GET routes under /audit, and the route table is really read", () => {
+        const routes = registeredRoutes();
+        const audit = routes.filter((r) => r.path.includes("/audit"));
+        expect(audit.map((r) => r.path).sort()).toEqual(
+          [EVENTS, `${EVENTS}/:id`, CHAIN, FILTER_OPTIONS].sort(),
+        );
+        for (const route of audit) {
+          const verbs = Object.entries(route.methods)
+            .filter(([, on]) => on)
+            .map(([verb]) => verb);
+          expect(verbs, route.path).toEqual(["get"]);
+        }
+        // A control that proves the inventory sees writes: other areas have them.
+        expect(
+          routes.some((r) => r.methods.post && !r.path.includes("/audit")),
+        ).toBe(true);
+      });
+
+      it("refuses every write verb on the list, one event, the chain and the filter options, with the CSRF token sent", async () => {
+        const admin = as("SYSTEM_ADMIN");
+        const server = t.app.getHttpServer();
+        const id = (await list("SYSTEM_ADMIN")).body.data[0]?.id ?? "x";
+        const before = await list("SYSTEM_ADMIN", "?pageSize=200");
+        for (const path of [EVENTS, `${EVENTS}/${id}`, CHAIN, FILTER_OPTIONS]) {
+          for (const verb of ["post", "put", "patch"] as const) {
+            const res = await call(t, admin, verb, path, {
+              csrf: true,
+              body: { summary: "rewritten" },
+            });
+            expect(res.status, `${verb} ${path}`).toBe(404);
+          }
+          const del = await request(server)
+            .delete(path)
+            .set("Cookie", admin.cookieHeader(path))
+            .set("X-CSRF-Token", admin.csrf);
+          expect(del.status, `delete ${path}`).toBe(404);
+        }
+        const after = await list("SYSTEM_ADMIN", "?pageSize=200");
+        expect(after.body.meta.total).toBe(before.body.meta.total);
+        expect(after.body.data).toEqual(before.body.data);
+      });
     });
   });
 
@@ -266,41 +350,63 @@ describe("audit viewer: reading the trail over HTTP", () => {
       };
     };
 
-    it("shows the sample rule's field to an auditor", async () => {
-      const { change } = await secret("AUDITOR");
-      expect(change?.masked).toBe(false);
-      expect(change?.after).toBeTruthy();
-    });
+    it.each(["AUDITOR", "SYSTEM_ADMIN"] as const)(
+      "shows the sample rule's field to %s (ADR 0058 decision 2 added the administrator)",
+      async (role) => {
+        const { change } = await secret(role);
+        expect(change?.masked).toBe(false);
+        expect(change?.after).toBeTruthy();
+      },
+    );
 
-    it("hides it from the system admin, with a reason, and the value is not in the body", async () => {
-      const { res, change } = await secret("SYSTEM_ADMIN");
-      expect(change).toMatchObject({
-        masked: true,
-        reason: "policy",
-        before: null,
-        after: null,
+    describe("a role that may read the trail but is not an unmasked reader", () => {
+      // No default role is both, so the matrix is given the read for the test.
+      // WAREHOUSE stands for any role the administrator might one day grant
+      // audit.read to.
+      beforeAll(async () => {
+        await t.app
+          .get(RolePermissionRepository, { strict: false })
+          .grant("WAREHOUSE", "audit.read");
       });
-      const auditorValue = (await secret("AUDITOR")).change?.after ?? "";
-      expect(auditorValue.length).toBeGreaterThan(0);
-      expect(res.text).not.toContain(`"${auditorValue}"`);
-    });
+      afterAll(async () => {
+        await t.app
+          .get(RolePermissionRepository, { strict: false })
+          .revoke("WAREHOUSE", "audit.read");
+      });
 
-    it("masks one event the same way", async () => {
-      const { res } = await secret("SYSTEM_ADMIN");
-      const id = res.body.data.find((e) => e.changes.some((c) => c.masked))?.id;
-      const one = await call(
-        t,
-        as("SYSTEM_ADMIN"),
-        "get",
-        `${EVENTS}/${id ?? ""}`,
-      );
-      expect(one.status).toBe(200);
-      const view = auditEventViewSchema.parse(
-        (one.body as { data: unknown }).data,
-      );
-      expect(
-        view.changes.filter((c) => c.masked).every((c) => c.after === null),
-      ).toBe(true);
+      it("hides it, with a reason, and the value is not in the body", async () => {
+        const { res, change } = await secret("WAREHOUSE");
+        expect(change).toMatchObject({
+          masked: true,
+          reason: "policy",
+          before: null,
+          after: null,
+        });
+        const auditorValue = (await secret("AUDITOR")).change?.after ?? "";
+        expect(auditorValue.length).toBeGreaterThan(0);
+        expect(res.text).not.toContain(`"${auditorValue}"`);
+      });
+
+      it("masks one event the same way", async () => {
+        const { res } = await secret("WAREHOUSE");
+        const id = res.body.data.find((e) =>
+          e.changes.some((c) => c.masked),
+        )?.id;
+        const one = await call(
+          t,
+          as("WAREHOUSE"),
+          "get",
+          `${EVENTS}/${id ?? ""}`,
+        );
+        expect(one.status).toBe(200);
+        const view = auditEventViewSchema.parse(
+          (one.body as { data: unknown }).data,
+        );
+        expect(view.changes.some((c) => c.masked)).toBe(true);
+        expect(
+          view.changes.filter((c) => c.masked).every((c) => c.after === null),
+        ).toBe(true);
+      });
     });
   });
 
