@@ -95,6 +95,11 @@ describe("the pill's sheet", () => {
     ).toBeGreaterThan(picker.indexOf("@media (forced-colors: active) {"));
   });
 
+  it("lifts a highlighted choice about its orb on a finger, so that its ring keeps clear of the pill's top edge", () => {
+    const block = atRule(picker, "@media (pointer: coarse), (hover: none)");
+    expect(block).toMatch(/\.ap-item\s*{[^}]*transform-origin: 50% 22px/);
+  });
+
   it("animates only scale and opacity in the pill's keyframes", () => {
     for (const name of [
       "ap-grow",
@@ -140,7 +145,7 @@ describe("the pill's sheet", () => {
 
   it("fades the leaving caption word out where it stands, over the same time the new one takes", () => {
     expect(picker).toMatch(
-      /\.ap-chip-text\[data-leaving\]\s*{\s*animation: ap-text-out var\(--motion-fast\) var\(--ease-out\) both/,
+      /\.ap-chip-text\[data-leaving\]\s*{\s*animation: ap-text-out var\(--motion-fast\) linear both/,
     );
     // Both words share the capsule's one cell, so each is centred in it.
     expect(picker).toMatch(/\.ap-chip-text\s*{\s*grid-area: 1 \/ 1/);

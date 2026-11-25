@@ -166,6 +166,10 @@
     inline-size: 80px;
     block-size: 80px;
     gap: 4px;
+    /* The lift of the highlighted choice is about its orb and not about the 80 px
+       box: about the box the orb rose 1 px more and its focus ring came within
+       0.6 px of the pill's top edge. */
+    transform-origin: 50% 22px;
   }
   /* The item is an 80 px box with the words under the orb, and a ring round it
      would touch the pill's edges and cut through the words. The ring goes round
@@ -215,9 +219,11 @@
     animation: ap-text-in var(--motion-fast) var(--ease-out) 60ms both;
   }
   /* The word that is leaving fades out where it stands, and is gone when the
-     fade ends (CaptionWords removes it). */
+     fade ends (CaptionWords removes it). It fades in a straight line: on the
+     ease-out curve it was below 15 percent by 50 ms, before the 60 ms wait of
+     the new word was over, and the capsule showed almost nothing for a moment. */
   .ap-chip-text[data-leaving] {
-    animation: ap-text-out var(--motion-fast) var(--ease-out) both;
+    animation: ap-text-out var(--motion-fast) linear both;
   }
 }
 @keyframes ap-grow {
