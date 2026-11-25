@@ -1,9 +1,18 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { must } from "@/test/must";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
 import { chipPlace, pickerMotion, pillGeometry } from "./pickerMotion";
+import { loadSpring } from "./useChipSpring";
 
 // The spring is motion's; this file replaces it to see what the caption asks
 // of it. jsdom has no IntersectionObserver, so the kit's own check makes every
@@ -12,6 +21,11 @@ const animate = vi.hoisted(() => vi.fn());
 vi.mock("motion/react", () => ({ animate }));
 
 loadPicker();
+// The spring library arrives when the first pill opens, so a glide asked for in
+// the first moments is a placement at once. These tests have it already.
+beforeAll(async () => {
+  await loadSpring();
+});
 
 function reducedMotion(reduce: boolean) {
   vi.stubGlobal("matchMedia", (query: string) => ({

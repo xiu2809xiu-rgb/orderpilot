@@ -4,10 +4,25 @@
 // own build from a written description of the behaviour (proportions, spring feel, a caption that follows the choice,
 // a flash of light after a pick, the keyboard model): no source, markup, picture, font, colour or glyph drawing was
 // copied. A private prototype for a school module. Adapted to OrderPilot's tokens.
-import { animate } from "motion/react";
-import { useLayoutEffect, useRef } from "react";
+import type { animate as motionAnimate } from "motion/react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useStill } from "../env";
 import { pickerMotion } from "./pickerMotion";
+
+type Animate = typeof motionAnimate;
+
+// The spring library is loaded when the first pill opens and not with the
+// picker: the picker is fetched on idle on every page, and the library is the
+// larger part of its cost. A glide that is asked for before it has arrived is
+// a placement at once, which is what reduced motion does anyway.
+let animate: Animate | undefined;
+let loading: Promise<void> | undefined;
+export function loadSpring(): Promise<void> {
+  loading ??= import("motion/react").then((library) => {
+    animate = library.animate;
+  });
+  return loading;
+}
 
 /**
  * Moves the caption under the active orb. Its left edge and width are two
@@ -23,17 +38,27 @@ export function useChipSpring(place: { x: number; w: number }, stop: number) {
   const placedAt = useRef<number | null>(null);
   const still = useStill();
 
+  useEffect(() => {
+    if (!still) void loadSpring();
+  }, [still]);
+
   useLayoutEffect(() => {
     const node = chip.current;
     if (!node) return;
-    if (still || placedAt.current === null || placedAt.current === stop) {
+    const glide = animate;
+    if (
+      still ||
+      !glide ||
+      placedAt.current === null ||
+      placedAt.current === stop
+    ) {
       node.style.setProperty("--ap-chip-x", String(place.x));
       node.style.setProperty("--ap-chip-w", String(place.w));
       placedAt.current = stop;
       return;
     }
     placedAt.current = stop;
-    const controls = animate(
+    const controls = glide(
       node,
       { "--ap-chip-x": place.x, "--ap-chip-w": place.w },
       { type: "spring", ...pickerMotion.spring },
