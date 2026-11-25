@@ -156,6 +156,44 @@ test("a colleague sees it in the Demo role menu", async ({ browser }) => {
   }
 });
 
+test("the mark on a colleague's dot in the Demo role menu keeps its dot's colour, not the row's muted text colour", async ({
+  browser,
+}) => {
+  const { context, page } = await asLooker(browser);
+  try {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Demo role" }).click();
+    const row = page.getByRole("menuitem", { name: new RegExp(PERSONA) });
+    await expect(row).toContainText("Do not disturb");
+    // A menu item paints every icon with no text colour class in its muted
+    // colour (components/ui/dropdown-menu); the mark must still draw in the
+    // colour its dot gives it, which is 4.5:1 on the dot's own tone.
+    const colours = await row.evaluate((item) => {
+      const dotEl = item.querySelector(".ap-dot");
+      const markEl = dotEl?.querySelector(".ap-mark");
+      const words = dotEl?.parentElement;
+      if (!dotEl || !markEl || !words) return null;
+      return {
+        dot: getComputedStyle(dotEl).color,
+        mark: getComputedStyle(markEl).color,
+        stroke: getComputedStyle(markEl).stroke,
+        muted: getComputedStyle(words).color,
+        tone: getComputedStyle(dotEl).backgroundColor,
+      };
+    });
+    expect(colours, "the row draws a dot with a mark").not.toBeNull();
+    if (!colours) return;
+    expect(colours.mark, "the mark's colour is its dot's").toBe(colours.dot);
+    expect(colours.stroke, "the mark is drawn in that colour").toBe(
+      colours.dot,
+    );
+    expect(colours.mark, "not the row's muted text").not.toBe(colours.muted);
+    expect(colours.mark, "not the dot's own tone").not.toBe(colours.tone);
+  } finally {
+    await context.close();
+  }
+});
+
 test("it is set back, and the colleague sees no words on that row", async ({
   page,
   browser,

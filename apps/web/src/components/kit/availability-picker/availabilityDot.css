@@ -37,6 +37,11 @@
 .ap-mark {
   inline-size: 72%;
   block-size: 72%;
+  /* The dot's own colour, whatever its container says about icons: a menu item
+     (components/ui/dropdown-menu) paints every icon without a text colour class
+     in its muted text colour, and this sheet is outside Tailwind's layers, so
+     this line wins. In forced colours the dot sets ButtonText, and this follows. */
+  color: inherit;
 }
 
 /* The button. A fine pointer gets the 24 px of WCAG 2.5.8; a finger gets 44. */

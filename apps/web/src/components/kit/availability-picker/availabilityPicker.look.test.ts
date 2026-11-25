@@ -163,6 +163,18 @@ describe("the dot's sheet", () => {
     expect(dot).toMatch(/\.ap-ring\s*{[^}]*z-index: -1/s);
   });
 
+  it("takes the mark's colour from its dot, whatever a menu item says about icons, and forced colours still reach it through the dot", () => {
+    // A menu item paints every icon with no text colour class in its muted
+    // colour, which would draw the mark in the row's text colour on the dot.
+    expect(must(/\.ap-mark\s*{([^}]*)}/.exec(dot))[1]).toMatch(
+      /color: inherit;/,
+    );
+    const forced = atRule(dot, "@media (forced-colors: active)");
+    expect(must(/\.ap-dot\s*{([^}]*)}/.exec(forced))[1]).toContain(
+      "color: ButtonText",
+    );
+  });
+
   it("keeps the 24 px of WCAG 2.5.8 on a fine pointer", () => {
     expect(dot).toMatch(
       /\.ap-trigger\s*{[^}]*inline-size: 24px;[^}]*block-size: 24px/s,
