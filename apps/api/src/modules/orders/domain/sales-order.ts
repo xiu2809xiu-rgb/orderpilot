@@ -18,6 +18,9 @@ import type { OrderFacts, OrderFactsLine } from "./order-facts.js";
 
 export type SalesOrderLineInput = OrderFactsLine;
 
+/** The PO version of a first submit. P-89 replaces this with the stored version. */
+export const FIRST_PO_VERSION = 1;
+
 /** One line of a stored order. The amount is worked out, never stored. */
 export class SalesOrderLine {
   constructor(private readonly input: SalesOrderLineInput) {
@@ -211,6 +214,31 @@ export class SalesOrder {
     return new SalesOrder({ ...this.input, captureState: "void" });
   }
 
+  /**
+   * Only a draft is submitted. The state comes before the version and the
+   * dates (ADR 0047 decision 13), and a submitted order says so in its own words.
+   */
+  requireSubmittable(): void {
+    if (this.captureState === "submitted")
+      throw new ConflictError(`Order ${this.orderNo} is already submitted.`);
+    this.requireDraft("submitted");
+  }
+
+  /**
+   * A copy that is submitted, with the same lines and version: the guarded
+   * update moves the version. The shipment date is checked again here because
+   * the constructor does not check it, so an order stored before the rule
+   * existed could otherwise be submitted with a shipment before its order date.
+   */
+  submitted(): SalesOrder {
+    this.requireSubmittable();
+    if (shipmentIsBeforeOrder(this.orderDate, this.shipmentDate))
+      throw new ValidationFailedError([
+        { path: "shipmentDate", message: SHIPMENT_BEFORE_ORDER_MESSAGE },
+      ]);
+    return new SalesOrder({ ...this.input, captureState: "submitted" });
+  }
+
   /** Throws, with the rule's own words, for anything but a draft. */
   requireDraft(verb: string): void {
     if (!this.isDraft)
@@ -224,7 +252,10 @@ export class SalesOrder {
     return sumDecimal(this.lines.map((line) => line.amount));
   }
 
-  /** A stored order has no workflow status and no stock figure of its own yet. */
+  /**
+   * A stored order carries no stock figure of its own. OrdersService overlays
+   * area 2's label for a submitted order; the facts carry null.
+   */
   toFacts(): OrderFacts {
     return {
       orderNo: this.orderNo,

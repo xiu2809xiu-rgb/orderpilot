@@ -3,6 +3,7 @@ import {
   ConflictError,
   ValidationFailedError,
 } from "../../../common/domain-error.js";
+import { SHIPMENT_BEFORE_ORDER_MESSAGE } from "@orderpilot/shared";
 import { SalesOrder, type SalesOrderInput } from "./sales-order.js";
 
 function input(over: Partial<SalesOrderInput> = {}): SalesOrderInput {
@@ -152,6 +153,63 @@ describe("SalesOrder", () => {
         expect(() => order.voided()).toThrow(ConflictError);
       },
     );
+
+    it("submits a draft into a copy that is submitted, with the same lines and the same version", () => {
+      const order = new SalesOrder(input({ version: 3 }));
+      const submitted = order.submitted();
+      expect(submitted.captureState).toBe("submitted");
+      expect(submitted.isDraft).toBe(false);
+      expect(submitted.version).toBe(3);
+      expect(submitted.toFacts().lines).toEqual(order.toFacts().lines);
+      expect(submitted.total).toBe(order.total);
+    });
+
+    it("does not change the order it was called on", () => {
+      const order = new SalesOrder(input());
+      order.submitted();
+      expect(order.captureState).toBe("draft");
+      expect(order.isDraft).toBe(true);
+    });
+
+    it("refuses to submit a submitted order, saying it is already submitted", () => {
+      const order = new SalesOrder(input({ captureState: "submitted" }));
+      expect(() => order.submitted()).toThrow(
+        new ConflictError("Order SO-20261108-0001 is already submitted."),
+      );
+      expect(() => {
+        order.requireSubmittable();
+      }).toThrow(ConflictError);
+    });
+
+    it("refuses to submit a void order with the draft rule's words", () => {
+      const order = new SalesOrder(input({ captureState: "void" }));
+      expect(() => order.submitted()).toThrow(
+        new ConflictError(
+          "Order SO-20261108-0001 is void, so it cannot be submitted. Only a draft can.",
+        ),
+      );
+    });
+
+    it("refuses a draft whose shipment date is before its order date, on shipmentDate", () => {
+      // The constructor lets it load: only an edit or a submit checks the pair.
+      const order = new SalesOrder(input({ shipmentDate: "2026-11-01" }));
+      try {
+        order.submitted();
+        throw new Error("did not throw");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ValidationFailedError);
+        expect((error as ValidationFailedError).details).toEqual([
+          { path: "shipmentDate", message: SHIPMENT_BEFORE_ORDER_MESSAGE },
+        ]);
+      }
+    });
+
+    it("says the state before the dates", () => {
+      const order = new SalesOrder(
+        input({ captureState: "submitted", shipmentDate: "2026-11-01" }),
+      );
+      expect(() => order.submitted()).toThrow(ConflictError);
+    });
 
     it("voids a draft into a copy and leaves the original", () => {
       const order = new SalesOrder(input());
