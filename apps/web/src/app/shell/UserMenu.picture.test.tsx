@@ -2,13 +2,27 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { myPictureKey } from "@/lib/useMyPicture";
 import { useSessionStore } from "@/stores/session";
 import { stubImage } from "@/test/fakeImage";
 import { sessionFor } from "@/test/fixtures";
 import { server } from "@/test/server";
+import { loadShellOverlays } from "./overlays/preload";
 import { UserMenu } from "./UserMenu";
+
+// Until the menu's code has loaded the button is a stand-in, and the real one
+// is a new element. Loaded first, so the button a test finds is the one that
+// stays: UserMenu.picture.swap.test.tsx covers the change itself.
+beforeAll(loadShellOverlays);
 
 const MINE = "*/api/v1/profile-pictures/mine";
 const APPROVED_ID = "3f2c1a40-6b7d-4e0a-9f1b-2d4c6e8a0b11";
@@ -79,12 +93,9 @@ describe("the account menu's avatar", () => {
       approved: { id: APPROVED_ID, decidedAt: NOON },
     });
     renderMenu();
-    // The first test of the file also pays for loading the menu and the client,
-    // which takes longer than 5 seconds while the whole suite runs at once.
-    const image = await within(trigger()).findByRole(
-      "presentation",
-      { hidden: true },
-      { timeout: 15_000 },
+    // The button is looked up again at every try, never kept across the wait.
+    const image = await waitFor(() =>
+      within(trigger()).getByRole("presentation", { hidden: true }),
     );
     expect(image).toHaveAttribute(
       "src",
