@@ -84,8 +84,14 @@ const choice = (page: Page, name: string): Locator =>
 
 /** The pill lies inside the viewport with room to spare. */
 async function expectInsideViewport(page: Page, spare = 8): Promise<void> {
-  // Radix places the menu a frame after it appears: take the box once two
-  // reads, a frame apart, agree.
+  // Radix draws the menu off screen (a box at y below zero) until it has
+  // measured the anchor, a frame or more after it appears: wait for a place,
+  // then for two reads, a frame apart, to agree.
+  await expect
+    .poll(async () => (await pill(page).boundingBox())?.y ?? -1, {
+      message: "the menu is placed",
+    })
+    .toBeGreaterThanOrEqual(0);
   let box = await pill(page).boundingBox();
   for (let tries = 0; tries < 20; tries += 1) {
     await page.waitForTimeout(50);
@@ -395,7 +401,15 @@ test.describe("on a phone with a touch screen", () => {
       }
     });
     const tapCentre = async (target: Locator): Promise<void> => {
-      const box = await target.boundingBox();
+      // The phone menu slides in: tap where the control has come to rest.
+      let box = await target.boundingBox();
+      for (let tries = 0; tries < 20; tries += 1) {
+        await page.waitForTimeout(100);
+        const next = await target.boundingBox();
+        const same = JSON.stringify(next) === JSON.stringify(box);
+        box = next;
+        if (same) break;
+      }
       expect(box, "the control has a box").not.toBeNull();
       if (!box) return;
       await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
