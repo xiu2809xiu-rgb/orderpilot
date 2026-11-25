@@ -167,6 +167,16 @@
     block-size: 80px;
     gap: 4px;
   }
+  /* The item is an 80 px box with the words under the orb, and a ring round it
+     would touch the pill's edges and cut through the words. The ring goes round
+     the 44 px orb, as on a fine pointer. */
+  .ap-item:focus-visible {
+    outline: none;
+  }
+  .ap-item:focus-visible .ap-orb {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
+  }
   .ap-label {
     position: static;
     inline-size: auto;
@@ -299,5 +309,17 @@
     background: Canvas;
     color: CanvasText;
     border: 1px solid CanvasText;
+  }
+}
+
+/* The same on a finger: the ring is on the orb and not on the 80 px item. This
+   comes after the rule above, which would give the item its outline again. */
+@media (forced-colors: active) and ((pointer: coarse) or (hover: none)) {
+  .ap-item:focus-visible {
+    outline: none;
+  }
+  .ap-item:focus-visible .ap-orb {
+    outline: 3px solid Highlight;
+    outline-offset: 4px;
   }
 }

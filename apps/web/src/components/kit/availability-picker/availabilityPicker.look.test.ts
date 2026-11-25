@@ -74,6 +74,27 @@ describe("the pill's sheet", () => {
     expect(block).toMatch(/\.ap-chip,\s*\.ap-measure\s*{\s*display: none/);
   });
 
+  it("draws the focus ring round the 44 px orb on a finger, not round the 80 px item, and forced colours follow", () => {
+    const block = atRule(picker, "@media (pointer: coarse), (hover: none)");
+    expect(block).toMatch(/\.ap-item:focus-visible\s*{\s*outline: none/);
+    expect(block).toMatch(
+      /\.ap-item:focus-visible \.ap-orb\s*{\s*outline: 2px solid var\(--ring\);\s*outline-offset: 4px/,
+    );
+    // Forced colours: the item has an outline in general and none on a finger,
+    // where the orb has it, and the finger's block comes last so that it wins.
+    const forced = atRule(
+      picker,
+      "@media (forced-colors: active) and ((pointer: coarse) or (hover: none))",
+    );
+    expect(forced).toMatch(/\.ap-item:focus-visible\s*{\s*outline: none/);
+    expect(forced).toMatch(
+      /\.ap-item:focus-visible \.ap-orb\s*{\s*outline: 3px solid Highlight/,
+    );
+    expect(
+      picker.indexOf("@media (forced-colors: active) and ((pointer: coarse)"),
+    ).toBeGreaterThan(picker.indexOf("@media (forced-colors: active) {"));
+  });
+
   it("animates only scale and opacity in the pill's keyframes", () => {
     for (const name of [
       "ap-grow",

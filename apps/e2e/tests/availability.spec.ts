@@ -460,6 +460,24 @@ test.describe("on a phone with a touch screen", () => {
     expect(labelBox?.y ?? 0).toBeGreaterThanOrEqual(
       (orbBox?.y ?? 0) + (orbBox?.height ?? 0) - 0.5,
     );
+    // After an arrow key the focus ring is round the 44 px orb: the 80 px item
+    // has no outline of its own, since a ring round it would touch the pill's
+    // edges and cut through the words under the orb.
+    await page.keyboard.press("ArrowRight");
+    const focused = pill(page).locator('[role="menuitemradio"]:focus');
+    await expect(focused).toHaveCount(1);
+    const rings = await focused.evaluate((item) => {
+      const orbEl = item.querySelector(".ap-orb");
+      const orb = orbEl ? getComputedStyle(orbEl) : null;
+      return {
+        itemStyle: getComputedStyle(item).outlineStyle,
+        orbStyle: orb?.outlineStyle ?? "no orb",
+        orbWidth: orb?.outlineWidth ?? "no orb",
+      };
+    });
+    expect(rings.itemStyle, "the item has no outline of its own").toBe("none");
+    expect(rings.orbStyle, "its orb has the ring").toBe("solid");
+    expect(rings.orbWidth).toBe("2px");
     await expectInsideViewport(page);
   });
 
