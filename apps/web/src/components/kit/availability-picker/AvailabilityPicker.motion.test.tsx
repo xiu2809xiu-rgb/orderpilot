@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { must } from "@/test/must";
@@ -60,6 +60,49 @@ async function open(user: ReturnType<typeof userEvent.setup>) {
     ).toHaveFocus();
   });
 }
+
+describe("the glass of the pill", () => {
+  const pill = () => screen.getByRole("menu");
+  // jsdom has no AnimationEvent, and React listens there for the webkit-prefixed
+  // names, so the event is made by hand, under both names, with the animation
+  // name React reads. The handlers are idempotent, so a double call is harmless.
+  const fireAnimation = (type: "start" | "end", animationName: string) => {
+    for (const name of [
+      `animation${type}`,
+      `webkitAnimation${type === "start" ? "Start" : "End"}`,
+    ]) {
+      fireEvent(
+        pill(),
+        Object.assign(new Event(name, { bubbles: true }), { animationName }),
+      );
+    }
+  };
+
+  it("is switched on when the growth ends and is off again on the next opening", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await open(user);
+    expect(pill()).not.toHaveAttribute("data-settled");
+    fireAnimation("end", "ap-grow");
+    expect(pill()).toHaveAttribute("data-settled");
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("menu")).toBeNull();
+    });
+    await open(user);
+    expect(pill()).not.toHaveAttribute("data-settled");
+  });
+
+  it("is switched off when the fold starts, so the blur does not scale", async () => {
+    const user = userEvent.setup();
+    renderPicker();
+    await open(user);
+    fireAnimation("end", "ap-grow");
+    expect(pill()).toHaveAttribute("data-settled");
+    fireAnimation("start", "ap-fold");
+    expect(pill()).not.toHaveAttribute("data-settled");
+  });
+});
 
 describe("the caption that follows the choice", () => {
   it("is placed at once under the checked item when the pill opens, with no spring", async () => {

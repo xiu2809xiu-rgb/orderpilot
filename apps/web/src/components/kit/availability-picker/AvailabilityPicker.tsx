@@ -5,7 +5,13 @@
 // a flash of light after a pick, the keyboard model): no source, markup, picture, font, colour or glyph drawing was
 // copied. A private prototype for a school module. Adapted to OrderPilot's tokens.
 import { DropdownMenu as MenuPrimitive } from "radix-ui";
-import { useState, type CSSProperties, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { PickerPill } from "./PickerPill";
 import { GROW_EASING, GROW_MS } from "./pickerMotion";
@@ -69,6 +75,17 @@ function sideways(event: KeyboardEvent<HTMLDivElement>) {
 }
 
 /**
+ * Runs once each time a pill appears. The picker stays mounted while the pill
+ * is closed, so its growth state would otherwise carry over and the second
+ * opening would start with the blur already on. (A ref callback cannot do
+ * this: Radix composes its refs afresh on every render.)
+ */
+function Appears({ onAppear }: { onAppear: () => void }) {
+  useEffect(onAppear, [onAppear]);
+  return null;
+}
+
+/**
  * The menu's content: a glass pill that grows out of its trigger. It uses
  * Radix's primitives directly and not the wrapper in components/ui, because
  * the wrapper's own entrance classes could not be cleared by tailwind-merge
@@ -87,6 +104,10 @@ export function AvailabilityPicker({
 }: PickerContentProps) {
   const coarse = useMediaQuery(COARSE);
   const [settled, setSettled] = useState(false);
+  // A stable function, so the effect below runs once for each pill.
+  const restart = useCallback(() => {
+    setSettled(false);
+  }, []);
   // The pill's near corner lies over its trigger, so it can grow out of it.
   const sideOffset = coarse ? -44 : skin === "ring" ? -32 : -24;
   return (
@@ -109,6 +130,15 @@ export function AvailabilityPicker({
         {...openFocus}
         onCloseAutoFocus={onCloseAutoFocus}
         onKeyDown={sideways}
+        onAnimationStart={(event) => {
+          // The fold scales the box again, so the blur goes off for it too.
+          if (
+            event.target === event.currentTarget &&
+            event.animationName === "ap-fold"
+          ) {
+            setSettled(false);
+          }
+        }}
         onAnimationEnd={(event) => {
           // The glass blur is switched on once the growth is over: a blurred
           // box that scales is repainted each frame.
@@ -120,6 +150,7 @@ export function AvailabilityPicker({
           }
         }}
       >
+        <Appears onAppear={restart} />
         <PickerPill value={value} onChange={onChange} labels={labels} />
       </MenuPrimitive.Content>
     </MenuPrimitive.Portal>
