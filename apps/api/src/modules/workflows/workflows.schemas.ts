@@ -7,6 +7,8 @@ import {
   orderFlowSchema,
   paymentResultSchema,
   paymentUndoResultSchema,
+  piReissueResultSchema,
+  salesApprovalResultSchema,
   sprDecisionResultSchema,
   sprDecisionUndoResultSchema,
   sprDetailSchema,
@@ -30,11 +32,19 @@ export const handedTaskListResponseSchema = mockPageEnvelope(handedTaskSchema);
 export const reminderListResponseSchema = mockPageEnvelope(
   workflowReminderSchema,
 );
-export const orderFlowResponseSchema = mockEnvelope(orderFlowSchema);
+/** A running order's flow is real, so `mock` is false for it, and true for a sample. */
+export const orderFlowResponseSchema = z.object({
+  data: orderFlowSchema,
+  meta: z.object({ mock: z.boolean() }),
+});
 export const sprResponseSchema = mockEnvelope(sprDetailSchema);
 export const sprDecisionResponseSchema = dataEnvelope(sprDecisionResultSchema);
 export const paymentResponseSchema = mockEnvelope(paymentResultSchema);
 export const paymentUndoResponseSchema = mockEnvelope(paymentUndoResultSchema);
+export const piReissueResponseSchema = dataEnvelope(piReissueResultSchema);
+export const salesApprovalResponseSchema = dataEnvelope(
+  salesApprovalResultSchema,
+);
 export const sprDecisionUndoResponseSchema = dataEnvelope(
   sprDecisionUndoResultSchema,
 );

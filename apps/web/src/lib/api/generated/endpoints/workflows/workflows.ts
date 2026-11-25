@@ -23,6 +23,8 @@ import type {
 import type {
   WorkflowsApprove200,
   WorkflowsApproveBody,
+  WorkflowsApproveSale200,
+  WorkflowsApproveSaleBody,
   WorkflowsChangeSla200,
   WorkflowsChangeSlaBody,
   WorkflowsCompleteTask200,
@@ -43,12 +45,15 @@ import type {
   WorkflowsNoticesForMeParams,
   WorkflowsOpenRules200,
   WorkflowsOrderFlow200,
+  WorkflowsReissuePi200,
+  WorkflowsReissuePiBody,
   WorkflowsReject200,
   WorkflowsRejectBody,
   WorkflowsSlaSettings200,
   WorkflowsSpr200,
   WorkflowsUndoDecision200,
   WorkflowsUndoPayment200,
+  WorkflowsUndoSaleApproval200,
   WorkflowsUndoTask200
 } from '../../model';
 
@@ -1023,7 +1028,7 @@ export function useWorkflowsInboxReminders<TData = Awaited<ReturnType<typeof wor
 
 
 /**
- * @summary An order's steps and timeline (mock data)
+ * @summary An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock
  */
 export const workflowsOrderFlow = (
     orderNo: string,
@@ -1094,7 +1099,7 @@ export function useWorkflowsOrderFlow<TData = Awaited<ReturnType<typeof workflow
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary An order's steps and timeline (mock data)
+ * @summary An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock
  */
 
 export function useWorkflowsOrderFlow<TData = Awaited<ReturnType<typeof workflowsOrderFlow>>, TError = ErrorType<unknown>>(
@@ -1115,7 +1120,7 @@ export function useWorkflowsOrderFlow<TData = Awaited<ReturnType<typeof workflow
 
 
 /**
- * @summary Confirm a payment, with its type. Kept in the mock overlay, audited
+ * @summary Confirm a payment, with its type. Audited. On an order the state machine runs it is stored, and once the prepayment is covered the order moves to the warehouse; on a sample it is kept in the mock overlay
  */
 export const workflowsConfirmPayment = (
     orderNo: string,
@@ -1194,7 +1199,7 @@ export function useWorkflowsConfirmPayment<TData = Awaited<ReturnType<typeof wor
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Confirm a payment, with its type. Kept in the mock overlay, audited
+ * @summary Confirm a payment, with its type. Audited. On an order the state machine runs it is stored, and once the prepayment is covered the order moves to the warehouse; on a sample it is kept in the mock overlay
  */
 
 export function useWorkflowsConfirmPayment<TData = Awaited<ReturnType<typeof workflowsConfirmPayment>>, TError = ErrorType<unknown>>(
@@ -1303,6 +1308,300 @@ export function useWorkflowsUndoPayment<TData = Awaited<ReturnType<typeof workfl
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsUndoPaymentQueryOptions(orderNo,paymentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited
+ */
+export const workflowsReissuePi = (
+    orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsReissuePi200>(
+      {url: `/api/v1/workflows/orders/${orderNo}/pi/reissue`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: workflowsReissuePiBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsReissuePiQueryKey = (orderNo: string,
+    workflowsReissuePiBody?: WorkflowsReissuePiBody,) => {
+    return [
+    'POST', `/api/v1/workflows/orders/${orderNo}/pi/reissue`, workflowsReissuePiBody
+    ] as const;
+    }
+
+
+export const getWorkflowsReissuePiQueryOptions = <TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsReissuePiQueryKey(orderNo,workflowsReissuePiBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsReissuePi>>> = ({ signal }) => workflowsReissuePi(orderNo,workflowsReissuePiBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsReissuePiQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsReissuePi>>>
+export type WorkflowsReissuePiQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsReissuePi>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsReissuePi>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsReissuePi>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsReissuePi>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited
+ */
+
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsReissuePiQueryOptions(orderNo,workflowsReissuePiBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Approve a sales order before its PI, while SALES_APPROVAL is on (#251, off by default). Area 4's policy says who may; never the person who raised it. Audited
+ */
+export const workflowsApproveSale = (
+    orderNo: string,
+    workflowsApproveSaleBody: WorkflowsApproveSaleBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsApproveSale200>(
+      {url: `/api/v1/workflows/orders/${orderNo}/sales-approval`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: workflowsApproveSaleBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsApproveSaleQueryKey = (orderNo: string,
+    workflowsApproveSaleBody?: WorkflowsApproveSaleBody,) => {
+    return [
+    'POST', `/api/v1/workflows/orders/${orderNo}/sales-approval`, workflowsApproveSaleBody
+    ] as const;
+    }
+
+
+export const getWorkflowsApproveSaleQueryOptions = <TData = Awaited<ReturnType<typeof workflowsApproveSale>>, TError = ErrorType<unknown>>(orderNo: string,
+    workflowsApproveSaleBody: WorkflowsApproveSaleBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsApproveSale>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsApproveSaleQueryKey(orderNo,workflowsApproveSaleBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsApproveSale>>> = ({ signal }) => workflowsApproveSale(orderNo,workflowsApproveSaleBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsApproveSale>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsApproveSaleQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsApproveSale>>>
+export type WorkflowsApproveSaleQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsApproveSale<TData = Awaited<ReturnType<typeof workflowsApproveSale>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsApproveSaleBody: WorkflowsApproveSaleBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsApproveSale>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsApproveSale>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsApproveSale>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsApproveSale<TData = Awaited<ReturnType<typeof workflowsApproveSale>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsApproveSaleBody: WorkflowsApproveSaleBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsApproveSale>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsApproveSale>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsApproveSale>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsApproveSale<TData = Awaited<ReturnType<typeof workflowsApproveSale>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsApproveSaleBody: WorkflowsApproveSaleBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsApproveSale>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Approve a sales order before its PI, while SALES_APPROVAL is on (#251, off by default). Area 4's policy says who may; never the person who raised it. Audited
+ */
+
+export function useWorkflowsApproveSale<TData = Awaited<ReturnType<typeof workflowsApproveSale>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsApproveSaleBody: WorkflowsApproveSaleBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsApproveSale>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsApproveSaleQueryOptions(orderNo,workflowsApproveSaleBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Undo a sales approval; only its approver may. Audited
+ */
+export const workflowsUndoSaleApproval = (
+    orderNo: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsUndoSaleApproval200>(
+      {url: `/api/v1/workflows/orders/${orderNo}/sales-approval/undo`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsUndoSaleApprovalQueryKey = (orderNo: string,) => {
+    return [
+    'POST', `/api/v1/workflows/orders/${orderNo}/sales-approval/undo`
+    ] as const;
+    }
+
+
+export const getWorkflowsUndoSaleApprovalQueryOptions = <TData = Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError = ErrorType<unknown>>(orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsUndoSaleApprovalQueryKey(orderNo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>> = ({ signal }) => workflowsUndoSaleApproval(orderNo, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsUndoSaleApprovalQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>>
+export type WorkflowsUndoSaleApprovalQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsUndoSaleApproval<TData = Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError = ErrorType<unknown>>(
+ orderNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoSaleApproval>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoSaleApproval>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoSaleApproval<TData = Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoSaleApproval>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoSaleApproval>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoSaleApproval<TData = Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Undo a sales approval; only its approver may. Audited
+ */
+
+export function useWorkflowsUndoSaleApproval<TData = Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoSaleApproval>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsUndoSaleApprovalQueryOptions(orderNo,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
