@@ -19,12 +19,12 @@ export function SparkEmpty({ mayReadSales, onAsk }: SparkEmptyProps) {
   const { t } = useTranslation("directions-spark");
   const icons = { stock: Package, trend: TrendingUp } as const;
   return (
-    <BlurFade className="flex flex-col gap-4 px-5 pb-4 text-center">
+    <BlurFade className="flex flex-col gap-4 px-5 pb-4">
       <div className="flex flex-col gap-2">
         <h3 className="fs-16 font-semibold text-foreground">
           {t("empty.title")}
         </h3>
-        <p className="fs-14 mx-auto max-w-[34ch] text-muted-foreground">
+        <p className="fs-14 max-w-[34ch] text-muted-foreground">
           {t("empty.intro")}
         </p>
       </div>

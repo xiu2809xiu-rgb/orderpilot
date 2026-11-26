@@ -15,11 +15,13 @@ interface ReviewProgressProps {
 }
 
 /**
- * What is left to approve, and the one primary button of the screen, Finish
- * review. It stays under the top bar for the whole review (sticky), so the
- * count and the button are never scrolled away from a person working down the
- * list. Its height is written to `--review-bar` on the review, which the page
- * and the rows use to stop below it: a field being approved is never behind it.
+ * What is left to approve, and the one filled button of the screen: Next to
+ * approve while a field waits (Finish review is off then, so it is an outline),
+ * and Finish review once none does. It stays under the top bar for the whole
+ * review (sticky), so the count and the buttons are never scrolled away from a
+ * person working down the list. Its height is written to `--review-bar` on
+ * the review, which the page and the rows use to stop below it: a field being
+ * approved is never behind it.
  */
 export function ReviewProgress({
   uncertainCount,
@@ -49,6 +51,8 @@ export function ReviewProgress({
     };
   }, []);
   const confirmed = uncertainCount - waitingCount;
+  // The live control is the filled one, so a disabled button is never the primary.
+  const nextIsLive = waitingCount > 0 && onNext !== undefined;
   return (
     <div
       ref={bar}
@@ -78,7 +82,7 @@ export function ReviewProgress({
         {onNext ? (
           <Button
             type="button"
-            variant="outline"
+            variant={nextIsLive ? "default" : "outline"}
             onClick={onNext}
             className="pointer-coarse:h-11"
           >
@@ -91,6 +95,7 @@ export function ReviewProgress({
           <Button
             ref={finishRef}
             type="button"
+            variant={nextIsLive ? "outline" : "default"}
             disabled={waitingCount > 0}
             aria-describedby={statusId}
             onClick={onFinish}

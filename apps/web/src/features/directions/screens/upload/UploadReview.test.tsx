@@ -326,6 +326,36 @@ describe("the finish button says why it is off", () => {
   });
 });
 
+describe("the one filled button of the progress card", () => {
+  // The live control is the filled one: a disabled button is never the primary.
+  const filled = (card: HTMLElement) =>
+    within(card)
+      .getAllByRole("button")
+      .filter((button) => button.getAttribute("data-variant") === "default")
+      .map((button) => button.textContent);
+
+  it("is Next to approve while a field waits, and Finish review once the last one is approved", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    const finish = screen.getByRole("button", { name: "Finish review" });
+    const card = must(finish.closest<HTMLElement>(".sticky"));
+    expect(finish).toBeDisabled();
+    expect(finish).toHaveAttribute("data-variant", "outline");
+    expect(filled(card)).toEqual(["Next to approve"]);
+    await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
+    expect(filled(card)).toEqual(["Next to approve"]);
+    await user.click(
+      screen.getByRole("button", { name: "Confirm Payment terms" }),
+    );
+    expect(finish).toBeEnabled();
+    expect(finish).toHaveAttribute("data-variant", "default");
+    expect(filled(card)).toEqual(["Finish review"]);
+    expect(
+      within(card).queryByRole("button", { name: "Next to approve" }),
+    ).toBeNull();
+  });
+});
+
 describe("starting again", () => {
   it("asks first while the review is in progress: Keep reviewing stays with the work and the focus", async () => {
     const user = userEvent.setup();

@@ -16,11 +16,14 @@ export function HomeSection({
   children,
   className,
   work = false,
+  quietIntro = false,
   id,
 }: {
   id?: string;
   title: string;
   intro?: string;
+  /** The intro in the faint tier, for a card whose body is what a person came for. */
+  quietIntro?: boolean;
   children: ReactNode;
   className?: string;
   work?: boolean;
@@ -47,7 +50,16 @@ export function HomeSection({
           </h2>
         </header>
         <div className="dx-section-body flex-1">
-          {intro ? <p className="dx-section-intro">{intro}</p> : null}
+          {intro ? (
+            <p
+              className={cn(
+                "dx-section-intro",
+                quietIntro && "dx-section-intro-faint",
+              )}
+            >
+              {intro}
+            </p>
+          ) : null}
           {children}
         </div>
       </SpotlightCard>

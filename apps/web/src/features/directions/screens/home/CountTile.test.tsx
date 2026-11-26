@@ -1,8 +1,9 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { cuesFor } from "@/features/nav";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
+import { must } from "@/test/must";
 import {
   loadNamespaces,
   nth,
@@ -67,5 +68,19 @@ describe("a home tile whose list is the tracker's", () => {
     renderAt(<CountTile cue={found.cue} />, "/");
     const tile = await screen.findByRole("link", { name: /^Open orders\s*4$/ });
     expect(tile).toHaveAttribute("href", "/order-tracker?open=true");
+  });
+});
+
+describe("a home tile's label", () => {
+  it("is the body tier, so that the hover fill and the tile light keep 4.5:1", async () => {
+    stubApi({ specs: SPECS });
+    renderAt(<CountTile cue={cueOf("SUPPORT", "openOrders")} />, "/");
+    const tile = await screen.findByRole("link", {
+      name: /^Open orders\s*\d+$/,
+    });
+    // The class is on the label's wrapper, which also holds the arrow.
+    expect(
+      must(within(tile).getByText("Open orders").parentElement),
+    ).toHaveClass("text-muted-foreground");
   });
 });

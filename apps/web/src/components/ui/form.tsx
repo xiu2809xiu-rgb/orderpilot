@@ -141,7 +141,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("-mt-1 text-xs text-(--faint-foreground)", className)}
+      className={cn("-mt-1 text-xs text-faint-foreground", className)}
       {...props}
     />
   );

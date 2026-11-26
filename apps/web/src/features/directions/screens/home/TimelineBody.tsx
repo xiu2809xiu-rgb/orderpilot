@@ -25,6 +25,7 @@ function OrderLine({ task }: { task: WorkflowTask }) {
   const customer = task.customerName ? ` · ${task.customerName}` : "";
   return (
     <TimelineDate
+      quiet
       dateTime={undefined}
     >{`${task.orderNo ?? ""}${customer}`}</TimelineDate>
   );
@@ -85,7 +86,9 @@ export function NowGroup({
                   {waitedText(t, entry.since, at)}
                 </span>
                 {entry.usual ? (
-                  <span>{usualText(tParts, entry.usual)}</span>
+                  <span className="text-faint-foreground">
+                    {usualText(tParts, entry.usual)}
+                  </span>
                 ) : null}
               </p>
               {entry.pastUsual === true ? (
@@ -125,7 +128,7 @@ export function NextGroup({ entries }: { entries: readonly TimelineEntry[] }) {
   return (
     <TimelineGroup title={t("timeline.next.title")}>
       {entries.length === 0 ? (
-        <p className="fs-14 max-w-prose text-muted-foreground">
+        <p className="fs-14 max-w-prose text-faint-foreground">
           {t("timeline.next.empty")}
         </p>
       ) : (

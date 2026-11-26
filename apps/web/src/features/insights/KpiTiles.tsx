@@ -28,11 +28,13 @@ export function KpiTiles({ measures }: { measures: readonly Kpi[] }) {
             <dl className="grid grid-cols-2 gap-s2">
               <div>
                 <dt className="dx-meta">{t("kpi.manual")}</dt>
-                <dd className="fs-28 tabular-nums">{kpi.manual}</dd>
+                <dd className="fs-28 font-normal tabular-nums text-muted-foreground">
+                  {kpi.manual}
+                </dd>
               </div>
               <div>
                 <dt className="dx-meta">{t("kpi.withOrderPilot")}</dt>
-                <dd className="fs-28 tabular-nums">
+                <dd className="numeral fs-28">
                   <GradientText>{kpi.withOrderPilot}</GradientText>
                 </dd>
               </div>
