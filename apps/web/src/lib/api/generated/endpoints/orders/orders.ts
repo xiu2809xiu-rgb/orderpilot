@@ -26,6 +26,8 @@ import type {
   OrdersList200,
   OrdersListParams,
   OrdersOne200,
+  OrdersSubmitDraft200,
+  OrdersSubmitDraftBody,
   OrdersUpdate200,
   OrdersUpdateBody,
   OrdersVoidDraft200,
@@ -523,6 +525,107 @@ export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidD
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getOrdersVoidDraftQueryOptions(orderNo,ordersVoidDraftBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Submit a draft order. Send the version you read. OrderPilot cannot change or cancel it afterwards
+ */
+export const ordersSubmitDraft = (
+    orderNo: string,
+    ordersSubmitDraftBody: OrdersSubmitDraftBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<OrdersSubmitDraft200>(
+      {url: `/api/v1/orders/${orderNo}/submit`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: ordersSubmitDraftBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getOrdersSubmitDraftQueryKey = (orderNo: string,
+    ordersSubmitDraftBody?: OrdersSubmitDraftBody,) => {
+    return [
+    'POST', `/api/v1/orders/${orderNo}/submit`, ordersSubmitDraftBody
+    ] as const;
+    }
+
+
+export const getOrdersSubmitDraftQueryOptions = <TData = Awaited<ReturnType<typeof ordersSubmitDraft>>, TError = ErrorType<unknown>>(orderNo: string,
+    ordersSubmitDraftBody: OrdersSubmitDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersSubmitDraft>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrdersSubmitDraftQueryKey(orderNo,ordersSubmitDraftBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersSubmitDraft>>> = ({ signal }) => ordersSubmitDraft(orderNo,ordersSubmitDraftBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersSubmitDraft>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrdersSubmitDraftQueryResult = NonNullable<Awaited<ReturnType<typeof ordersSubmitDraft>>>
+export type OrdersSubmitDraftQueryError = ErrorType<unknown>
+
+
+export function useOrdersSubmitDraft<TData = Awaited<ReturnType<typeof ordersSubmitDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    ordersSubmitDraftBody: OrdersSubmitDraftBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersSubmitDraft>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersSubmitDraft>>,
+          TError,
+          Awaited<ReturnType<typeof ordersSubmitDraft>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersSubmitDraft<TData = Awaited<ReturnType<typeof ordersSubmitDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    ordersSubmitDraftBody: OrdersSubmitDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersSubmitDraft>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersSubmitDraft>>,
+          TError,
+          Awaited<ReturnType<typeof ordersSubmitDraft>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersSubmitDraft<TData = Awaited<ReturnType<typeof ordersSubmitDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    ordersSubmitDraftBody: OrdersSubmitDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersSubmitDraft>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Submit a draft order. Send the version you read. OrderPilot cannot change or cancel it afterwards
+ */
+
+export function useOrdersSubmitDraft<TData = Awaited<ReturnType<typeof ordersSubmitDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    ordersSubmitDraftBody: OrdersSubmitDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersSubmitDraft>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersSubmitDraftQueryOptions(orderNo,ordersSubmitDraftBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
