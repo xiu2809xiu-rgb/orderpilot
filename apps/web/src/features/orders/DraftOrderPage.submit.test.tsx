@@ -336,6 +336,14 @@ describe("Submit order on a draft's form", () => {
         await user.click(confirmIn(dialog));
         const alert = await within(dialog).findByRole("alert");
         expect(within(alert).getByText(words)).toBeVisible();
+        // The title is about the request: "not submitted" would contradict
+        // the server's own "is already submitted".
+        expect(
+          within(alert).getByText("This submit did not go through"),
+        ).toBeVisible();
+        expect(
+          within(alert).queryByText("The order was not submitted"),
+        ).toBeNull();
         expect(within(alert).queryByText("It is still a draft.")).toBeNull();
         expect(
           within(dialog).queryByRole("button", { name: "Submit order" }),

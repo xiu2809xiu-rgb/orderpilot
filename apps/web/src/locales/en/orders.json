@@ -109,6 +109,7 @@
       "working": "Submitting",
       "reload": "Reload the order",
       "failedTitle": "The order was not submitted",
+      "reloadTitle": "This submit did not go through",
       "stillDraft": "It is still a draft.",
       "unknownTitle": "We could not confirm the result",
       "unknownBody": "The order may have been submitted. Reload the order to see which.",

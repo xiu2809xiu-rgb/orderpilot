@@ -26,6 +26,14 @@ interface SubmitOrderDialogProps {
   returnFocusTo: () => HTMLElement | null;
 }
 
+// A 409 or 404 does not say what became of the order, so its title says only
+// that this submit did not go through, which holds for each of them.
+const titleKey = {
+  refused: "form.submit.failedTitle",
+  reload: "form.submit.reloadTitle",
+  unknown: "form.submit.unknownTitle",
+} as const;
+
 const PRESSABLE = "aria-disabled:cursor-not-allowed aria-disabled:opacity-50";
 
 /**
@@ -35,8 +43,9 @@ const PRESSABLE = "aria-disabled:cursor-not-allowed aria-disabled:opacity-50";
  * and no shortcut confirms. While the request is in flight both buttons are
  * `aria-disabled` and ignore presses (not `disabled`, which drops focus), and
  * Escape and an outside click do nothing. The same holds while the order is
- * read again after a refusal (`submitting` is true then too). After a failure it says only what
- * the failure proves (see `SubmitFailure`) and focus moves to what to do next.
+ * read again after a refusal (`submitting` is true then too). After a failure
+ * it says only what the failure proves (see `SubmitFailure`) and focus moves to
+ * what to do next.
  */
 export function SubmitOrderDialog({
   record,
@@ -105,13 +114,7 @@ export function SubmitOrderDialog({
               aria-hidden="true"
             />
             <div className="min-w-0 space-y-1 break-words">
-              <p className="font-medium">
-                {t(
-                  failure.kind === "unknown"
-                    ? "form.submit.unknownTitle"
-                    : "form.submit.failedTitle",
-                )}
-              </p>
+              <p className="font-medium">{t(titleKey[failure.kind])}</p>
               <p>
                 {failure.kind === "unknown"
                   ? t("form.submit.unknownBody")
