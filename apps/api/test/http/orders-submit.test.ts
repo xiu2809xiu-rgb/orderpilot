@@ -18,6 +18,7 @@ import {
   type HandoffAnswer,
   type OrderSubmitted,
 } from "../../src/modules/orders/domain/order-handoff.js";
+import { SalesOrder } from "../../src/modules/orders/domain/sales-order.js";
 import { SalesOrderRepository } from "../../src/modules/orders/sales-order.repository.js";
 import { WorkflowOrderStatusReader } from "../../src/modules/workflows/workflow-order-status-reader.js";
 import {
@@ -152,14 +153,22 @@ describe("submitting draft orders over HTTP", () => {
       expect(res.status).toBe(401);
     });
 
-    it("answers 403 to Warehouse, Auditor and System admin, audits each refusal and submits nothing", async () => {
+    it("answers 403 to every role but Support and the Product Manager, audits each as a permission refusal only, and submits nothing", async () => {
       const mine = await create();
-      for (const role of ["WAREHOUSE", "AUDITOR", "SYSTEM_ADMIN"] as const) {
+      const refused = ROLES.filter(
+        (role) => role !== "SUPPORT" && role !== "PRODUCT_MANAGER",
+      );
+      expect(refused.length).toBeGreaterThan(0);
+      for (const role of refused) {
         const marked = await refusals();
         const res = await submit(role, mine.orderNo);
         expect(res.status, `${role} ${res.text}`).toBe(403);
         expect(await refusals()).toBe(marked + 1);
       }
+      // A permission refusal is the guard's, not the next team's.
+      expect(await eventsOf("order.submit.refused", mine.orderNo)).toHaveLength(
+        0,
+      );
       expect(handoff.calls).toHaveLength(0);
       expect(await stateOf(mine.orderNo)).toMatchObject({
         captureState: "draft",
@@ -202,6 +211,63 @@ describe("submitting draft orders over HTTP", () => {
       expect(bad.status).toBe(400);
       expect(handoff.calls).toHaveLength(0);
       expect((await stateOf(mine.orderNo)).captureState).toBe("draft");
+    });
+
+    it("answers 400 on the right path for a draft whose customer and item master data does not know, and leaves it a draft", async () => {
+      const repository = t.app.get(SalesOrderRepository, { strict: false });
+      const mine = await create();
+      const known = await repository.findByNo(mine.orderNo);
+      if (!known) throw new Error("the draft was not stored");
+      const seeded = (orderNo: string, customerNo: string, itemNo: string) =>
+        repository.insert(
+          new SalesOrder({
+            orderNo,
+            navisionNo: null,
+            captureState: "draft",
+            customerNo,
+            externalDocumentNo: newPo(),
+            orderDate: "2026-11-10",
+            shipmentDate: null,
+            currencyCode: "USD",
+            prepaymentPercent: "0",
+            createdBy: known.createdBy,
+            version: 1,
+            lines: [
+              {
+                lineNo: 1,
+                itemNo,
+                description: "Synthetic line",
+                quantity: "1",
+                unitPrice: "1.00",
+                qtyToShip: "1",
+              },
+            ],
+          }),
+        );
+      await seeded("SO-20261126-9001", "C-NOSUCH", item.no);
+      await seeded("SO-20261126-9002", customer.no, "I-NOSUCH");
+      const noCustomer = await submit("SUPPORT", "SO-20261126-9001");
+      expect(noCustomer.status).toBe(400);
+      expect(errorOf(noCustomer).details).toEqual([
+        {
+          path: "customerNo",
+          message: "No customer has this Business Central number.",
+        },
+      ]);
+      const noItem = await submit("SUPPORT", "SO-20261126-9002");
+      expect(noItem.status).toBe(400);
+      expect(errorOf(noItem).details).toEqual([
+        {
+          path: "lines.0.itemNo",
+          message: "No item has this Business Central number.",
+        },
+      ]);
+      expect(handoff.calls).toHaveLength(0);
+      for (const orderNo of ["SO-20261126-9001", "SO-20261126-9002"])
+        expect(await stateOf(orderNo)).toMatchObject({
+          captureState: "draft",
+          version: 1,
+        });
     });
   });
 
@@ -349,6 +415,8 @@ describe("submitting draft orders over HTTP", () => {
         code: "CONFLICT",
         version: 1,
       });
+      expect(rows[0]?.summary).toMatch(/was refused by the order flow$/);
+      expect(rows[0]?.summary).not.toMatch(/workflow/i);
       expect(JSON.stringify(rows[0])).not.toContain("Synthetic refusal words");
       // Nothing was left half done: the order can be submitted once it is fine.
       handoff.next = null;
@@ -422,7 +490,9 @@ describe("submitting draft orders over HTTP", () => {
         // The line count is a number, never the lines.
         if ("lines" in (event.changes ?? {}))
           expect(typeof event.changes?.lines).toBe("number");
-        const text = JSON.stringify(event);
+        // The words and the changes only: the stored event also holds a random
+        // id and two 64-character hashes, where "7321" can turn up by chance.
+        const text = `${event.summary} ${JSON.stringify(event.changes)}`;
         for (const price of ["31.97", "7321.13", "7321"])
           expect(text).not.toContain(price);
       }
