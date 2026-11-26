@@ -1,8 +1,10 @@
 import { ROLES, type Role } from "@orderpilot/shared";
-import { render } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import i18n from "@/i18n";
 import { cuesFor } from "@/features/nav";
 import { useSessionStore } from "@/stores/session";
+import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
 import { HomeSkeleton } from "./HomeSkeleton";
 
@@ -18,6 +20,10 @@ const BY_ROLE: Record<Role, { main: string; extra: string | null }> = {
   MANAGEMENT: { main: "overdue", extra: null },
   AUDITOR: { main: "refused", extra: null },
 };
+
+beforeAll(async () => {
+  await i18n.loadNamespaces(["components"]);
+});
 
 describe("the home skeleton", () => {
   beforeEach(() => {
@@ -105,5 +111,17 @@ describe("the home skeleton", () => {
     });
     const { container } = render(<HomeSkeleton />);
     expect(container.querySelector("[data-flows]")).toBeNull();
+  });
+
+  it("is announced once as loading, and has no axe violation", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("SUPPORT"),
+    });
+    const { container } = render(<HomeSkeleton />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveAttribute("aria-busy", "true");
+    expect(status).toHaveTextContent("Loading");
+    expect(await axeViolations(container)).toEqual([]);
   });
 });
