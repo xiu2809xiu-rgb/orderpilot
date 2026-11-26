@@ -15,7 +15,7 @@ import { useOrderLinks } from "./homeLinks";
  * tiles keeps its figures on one line whether or not a label wraps.
  */
 const TILE = "dx-card flex h-full min-h-24 flex-col justify-between gap-2 p-4";
-const LABEL = "fs-14 min-w-0 text-faint-foreground";
+const LABEL = "fs-14 min-w-0 text-muted-foreground";
 
 /**
  * One count of the role that opens the list it counts. The number is the

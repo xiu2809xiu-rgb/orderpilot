@@ -72,7 +72,7 @@ describe("a home tile whose list is the tracker's", () => {
 });
 
 describe("a home tile's label", () => {
-  it("is the faint tier, on the card", async () => {
+  it("is the body tier, so that the hover fill and the tile light keep 4.5:1", async () => {
     stubApi({ specs: SPECS });
     renderAt(<CountTile cue={cueOf("SUPPORT", "openOrders")} />, "/");
     const tile = await screen.findByRole("link", {
@@ -81,6 +81,6 @@ describe("a home tile's label", () => {
     // The class is on the label's wrapper, which also holds the arrow.
     expect(
       must(within(tile).getByText("Open orders").parentElement),
-    ).toHaveClass("text-faint-foreground");
+    ).toHaveClass("text-muted-foreground");
   });
 });

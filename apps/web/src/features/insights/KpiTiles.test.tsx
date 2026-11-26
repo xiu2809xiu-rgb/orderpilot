@@ -7,7 +7,7 @@ import { KpiTiles } from "./KpiTiles";
 
 // The comparison is the point of a tile, so each figure keeps its label and its
 // place. Only the weight differs: the answer leads, the baseline is quiet, and
-// the draft wording is the faintest.
+// the draft wording is the body tier, as the tile light rules out the faint one.
 
 const measure: Kpi = {
   id: "processingTime",
@@ -36,7 +36,7 @@ describe("an Insights tile", () => {
     expect(withOrderPilot).toHaveClass("fs-28");
   });
 
-  it("draws the draft definition in the faint tier", () => {
+  it("draws the draft definition in the body tier, which stays readable under the tile light", () => {
     render(<KpiTiles measures={[measure]} />);
     const definition = must(
       screen
@@ -45,7 +45,7 @@ describe("an Insights tile", () => {
         })
         .closest("p"),
     );
-    expect(definition).toHaveClass("text-faint-foreground");
+    expect(definition).toHaveClass("text-muted-foreground");
     expect(within(definition).getByText(/Draft definition/)).toBeVisible();
   });
 });

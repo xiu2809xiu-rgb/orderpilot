@@ -39,7 +39,7 @@ export function KpiTiles({ measures }: { measures: readonly Kpi[] }) {
                 </dd>
               </div>
             </dl>
-            <p className="fs-14 text-faint-foreground">
+            <p className="fs-14 text-muted-foreground">
               <span className="font-medium">{t("kpi.definition")}:</span>{" "}
               {kpi.definition}
             </p>

@@ -66,17 +66,17 @@ export function KpiTile({
       intensity={0.1}
       className={cn("dx-card kpi flex flex-col gap-2 p-4", className)}
     >
-      <p className="fs-14 text-trim-start text-faint-foreground">{label}</p>
+      <p className="fs-14 text-trim-start text-muted-foreground">{label}</p>
       <p className="fs-28 flex flex-wrap items-baseline gap-x-2">
         {value === null ? (
-          <span className="fs-14 text-faint-foreground">
+          <span className="fs-14 text-muted-foreground">
             {t("kpi.noFigure")}
           </span>
         ) : (
           <GradientText>{ticker}</GradientText>
         )}
         {value !== null && unit ? (
-          <span className="fs-14 font-normal text-faint-foreground">
+          <span className="fs-14 font-normal text-muted-foreground">
             {unit}
           </span>
         ) : null}

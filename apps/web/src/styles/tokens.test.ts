@@ -104,6 +104,43 @@ describe.each(SCHEMES)("%s scheme", (scheme) => {
     expect(failures).toEqual([]);
   });
 
+  it("keeps the muted text, and the faint text on the work panel, readable under the pointer light and a hover fill", () => {
+    // SpotlightCard lights the card under the pointer with the ring colour at
+    // its intensity (0.1 on a tile, 0.08 on a home section), and a count tile
+    // takes the hover fill over the card. Both lower a text's contrast, which
+    // no still pair above measures. On a card the faint tier drops under 4.5:1
+    // (dark: 3.81 under the tile light), so a tile that is lit or hovered
+    // draws its label in the muted tier. The work panel is opaque enough for
+    // the faint tier to survive the 8% light of a home section.
+    const lit = (strength: number, base: string) =>
+      flatten({ ...colour("ring"), a: strength }, surface(t, [base]));
+    const cases: [string, string, Rgba][] = [
+      ["muted-foreground", "ring at 10% over card", lit(0.1, "card")],
+      ["muted-foreground", "ring at 8% over card", lit(0.08, "card")],
+      [
+        "muted-foreground",
+        "dx-hover-bg over card",
+        surface(t, ["dx-hover-bg", "card"]),
+      ],
+      [
+        "muted-foreground",
+        "ring at 8% over panel-strong",
+        lit(0.08, "panel-strong"),
+      ],
+      [
+        "faint-foreground",
+        "ring at 8% over panel-strong",
+        lit(0.08, "panel-strong"),
+      ],
+    ];
+    const failures: string[] = [];
+    for (const [text, what, under] of cases) {
+      const ratio = contrast(flatten(colour(text), under), under);
+      if (ratio < 4.5) failures.push(`${text} on ${what}: ${ratio.toFixed(2)}`);
+    }
+    expect(failures).toEqual([]);
+  });
+
   it("keeps the quiet text at 4.5:1 straight on the ground, where a page head sits", () => {
     // A page's date line, its one-line description, the back link and the
     // count beside a title have no panel under them. In light the aurora
