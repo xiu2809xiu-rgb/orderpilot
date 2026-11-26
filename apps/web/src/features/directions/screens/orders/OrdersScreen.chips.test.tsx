@@ -11,6 +11,7 @@ import {
   vi,
 } from "vitest";
 import { useSessionStore } from "@/stores/session";
+import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
 import OrdersScreen from "./OrdersScreen";
 import { loadNamespaces, nth, renderAt, stubApi } from "./ordersTestKit";
@@ -149,7 +150,7 @@ describe("the status chips", () => {
     expect(screen.queryByRole("list", { name: "Filters in force" })).toBeNull();
   });
 
-  it("are named by the applied pill, in the lifecycle's order, and the count of the button says how many", async () => {
+  it("are named by the applied pill, in the lifecycle's order for chip-made links, and the count of the button says how many", async () => {
     const user = userEvent.setup();
     open();
     await bodyRows();
@@ -168,6 +169,31 @@ describe("the status chips", () => {
       ),
     ).toBeVisible();
     expect(screen.getByLabelText("2 statuses are on")).toHaveTextContent("2");
+  });
+
+  it("count one status in the singular, and the pill names it", async () => {
+    const user = userEvent.setup();
+    open();
+    await bodyRows();
+    const group = await openStatuses(user);
+    await user.click(
+      within(group).getByRole("button", { name: "Waiting for payment" }),
+    );
+    expect(screen.getByLabelText("1 status is on")).toHaveTextContent("1");
+    expect(
+      within(pills()).getByText("Status: Waiting for payment"),
+    ).toBeVisible();
+  });
+
+  it("have no accessibility violation with the popover open and a pill leaving", async () => {
+    const user = userEvent.setup();
+    open(`/orders?status=${PAYMENT}%2C${MISMATCH}&overdue=true`);
+    await bodyRows();
+    await openStatuses(user);
+    await user.click(remove("Past due"));
+    expect(document.querySelectorAll("[data-leaving]")).toHaveLength(1);
+    // The popover is drawn in a portal, so the whole body is read.
+    expect(await axeViolations(document.body)).toEqual([]);
   });
 
   it("name the first three and count the rest when a pill would be too long", async () => {
