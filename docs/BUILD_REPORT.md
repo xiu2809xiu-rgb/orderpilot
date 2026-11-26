@@ -338,7 +338,7 @@ The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 
 | P-86  | Synthetic data from the briefing                                 | P    | must     | 13     | 3, 4    | `feat/area1-briefing-data`            | [#261](https://github.com/xiu2809xiu-rgb/orderpilot/pull/261) |
 | P-87  | Drafts that a person sends                                       | E    | must     | 5      | 5       | `feat/area1-drafts`                   | Not started                                                   |
 | P-88  | Customer check on intake and the new-customer card               | B    | must     | 8      | 6       | `feat/area1-customer-check`           | Not started                                                   |
-| P-89  | PO versions                                                      | C    | must     | 5      | 6       | `feat/area1-po-versions`              | Not started                                                   |
+| P-89  | PO versions                                                      | C    | must     | 8      | 6, 7    | `feat/area1-po-versions`              | Built, not merged, #227                                       |
 | P-90  | The short-stock revision request                                 | C    | must     | 3      | 6, 7    | `feat/area1-short-stock-request`      | Not started                                                   |
 | P-91  | The compare screen                                               | D    | must     | 8      | 6, 7    | `feat/area1-compare-documents`        | Not started                                                   |
 | P-92  | Document cabinet: filing and search                              | A    | must     | 8      | 7       | `feat/area1-document-cabinet`         | Not started                                                   |
@@ -433,6 +433,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-36  | Orders: the reader and the list                       | `feat/product-pass-orders`       | Merged, [#217](https://github.com/xiu2809xiu-rgb/orderpilot/pull/217), part of #122 |
 | P-49  | New order and draft editing                           | `feat/order-form`                | Merged, [#218](https://github.com/xiu2809xiu-rgb/orderpilot/pull/218)               |
 | P-114 | Submit an order                                       | `feat/area1-order-submit`        | Built, not merged, [#411](https://github.com/xiu2809xiu-rgb/orderpilot/issues/411)  |
+| P-89  | PO versions                                           | `feat/area1-po-versions`         | Built, not merged, [#227](https://github.com/xiu2809xiu-rgb/orderpilot/issues/227)  |
 | P-50  | Cancel and copy an order                              | `feat/order-actions`             | Not started                                                                         |
 | P-51  | The one order page                                    | `feat/one-order-page`            | Not started                                                                         |
 | P-37  | Document intake and the inbox                         | `feat/product-pass-documents`    | Not started                                                                         |

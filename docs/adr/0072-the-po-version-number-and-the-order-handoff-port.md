@@ -33,6 +33,7 @@ This story is the part area 2 needs first. It fixes the name of the number and t
 - **A known limit.** A revised PO with a new number never meets the duplicate rule, so it is stored as a separate order that nothing links to, until Spectra answers Q-43 (does a revised PO keep its number). The path built keeps the number.
 - **Not built here: cancelling a submitted order.** That is P-50's, and it is expected to add a third call to this port. It is not designed here.
 - **ADR 0047's duplicate rule is not amended here.** P-89 amends its decision 3 when it merges.
+  - _Amended by [ADR 0074](0074-po-versions.md):_ P-89 amended decision 3 of ADR 0047 in text only. A re-sent PO becomes the next PO version when a person confirms that it revises the order, and otherwise the 409 stays.
 - **What area 2 must know when it implements the port.**
   - `OrderStateMachine.start` refuses a user actor who is not Support, so a Product Manager's submit starts the workflow as a system actor, and the machine then sets no `raisedByUserId`. The fact carries the person so that area 2 can keep it another way. The sales approval refuses an order without a `raisedByUserId` as "requester-unknown" (`sales-approval.service.ts`), so the start must take it from `submittedBy.userId`.
   - `OrderWorkflowRepository.insert` refuses a second start with a unique key. Inside an open transaction Postgres aborts the whole transaction on that error, so the implementation must read `statusOf` first and answer `none`, not rely on the conflict.
