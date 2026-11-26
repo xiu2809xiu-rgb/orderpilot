@@ -337,7 +337,8 @@ test("a double click on the ring at gaps of 60, 200, 320 and 400 ms, and a tripl
     // choice. The quarter second stops a fast double click; the opening press
     // said again at its place stops a slower one, within a fixed 500 ms, and a
     // repeat restarts the half second, so a third click at the same gap is
-    // stopped too. The largest gap is 400 ms: 440 leaves too little room before
+    // stopped too (a burst is one gesture only for the first second after the
+    // opening, and three clicks 300 ms apart end at 600 ms). The largest gap is 400 ms: 440 leaves too little room before
     // the half second on a slow runner.
     const rounds: { name: string; gaps: number[] }[] = [
       { name: "a double click at 60 ms", gaps: [60] },

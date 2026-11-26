@@ -506,6 +506,26 @@ describe("a press that repeats the opening press", () => {
     expect(onPick).toHaveBeenCalledWith("AVAILABLE");
   });
 
+  it("picks nothing for clicks at the opening place 300, 600 and 900 ms after it, and the click at 1200 ms picks once", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    // Each click is within the half second of the one before, and the burst
+    // is one gesture only for the first second after the opening.
+    for (const at of [300, 600, 900]) {
+      goTo(at);
+      tap(press(item("Available"), 100, 100));
+    }
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+    goTo(1200);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(onPick).toHaveBeenCalledWith("AVAILABLE");
+  });
+
   it("counts the quarter second from each opening, also when the pill stayed mounted through the fold", async () => {
     // Radix keeps a closing pill in the page until its fold ends. jsdom has no
     // animations, so the closed pill is given one, as the sheet does.

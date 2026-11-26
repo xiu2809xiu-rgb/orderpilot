@@ -61,6 +61,23 @@ describe("the windows of the opening-press model", () => {
     expect(onPick).toHaveBeenCalledTimes(1);
   });
 
+  it("ends a burst of clicks at one place after the first second: 300, 600 and 950 ms are refused and 1020 ms picks", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    for (const ms of [300, 600, 950]) {
+      goTo(ms);
+      tap(item("Available"), 100, 100);
+      expect(onPick, `at ${String(ms)} ms`).not.toHaveBeenCalled();
+    }
+    // 70 ms after the click before it: only the end of the first second lets it pick.
+    goTo(1020);
+    tap(item("Available"), 100, 100);
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
   it("does not let a press far from the opening press restart the half second", async () => {
     const onPick = vi.fn();
     renderPicker({ onPick });

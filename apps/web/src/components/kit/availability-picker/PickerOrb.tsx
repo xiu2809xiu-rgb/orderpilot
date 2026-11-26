@@ -65,7 +65,7 @@ export function PickerOrb({
       className="ap-item"
       style={{ "--ap-i": index } as CSSProperties}
       onPointerDown={(event: PointerEvent<HTMLElement>) => {
-        // Both are asked, so that every repeat restarts the half second.
+        // Both are asked, so that a repeat restarts the half second.
         const repeat = repeatsOpeningPress(event);
         const early = msSinceOpened() < OPEN_GUARD_MS;
         mark(repeat || early ? "refused" : "taken");

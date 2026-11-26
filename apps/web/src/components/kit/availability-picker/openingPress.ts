@@ -15,7 +15,10 @@
  *   fixed number, the usual double-click time; it does not read the system's
  *   setting, which can be longer, and a slower double click picks. A repeat
  *   restarts the 500 ms, so a burst of clicks at one place is one gesture and
- *   a triple click picks nothing either.
+ *   a triple click picks nothing either. But only for the first second after
+ *   the opening (OPENING_CLICK_MS): the gesture that opened the menu lasts one
+ *   second at most, and a person who keeps clicking because nothing seems to
+ *   happen gets their pick as soon as that second is over, wherever it lands.
  * - A refused press stays refused: its release and the click that belongs to
  *   it pick nothing, however long the button was held.
  * - What a choice keeps of a press (that it may pick, or that it was refused)
@@ -94,9 +97,13 @@ export function forgetOpeningPress(): void {
   openedAt = null;
 }
 
-/** Whether this press says the opening press again. If it does, the half second starts over from it. */
+/**
+ * Whether this press says the opening press again. If it does, the half second
+ * starts over from it, but only within the first second after the opening.
+ */
 export function repeatsOpeningPress(event: PressPoint): boolean {
   if (!opening) return false;
+  if (msSinceOpened() >= OPENING_CLICK_MS) return false;
   const now = performance.now();
   if (now - opening.at >= REPEAT_WINDOW_MS) return false;
   const near =
