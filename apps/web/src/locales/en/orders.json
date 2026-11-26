@@ -15,7 +15,7 @@
     "title": "Sales order {{number}}",
     "newTitle": "New order",
     "newDescription": "Enter a customer's PO as a draft. Nothing is posted to Business Central from here.",
-    "draftDescription": "A draft: entry is not finished and nothing is reserved. It can be edited or voided here, and it is not in the order journey yet. Stock figures are from the mock Business Central.",
+    "draftDescription": "A draft: entry is not finished and nothing is reserved. Edit it, submit it when the PO is fully entered, or void it. Stock figures are from the mock Business Central.",
     "formLabel": "Sales order",
     "statusNew": "Not saved yet",
     "tabsEmpty": "Nothing here yet.",
@@ -91,6 +91,29 @@
       "description": "A voided order cannot be changed, and its PO number is free to use again. Say why.",
       "confirm": "Void order",
       "done": "Order {{orderNo}} voided"
+    },
+    "submit": {
+      "label": "Submit order",
+      "title": "Submit order {{orderNo}}?",
+      "consequence": "You cannot undo this. Once it is submitted, OrderPilot cannot change or cancel the order, and this customer's PO number stays with it.",
+      "notDone": "Submitting does not approve the order, reserve stock or post anything to Business Central.",
+      "summary_one": "Customer {{customerNo}}, PO {{po}}, {{count}} line",
+      "summary_other": "Customer {{customerNo}}, PO {{po}}, {{count}} lines",
+      "totals": "Total {{total}}, prepayment {{percent}}%",
+      "zeroTotal": "The total is 0.00. Check the unit prices before you submit.",
+      "short": "Stock is short on {{item}} by {{quantity}}.",
+      "shortMore_one": "Stock is short on {{item}} by {{quantity}} and {{count}} more item.",
+      "shortMore_other": "Stock is short on {{item}} by {{quantity}} and {{count}} more items.",
+      "confirm": "Submit order",
+      "keep": "Keep editing",
+      "working": "Submitting",
+      "reload": "Reload the order",
+      "failedTitle": "The order was not submitted",
+      "stillDraft": "It is still a draft.",
+      "unknownTitle": "We could not confirm the result",
+      "unknownBody": "The order may have been submitted. Reload the order to see which.",
+      "trace": "Trace ID: {{traceId}}",
+      "done": "Order {{orderNo}} submitted"
     },
     "denied": "Your role may read orders but not start them."
   }

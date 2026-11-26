@@ -83,17 +83,20 @@ describe("a draft order's page", () => {
     expect(await screen.findByText(/40 PCS available/)).toBeVisible();
   });
 
-  it("says what a draft is and what can be done with it, promising nothing unbuilt", async () => {
+  it("says what a draft is and what can be done with it, and offers exactly that", async () => {
     fakeServer();
     renderOrders(PATH);
     await quantity();
     expect(
       screen.getByText(
-        "A draft: entry is not finished and nothing is reserved. It can be edited or voided here, and it is not in the order journey yet. Stock figures are from the mock Business Central.",
+        "A draft: entry is not finished and nothing is reserved. Edit it, submit it when the PO is fully entered, or void it. Stock figures are from the mock Business Central.",
       ),
     ).toBeVisible();
-    // Only what exists is offered: Save and Void, and no Submit.
-    expect(screen.queryByRole("button", { name: /submit/i })).toBeNull();
+    // Save, Submit order and Void are offered, and nothing that is not built:
+    // no approval, which the description says nothing about either.
+    expect(screen.getByRole("button", { name: "Submit order" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Void" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /approv/i })).toBeNull();
   });
 
   it("says when the order is not found", async () => {
