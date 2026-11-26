@@ -41,7 +41,7 @@ Every feature traces to at least one of the six module requirements. Each row sa
 | Home leads with the overview, and Needs you shows five tasks                    | `apps/web/src/features/directions/screens/home`                                      | `HomeLayout.test.tsx`, `HomeInbox.test.tsx`    | #354      | In review   |
 | The settings page: a section list, one section at a time, plain rows            | `apps/web/src/app/pages/settings`, `apps/web/src/app/shell/shortcutRegistry.ts`      | `SettingsNav.test.tsx`, `HealthPanel.test.tsx` | #349      | In review   |
 | Text, icons and headings in the shared parts look aligned to the eye            | `apps/web/src/styles/optical.css`, `lib/opticalEdge.ts`                              | `optical.test.tsx`, `opticalEdge.test.ts`      | #355      | In review   |
-| A person who loses the phone can still get in: recovery codes, then a reset     | `TwoStepCard.tsx`, `users.service.ts`                                                | `two-step-reset.test.ts`                       | #380      | In review   |
+| A person who loses the phone can get in: codes, then a reset outside production | `TwoStepCard.tsx`, `users.service.ts`                                                | `two-step-reset.test.ts`                       | #380      | In review   |
 
 ## M2 GRS by design
 
