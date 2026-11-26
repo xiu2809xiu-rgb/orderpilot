@@ -50,6 +50,7 @@ function toDomain(row: Row): SalesOrder {
     prepaymentPercent: row.prepaymentPercent.toFixed(2),
     createdBy: row.createdBy,
     version: row.version,
+    poVersionNo: row.poVersionNo,
     lines: row.lines.map((line) => ({
       lineNo: line.lineNo,
       itemNo: line.itemNo,

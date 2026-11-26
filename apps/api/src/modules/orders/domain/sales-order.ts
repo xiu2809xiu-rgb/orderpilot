@@ -94,6 +94,8 @@ export interface SalesOrderInput {
   readonly createdBy: string;
   /** Counts the saves. Many fixtures leave it out, and a new order is at 1. */
   readonly version?: number | undefined;
+  /** Which PO version this row holds (ADR 0074). A new order is at 1. */
+  readonly poVersionNo?: number | undefined;
   readonly lines: readonly SalesOrderLineInput[];
 }
 
@@ -176,6 +178,9 @@ export class SalesOrder {
   }
   get version(): number {
     return this.input.version ?? 1;
+  }
+  get poVersionNo(): number {
+    return this.input.poVersionNo ?? 1;
   }
   get isDraft(): boolean {
     return this.input.captureState === "draft";
@@ -270,6 +275,7 @@ export class SalesOrder {
       prepaymentPercent: this.prepaymentPercent,
       navisionNo: this.navisionNo,
       version: this.version,
+      poVersionNo: this.poVersionNo,
       workflowStatus: null,
       total: this.total,
       lines: this.lines.map((line) => line.toFacts()),

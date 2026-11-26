@@ -49,6 +49,8 @@ export interface OrderFacts {
   readonly navisionNo: string | null;
   /** Counts the saves of a stored order. Null for a sample: it cannot be edited. */
   readonly version: number | null;
+  /** The PO version a stored order holds now (ADR 0074). Null for a sample. */
+  readonly poVersionNo: number | null;
   /** Area 2's label as text, or null when the order has no workflow. */
   readonly workflowStatus: string | null;
   readonly total: string;

@@ -45,6 +45,16 @@ Order status lives only in area 2's state machine. Confirming a revision writes 
 - `supersededAt` is the application's clock and the head's `createdAt` the database's. The two run on one host in every deployment we plan.
 - The same Support user or Product Manager may revise as often as they like, and the audit row holds no direction of the total. Whether a price change needs a second person or a limit is Angelyn's question.
 
+## The migration check
+
+Prisma cannot declare a CHECK, a trigger or a constraint trigger, so those parts of the migration are written by hand, after the DDL that Prisma proposed for the new column and the two tables (the migration's first part is that DDL, unchanged). The check was run on the migrated test database, with Prisma 7.9.1:
+
+```
+prisma migrate diff --from-config-datasource --to-schema prisma/schema --exit-code
+```
+
+The real output was `No difference detected.` and the exit code was 0. With `--script` it printed `-- This is an empty migration.` So a later `prisma migrate dev` does not propose to drop the hand-written parts. Database tests read the behaviour: each of the four insert-only refusals, the restrict key, the two commit-time checks and the TRUNCATE that goes through was seen failing with its guard dropped.
+
 ## Alternatives considered
 
 - **A JSON snapshot column.** Rejected: typed columns and a drift test keep the copy and the order in step.

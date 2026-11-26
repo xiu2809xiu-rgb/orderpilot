@@ -31,6 +31,7 @@ function toFacts(order: SampleOrder, dataset: SyntheticDataset): OrderFacts {
     // A sample's number is the one Business Central gives it.
     navisionNo: order.header.no,
     version: null,
+    poVersionNo: null,
     workflowStatus: sampleStepFor(order.sampleScreenState).status.label,
     total: order.total,
     lines: order.lines.map((line, index) => ({
