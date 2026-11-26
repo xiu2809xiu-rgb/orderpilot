@@ -122,6 +122,11 @@
   line-height: 1.25rem;
   color: var(--muted-foreground);
 }
+/* The same line one tier quieter, for a card that opts in. It sits on a card
+   or a panel, where the faint tier holds 4.5:1 (ADR 0063 point 4). */
+.dx-section-intro-faint {
+  color: var(--faint-foreground);
+}
 
 /* A heading inside a card: a group of rows, a metric, a step. 14 / 600 in ink,
    24 px under whatever came before it and 8 px over its items. */

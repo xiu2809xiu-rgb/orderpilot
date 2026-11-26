@@ -38,7 +38,7 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
     <TimelineGroup title={t("timeline.done.title")}>
       <p className="dx-meta max-w-prose">{t("timeline.done.hint")}</p>
       {done.length === 0 ? (
-        <p className="fs-14 max-w-prose text-muted-foreground">
+        <p className="fs-14 max-w-prose text-faint-foreground">
           {t("timeline.done.empty")}
         </p>
       ) : (
@@ -70,7 +70,7 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
                     </Link>
                   </TimelineTitle>
                   {customerName ? (
-                    <TimelineDate dateTime={undefined}>
+                    <TimelineDate quiet dateTime={undefined}>
                       {customerName}
                     </TimelineDate>
                   ) : null}

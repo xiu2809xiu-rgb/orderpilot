@@ -39,7 +39,12 @@ export function MyTimeline({
     : t("timeline.summary", { last });
 
   return (
-    <HomeSection title={t("timeline.title")} intro={t("timeline.intro")} work>
+    <HomeSection
+      title={t("timeline.title")}
+      intro={t("timeline.intro")}
+      quietIntro
+      work
+    >
       {home.list.isError ? (
         // Needs you, below, says what failed and offers the retry; saying it twice helps no one.
         <p className="fs-14 max-w-prose text-muted-foreground">
@@ -47,7 +52,7 @@ export function MyTimeline({
         </p>
       ) : (
         <HomeQuery query={home.list} loading={<RowSkeletons rows={3} />}>
-          <p className="fs-14 mb-6 max-w-prose text-muted-foreground">
+          <p className="fs-14 mb-6 max-w-prose text-faint-foreground">
             {summary}
           </p>
           <div className="flex flex-col gap-6">
