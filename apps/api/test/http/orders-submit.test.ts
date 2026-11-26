@@ -159,6 +159,13 @@ describe("submitting draft orders over HTTP", () => {
         (role) => role !== "SUPPORT" && role !== "PRODUCT_MANAGER",
       );
       expect(refused.length).toBeGreaterThan(0);
+      // Counted by the action alone: the guard's rows name the route, not the
+      // order, so a count by order number would miss a row written by mistake.
+      const refusedSubmits = async () =>
+        (await auditEvents(t)).filter(
+          (e) => e.action === "order.submit.refused",
+        ).length;
+      const before = await refusedSubmits();
       for (const role of refused) {
         const marked = await refusals();
         const res = await submit(role, mine.orderNo);
@@ -166,9 +173,7 @@ describe("submitting draft orders over HTTP", () => {
         expect(await refusals()).toBe(marked + 1);
       }
       // A permission refusal is the guard's, not the next team's.
-      expect(await eventsOf("order.submit.refused", mine.orderNo)).toHaveLength(
-        0,
-      );
+      expect(await refusedSubmits()).toBe(before);
       expect(handoff.calls).toHaveLength(0);
       expect(await stateOf(mine.orderNo)).toMatchObject({
         captureState: "draft",

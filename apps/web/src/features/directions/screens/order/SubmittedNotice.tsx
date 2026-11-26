@@ -17,6 +17,9 @@ import { takeSubmittedFocus } from "./submittedFocus";
  * that role could have made one. It names no price, so a masked role reads the
  * same words.
  *
+ * Its links take the notice's own info colour: the teal link colour is 4.06:1
+ * on this tinted ground in the light theme, under the 4.5:1 that WCAG needs.
+ *
  * It is a labelled region and not a live region: the toast that ended the
  * submit already announced it, and a focused, labelled region is read once.
  * It takes focus once, straight after a submit (`takeSubmittedFocus`).
@@ -61,7 +64,7 @@ export function SubmittedNotice({ detail }: { detail: SalesOrderDetail }) {
           <Link
             to="?tab=activity"
             replace
-            className="inline-flex items-center rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none pointer-coarse:min-h-11"
+            className="inline-flex items-center rounded-sm text-(--info) underline-offset-4 hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none pointer-coarse:min-h-11"
             onClick={(event) => {
               // The link only changes the tab in the address; a phone shows the
               // tabs below the status card, so the panel is brought into view.
@@ -78,7 +81,7 @@ export function SubmittedNotice({ detail }: { detail: SalesOrderDetail }) {
             entity="Order"
             id={orderNo}
             subject={t("order.submitted.auditSubject", { orderNo })}
-            className="pointer-coarse:min-h-11"
+            className="text-(--info) pointer-coarse:min-h-11"
           />
         </p>
       </div>

@@ -115,9 +115,9 @@ export function useSubmitOrder(options: {
       const answer = await ordersSubmitDraft(orderNo, {
         version: form.getValues("version") ?? 1,
       });
-      // In this order, and nothing sets state after the swap: the cache write
-      // makes the route draw the order's page in place of this form, so the
-      // page that mounts finds the mark and takes focus.
+      // The mark first, then the cache write that makes the route draw the
+      // order's page in place of this form: the page that mounts takes the
+      // mark. Nothing sets state after the swap.
       markSubmittedFocus(orderNo);
       toast.done(t("form.submit.done", { orderNo }));
       queryClient.setQueryData(getOrdersOneQueryKey(orderNo), answer);
