@@ -66,10 +66,8 @@ describe("the differences between two PO versions", () => {
     const { container } = render(
       <PoDifferences differences={differences()} currency="USD" />,
     );
-    // jsdom lays nothing out, so the class that overrides the list's no-wrap is what is checked.
-    expect(container.querySelector("table")?.className).toContain(
-      "[&_.od-customer-name]:whitespace-normal",
-    );
+    // jsdom applies no stylesheet, so the class that differences.css answers is what is checked.
+    expect(container.querySelector("table")?.className).toContain("od-diff");
   });
 
   it("lists the header first", () => {

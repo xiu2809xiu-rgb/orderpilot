@@ -1,0 +1,12 @@
+/*
+ * The orders list cuts a long item name short with an ellipsis. In the table of
+ * differences the name wraps instead: the longest name on the page would
+ * otherwise widen the table and push the status chip half out of its scroll
+ * region on a phone, before the person has read it. Plain CSS, not a utility
+ * class: orders.css is not in a layer, so a utility would lose to it.
+ */
+.od-diff .od-customer-name {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}

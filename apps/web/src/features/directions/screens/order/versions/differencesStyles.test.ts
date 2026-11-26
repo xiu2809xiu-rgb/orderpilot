@@ -15,4 +15,15 @@ describe("the stylesheet of the differences", () => {
       /^import "@\/features\/directions\/screens\/orders\/orders\.css";$/m,
     );
   });
+
+  it("wraps a long item name in the table of differences, in a rule that orders.css cannot outrank", () => {
+    // orders.css is outside every layer, so a utility class (which is inside one)
+    // loses to its no-wrap rule: the override has to be plain CSS of the same kind.
+    expect(read("./differences.css")).toMatch(
+      /\.od-diff \.od-customer-name \{[^}]*white-space: normal;/,
+    );
+    expect(read("./PoDifferences.tsx")).toMatch(
+      /^import "\.\/differences\.css";$/m,
+    );
+  });
 });
