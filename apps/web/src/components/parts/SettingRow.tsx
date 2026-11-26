@@ -64,7 +64,7 @@ export function SettingRow({
         {description ? (
           <p
             id={descriptionId}
-            className="fs-14 max-w-prose text-muted-foreground"
+            className="fs-14 max-w-prose text-faint-foreground"
           >
             {description}
           </p>
