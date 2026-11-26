@@ -11,6 +11,7 @@ import {
   OPEN_GUARD_MS,
   REPEAT_REACH_PX,
   REPEAT_WINDOW_MS,
+  markOpened,
   repeatsOpeningPress,
 } from "./openingPress";
 
@@ -375,6 +376,9 @@ describe("a press that repeats the opening press", () => {
     renderPicker({ busy: true });
     clock();
     openByPress(100, 100);
+    // A menu that opens a moment later by another way: a press that was held
+    // back must not be there for it to repeat.
+    markOpened();
     expect(repeatsOpeningPress({ clientX: 100, clientY: 100 })).toBe(false);
   });
 
@@ -387,6 +391,7 @@ describe("a press that repeats the opening press", () => {
       clientY: 100,
     });
     expect(screen.queryByRole("menu")).toBeNull();
+    markOpened();
     expect(repeatsOpeningPress({ clientX: 100, clientY: 100 })).toBe(false);
   });
 

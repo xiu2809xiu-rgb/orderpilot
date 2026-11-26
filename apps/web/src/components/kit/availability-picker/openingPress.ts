@@ -23,10 +23,11 @@
  *   it pick nothing, however long the button was held.
  * - What a choice keeps of a press (that it may pick, or that it was refused)
  *   counts only in the opening it was made in: each opening has a number, and
- *   a mark from another opening is read as no press. Radix keeps the pill
- *   mounted when the menu closes and opens again within the fold, and a press
- *   that was slid away from and never finished must not make the next click
- *   of that choice look like one that was pressed.
+ *   a mark from another opening is read as no press. A pick closes the menu,
+ *   which ends its opening, so a pick needs no clearing of its own. Radix
+ *   keeps the pill mounted when the menu closes and opens again within the
+ *   fold, and a press that was slid away from and never finished must not
+ *   make the next click of that choice look like one that was pressed.
  * - A click made by a pointer (its `detail` is 1 or more) on a choice that was
  *   not pressed is the click of the tap that opened the pill, and is refused
  *   in the first second of the clock (OPENING_CLICK_MS). After that an input

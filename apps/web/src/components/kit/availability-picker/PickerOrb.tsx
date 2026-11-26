@@ -47,8 +47,9 @@ export function PickerOrb({
 }) {
   const Mark = availabilityLook[value].mark;
   // The mark outlives the release, and a touch screen's pointerleave comes
-  // before its click, so no leave clears it. It goes with a pick or a cancel,
-  // and it is void in any other opening than the one it was made in.
+  // before its click, so no leave clears it. It goes with a cancel and with
+  // the refusal of its click, and it is void in any other opening than the one
+  // it was made in (a pick closes the menu, which ends its opening).
   const seen = useRef<{ press: Press; opening: number }>({
     press: "none",
     opening: 0,
@@ -96,7 +97,6 @@ export function PickerOrb({
       }}
       // A repeat of the current value is a pick too: it renews the 12 hours.
       onSelect={() => {
-        mark("none");
         onPick(value);
       }}
     >
