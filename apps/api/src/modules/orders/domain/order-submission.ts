@@ -3,7 +3,7 @@ import type {
   HandoffRequest,
   OrderSubmitted,
 } from "./order-handoff.js";
-import { FIRST_PO_VERSION, type SalesOrder } from "./sales-order.js";
+import type { SalesOrder } from "./sales-order.js";
 
 /**
  * The fact that tells area 2's workflow an order was submitted (ADR 0072).
@@ -23,7 +23,7 @@ export function submissionFact(
     submittedAt: at,
     total: order.total,
     prepaymentPercent: order.prepaymentPercent,
-    poVersionNo: FIRST_PO_VERSION,
+    poVersionNo: order.poVersionNo,
     request,
   };
 }

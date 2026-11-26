@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { submissionFact } from "./order-submission.js";
-import { FIRST_PO_VERSION, SalesOrder } from "./sales-order.js";
+import { SalesOrder } from "./sales-order.js";
 
 const order = new SalesOrder({
   orderNo: "SO-20261108-0001",
@@ -44,7 +44,11 @@ describe("submissionFact", () => {
       poVersionNo: 1,
       request,
     });
-    expect(FIRST_PO_VERSION).toBe(1);
+  });
+
+  it("a draft is at PO version 1, so the first submit hands over 1", () => {
+    expect(order.poVersionNo).toBe(1);
+    expect(submissionFact(order, by, at, request).poVersionNo).toBe(1);
   });
 
   it("holds the total as a decimal string and no line, no unit price", () => {
@@ -59,6 +63,7 @@ describe("submissionFact", () => {
     const allowed = new Set([
       "orderNo",
       "customerNo",
+      "poVersionNo",
       "prepaymentPercent",
       "total",
     ]);

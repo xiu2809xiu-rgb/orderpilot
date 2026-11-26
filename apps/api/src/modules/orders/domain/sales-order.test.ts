@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   ConflictError,
+  DomainError,
   ValidationFailedError,
 } from "../../../common/domain-error.js";
 import { SHIPMENT_BEFORE_ORDER_MESSAGE } from "@orderpilot/shared";
-import { SalesOrder, type SalesOrderInput } from "./sales-order.js";
+import {
+  SalesOrder,
+  type PoVersionContentInput,
+  type SalesOrderInput,
+} from "./sales-order.js";
 
 function input(over: Partial<SalesOrderInput> = {}): SalesOrderInput {
   return {
@@ -217,6 +222,142 @@ describe("SalesOrder", () => {
       expect(closed.captureState).toBe("void");
       expect(closed.isDraft).toBe(false);
       expect(order.captureState).toBe("draft");
+    });
+  });
+
+  describe("PO versions", () => {
+    const submitted = (over: Partial<SalesOrderInput> = {}) =>
+      new SalesOrder(input({ captureState: "submitted", ...over }));
+    const content = (
+      over: Partial<PoVersionContentInput> = {},
+    ): PoVersionContentInput => ({
+      orderDate: "2026-11-20",
+      shipmentDate: "2026-12-01",
+      prepaymentPercent: "50.00",
+      lines: [
+        {
+          lineNo: 1,
+          itemNo: "I-0001",
+          description: "Synthetic demo item",
+          quantity: "8",
+          unitPrice: "13.00",
+          qtyToShip: "8",
+        },
+      ],
+      ...over,
+    });
+    const refusal = (call: () => unknown): DomainError => {
+      try {
+        call();
+      } catch (error) {
+        if (error instanceof DomainError) return error;
+        throw error;
+      }
+      throw new Error("did not throw");
+    };
+
+    it("poVersionNo is 1 unless the input holds one", () => {
+      expect(new SalesOrder(input()).poVersionNo).toBe(1);
+      expect(new SalesOrder(input({ poVersionNo: 3 })).poVersionNo).toBe(3);
+    });
+
+    it("toFacts carries poVersionNo", () => {
+      expect(
+        new SalesOrder(input({ poVersionNo: 4 })).toFacts().poVersionNo,
+      ).toBe(4);
+    });
+
+    it("revised() copies the order with the new content, the next PO version and the same version, through the constructor", () => {
+      const order = submitted({ version: 5 });
+      const next = order.revised(content());
+      expect(next.poVersionNo).toBe(2);
+      expect(next.version).toBe(5);
+      expect(next.orderDate).toBe("2026-11-20");
+      expect(next.shipmentDate).toBe("2026-12-01");
+      expect(next.prepaymentPercent).toBe("50.00");
+      expect(next.lines.map((l) => l.quantity)).toEqual(["8"]);
+      // The constructor's rules run: an order with no lines is refused.
+      expect(() => order.revised(content({ lines: [] }))).toThrow(
+        ValidationFailedError,
+      );
+    });
+
+    it("does not change the order it was called on", () => {
+      const order = submitted();
+      order.revised(content());
+      expect(order.poVersionNo).toBe(1);
+      expect(order.orderDate).toBe("2026-11-08");
+      expect(order.lines).toHaveLength(2);
+    });
+
+    it("keeps the customer, the PO number, the currency, the Business Central number and the state", () => {
+      const order = submitted({ navisionNo: "SO-0042", currencyCode: "USD" });
+      const next = order.revised(content());
+      expect(next.customerNo).toBe("C-10010");
+      expect(next.externalDocumentNo).toBe("PO-7788");
+      expect(next.currencyCode).toBe("USD");
+      expect(next.navisionNo).toBe("SO-0042");
+      expect(next.captureState).toBe("submitted");
+      expect(next.createdBy).toBe(order.createdBy);
+    });
+
+    it("refuses a draft, with words that say to edit it, and a void order", () => {
+      const draft = refusal(() => new SalesOrder(input()).revised(content()));
+      expect(draft.code).toBe("CONFLICT");
+      expect(draft.message).toBe(
+        "Order SO-20261108-0001 is a draft, so edit it. Only a submitted order is revised.",
+      );
+      expect(draft.details).toEqual([
+        { path: "captureState", message: "draft" },
+      ]);
+      const closed = refusal(() =>
+        new SalesOrder(input({ captureState: "void" })).revised(content()),
+      );
+      expect(closed.message).toBe(
+        "Order SO-20261108-0001 is void, so it cannot be revised. Only a submitted order can be.",
+      );
+      expect(closed.details).toEqual([
+        { path: "captureState", message: "void" },
+      ]);
+    });
+
+    it("refuses another customer on customerNo", () => {
+      const error = refusal(() => {
+        submitted().requireSameOrder("C-10011", "PO-7788");
+      });
+      expect(error).toBeInstanceOf(ValidationFailedError);
+      expect(error.details?.map((d) => d.path)).toEqual(["customerNo"]);
+    });
+
+    it("refuses another PO number once spaces and case are ignored, and allows the same number in another case", () => {
+      const order = submitted();
+      expect(() => {
+        order.requireSameOrder("C-10010", "  po-7788 ");
+      }).not.toThrow();
+      expect(() => {
+        order.requireSameOrder("C-10010", "Po -7788");
+      }).toThrow(ValidationFailedError);
+      const error = refusal(() => {
+        order.requireSameOrder("C-10010", "PO-9999");
+      });
+      expect(error.details).toEqual([
+        {
+          path: "externalDocumentNo",
+          message:
+            "A revised PO keeps the PO number PO-7788. A PO with another number is a new order.",
+        },
+      ]);
+    });
+
+    it("refuses a shipment date before the order date, on shipmentDate", () => {
+      const error = refusal(() =>
+        submitted().revised(
+          content({ orderDate: "2026-11-20", shipmentDate: "2026-11-01" }),
+        ),
+      );
+      expect(error.details).toEqual([
+        { path: "shipmentDate", message: SHIPMENT_BEFORE_ORDER_MESSAGE },
+      ]);
     });
   });
 });

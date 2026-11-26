@@ -11,15 +11,14 @@ import {
 } from "@orderpilot/shared";
 import {
   ConflictError,
+  DomainError,
   ValidationFailedError,
 } from "../../../common/domain-error.js";
 import { isTotalHoldable, TOTAL_TOO_LARGE } from "./draft-lines.js";
 import type { OrderFacts, OrderFactsLine } from "./order-facts.js";
+import { normalisePoNumber } from "./po-number.js";
 
 export type SalesOrderLineInput = OrderFactsLine;
-
-/** The PO version of a first submit. P-89 replaces this with the stored version. */
-export const FIRST_PO_VERSION = 1;
 
 /** One line of a stored order. The amount is worked out, never stored. */
 export class SalesOrderLine {
@@ -96,6 +95,14 @@ export interface SalesOrderInput {
   readonly version?: number | undefined;
   /** Which PO version this row holds (ADR 0074). A new order is at 1. */
   readonly poVersionNo?: number | undefined;
+  readonly lines: readonly SalesOrderLineInput[];
+}
+
+/** What a confirmed revision brings. The customer, the PO number and the currency stay the order's own. */
+export interface PoVersionContentInput {
+  readonly orderDate: string;
+  readonly shipmentDate: string | null;
+  readonly prepaymentPercent: string;
   readonly lines: readonly SalesOrderLineInput[];
 }
 
@@ -242,6 +249,74 @@ export class SalesOrder {
         { path: "shipmentDate", message: SHIPMENT_BEFORE_ORDER_MESSAGE },
       ]);
     return new SalesOrder({ ...this.input, captureState: "submitted" });
+  }
+
+  /**
+   * Only a submitted order is revised (ADR 0074 decision 4). A draft is edited
+   * in place, so its words say to edit it, and a void order is closed. The
+   * state is the detail of the 409, so a screen can tell the two apart without
+   * reading the words.
+   */
+  requireRevisable(): void {
+    if (this.captureState === "submitted") return;
+    if (this.captureState === "draft")
+      throw new DomainError(
+        "CONFLICT",
+        `Order ${this.orderNo} is a draft, so edit it. Only a submitted order is revised.`,
+        [{ path: "captureState", message: "draft" }],
+      );
+    throw new DomainError(
+      "CONFLICT",
+      `Order ${this.orderNo} is void, so it cannot be revised. Only a submitted order can be.`,
+      [{ path: "captureState", message: "void" }],
+    );
+  }
+
+  /**
+   * A revised PO is for the same customer and keeps the PO number. The number
+   * is compared as the service stores it, ignoring case, in JavaScript: the
+   * index uses Postgres upper(), which can differ for exotic letters, but the
+   * head keeps its own text so a revision can never hit the index.
+   */
+  requireSameOrder(customerNo: string, poNumber: string): void {
+    const issues: FieldIssue[] = [];
+    if (customerNo !== this.customerNo)
+      issues.push({
+        path: "customerNo",
+        message:
+          "A revised PO is for the same customer. A PO for another customer is a new order.",
+      });
+    const same = (text: string): string =>
+      normalisePoNumber(text).toUpperCase();
+    if (same(poNumber) !== same(this.externalDocumentNo))
+      issues.push({
+        path: "externalDocumentNo",
+        message: `A revised PO keeps the PO number ${this.externalDocumentNo}. A PO with another number is a new order.`,
+      });
+    if (issues.length > 0) throw new ValidationFailedError(issues);
+  }
+
+  /**
+   * A copy at the next PO version with the new content, built through the
+   * constructor so every rule runs again. It keeps the customer, the PO number,
+   * the currency, the Business Central number, the state and the edit token:
+   * the guarded move in the repository bumps `version` and `poVersionNo`
+   * together, as `submitted()` leaves the version to its guard.
+   */
+  revised(content: PoVersionContentInput): SalesOrder {
+    this.requireRevisable();
+    if (shipmentIsBeforeOrder(content.orderDate, content.shipmentDate))
+      throw new ValidationFailedError([
+        { path: "shipmentDate", message: SHIPMENT_BEFORE_ORDER_MESSAGE },
+      ]);
+    return new SalesOrder({
+      ...this.input,
+      orderDate: content.orderDate,
+      shipmentDate: content.shipmentDate,
+      prepaymentPercent: content.prepaymentPercent,
+      lines: content.lines,
+      poVersionNo: this.poVersionNo + 1,
+    });
   }
 
   /** Throws, with the rule's own words, for anything but a draft. */
