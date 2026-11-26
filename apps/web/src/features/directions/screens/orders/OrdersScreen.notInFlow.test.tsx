@@ -76,7 +76,7 @@ describe("an order typed in here that no team holds", () => {
     expect(within(held).getByText("Nobody")).toBeVisible();
     expect(
       within(peek).getByText(
-        "This order has no journey yet: the tracker does not know it.",
+        "This order has no journey: it is not in the order flow.",
       ),
     ).toBeVisible();
     await waitFor(() => {

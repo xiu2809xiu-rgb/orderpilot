@@ -4,10 +4,11 @@ import { Term, withTerms } from "@/components/common/Term";
 import { formatDay } from "@/lib/format";
 import { orderHref } from "../home/homeLinks";
 import { FoldedFacts } from "./FoldedFacts";
+import { HeldAtCell } from "./HeldAtCell";
 import { foldedAt, type Fit } from "./orderFit";
 import { OrderCell } from "./OrderCell";
 import { AgeCell, DocsCell, StockCell, ValueCell } from "./OrderFigures";
-import { ageInDays, ALL_DONE, type OrderRow } from "./orderRow";
+import { ageInDays, type OrderRow } from "./orderRow";
 import { StageCell } from "./StageCell";
 import { shortSentence } from "./stockText";
 
@@ -110,15 +111,7 @@ export function orderColumns({
       id: "heldAt",
       header: t("columns.heldAt"),
       headerContent: <Term word="heldAt">{t("columns.heldAt")}</Term>,
-      cell: (row) =>
-        row.ownerRole === null ? (
-          <span className="text-muted-foreground">-</span>
-        ) : row.step === ALL_DONE ? (
-          <span className="text-muted-foreground">{t("cells.done")}</span>
-        ) : (
-          // A long role name takes two lines rather than widen the column.
-          <span className="od-held">{roleLabel(row.ownerRole)}</span>
-        ),
+      cell: (row) => <HeldAtCell row={row} roleLabel={roleLabel} />,
       exportValue: (row) => (row.ownerRole ? roleLabel(row.ownerRole) : ""),
     },
     {

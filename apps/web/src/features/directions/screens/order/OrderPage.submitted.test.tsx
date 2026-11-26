@@ -112,6 +112,35 @@ describe("the page of a submitted order that no team holds", () => {
   });
 });
 
+describe("the Journey card of a submitted order that no team holds", () => {
+  it("says it has no journey because it is not in the order flow, with no yet", async () => {
+    stubApi({ specs: [TYPED] });
+    open();
+    const card = (await screen.findByText("Journey")).closest("section");
+    if (!card) throw new Error("no Journey card");
+    expect(
+      within(card).getByText(
+        "This order has no journey: it is not in the order flow.",
+      ),
+    ).toBeVisible();
+    expect(screen.queryByText(/no journey yet/)).toBeNull();
+  });
+
+  it.each(["draft", "void"] as const)(
+    "keeps its own line for a %s order",
+    async (entered) => {
+      stubApi({ specs: [{ ...TYPED, entered }] });
+      open({ ...TYPED, entered });
+      expect(
+        await screen.findByText(
+          "This order has no journey yet: the tracker does not know it.",
+        ),
+      ).toBeVisible();
+      expect(screen.queryByText(/it is not in the order flow\./)).toBeNull();
+    },
+  );
+});
+
 describe("the tabs of a submitted order that no team holds", () => {
   it("says no steps in the Activity tab, with no 0 badge, and lists what people did below", async () => {
     stubApi({ specs: [TYPED] });

@@ -14,23 +14,13 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api/errors";
-import { formatDay, todayInSingapore } from "@/lib/format";
 import { orderHref } from "../home/homeLinks";
 import { OrderJourney } from "../order/OrderJourney";
 import { ShipLine } from "../order/ShipLine";
 import { useOrderJourney } from "../order/useOrderJourney";
-import { Amount } from "./Amount";
-import { EntryChip } from "./EntryChip";
-import { StockCell } from "./OrderFigures";
-import {
-  ageInDays,
-  ALL_DONE,
-  isTypedHere,
-  isUntracked,
-  stageWordKey,
-  type OrderRow,
-} from "./orderRow";
+import { isTypedHere, isUntracked, type OrderRow } from "./orderRow";
 import { focusPeekOpener } from "./peekFocus";
+import { PeekFacts } from "./PeekFacts";
 
 /**
  * The side peek: one order's journey beside the list, so a person can see
@@ -121,46 +111,7 @@ export function OrderPeek({
             <ScrollRegion label={t("peek.region")} className="od-peek-body">
               {/* One child, so the region's size observer sees the journey arrive. */}
               <div className="od-peek-inner">
-                <dl className="od-facts fs-14">
-                  <Fact label={t("peek.status")}>
-                    {row.status?.label ??
-                      row.workflowStatus ??
-                      t(stageWordKey(row))}
-                  </Fact>
-                  <Fact label={t("columns.heldAt")}>
-                    {row.ownerRole && row.step !== ALL_DONE
-                      ? roleLabel(row.ownerRole)
-                      : isTypedHere(row)
-                        ? t("cells.heldNobody")
-                        : t("cells.done")}
-                  </Fact>
-                  <Fact label={t("columns.age")}>
-                    {t("cells.days", {
-                      count: ageInDays(row.orderDate, todayInSingapore()),
-                    })}
-                  </Fact>
-                  <Fact label={t("columns.shipDate")}>
-                    {row.shipmentDate
-                      ? formatDay(row.shipmentDate)
-                      : t("cells.notSet")}
-                  </Fact>
-                  <Fact label={t("columns.value")}>
-                    <Amount field={row.amount} currency={row.currencyCode} />
-                  </Fact>
-                  <Fact label={t("columns.po")}>
-                    <span className="numeral">{row.externalDocumentNo}</span>
-                  </Fact>
-                  {row.source === "stored" && row.captureState ? (
-                    <Fact label={t("columns.entry")}>
-                      <EntryChip state={row.captureState} />
-                    </Fact>
-                  ) : null}
-                  {row.shortage ? (
-                    <Fact label={t("columns.stock")}>
-                      <StockCell row={row} />
-                    </Fact>
-                  ) : null}
-                </dl>
+                <PeekFacts row={row} roleLabel={roleLabel} />
                 <h3 className="od-peek-title fs-14">{t("peek.journey")}</h3>
                 {asks && timeline.isPending ? (
                   <div className="space-y-3" aria-hidden="true">
@@ -169,7 +120,11 @@ export function OrderPeek({
                   </div>
                 ) : notInTracker || !journey ? (
                   <p className="fs-14 text-muted-foreground">
-                    {t("peek.noJourney")}
+                    {t(
+                      isTypedHere(row)
+                        ? "peek.noJourneyTypedHere"
+                        : "peek.noJourney",
+                    )}
                   </p>
                 ) : timeline.isError ? (
                   <ErrorPanel
@@ -203,20 +158,5 @@ export function OrderPeek({
         ) : null}
       </SheetContent>
     </Sheet>
-  );
-}
-
-function Fact({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="od-fact">
-      <dt className="fs-12 text-muted-foreground">{label}</dt>
-      <dd>{children}</dd>
-    </div>
   );
 }

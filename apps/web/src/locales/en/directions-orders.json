@@ -143,7 +143,9 @@
   "board": {
     "region": "Orders by stage",
     "done": "Done",
+    "notStarted": "Not started",
     "notInFlow": "Not in the order flow",
+    "inFlow": "In the order flow",
     "empty": "No orders",
     "more_one": "Show {{count}} more in the list",
     "more_other": "Show {{count}} more in the list",
@@ -156,6 +158,7 @@
     "status": "Status",
     "journey": "Journey",
     "noJourney": "This order has no journey yet: the tracker does not know it.",
+    "noJourneyTypedHere": "This order has no journey: it is not in the order flow.",
     "open": "Open order",
     "region": "Order summary"
   },

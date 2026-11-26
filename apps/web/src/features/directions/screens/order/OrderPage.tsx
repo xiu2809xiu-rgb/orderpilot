@@ -165,6 +165,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
           journey={journey}
           late={late}
           refused={trackerRefused}
+          typedHere={typedHere}
           tone={tone}
         />
         <section

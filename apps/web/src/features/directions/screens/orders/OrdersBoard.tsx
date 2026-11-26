@@ -32,12 +32,19 @@ export function OrdersBoard({
   const { t: tp } = useTranslation("directions-parts");
   const columns = useMemo(() => {
     const groups = Array.from({ length: ALL_DONE }, (): OrderRow[] => []);
-    const unknown: OrderRow[] = [];
+    // Rows with no step are of three kinds, each under its own word: a sample
+    // the tracker has no step for, a stored order that no team holds, and a
+    // stored order that a team holds, which the tracker cannot place on a step.
+    const notStarted: OrderRow[] = [];
+    const notInFlow: OrderRow[] = [];
+    const inFlow: OrderRow[] = [];
     for (const row of rows) {
-      if (row.step === null) unknown.push(row);
-      else groups[row.step - 1]?.push(row);
+      if (row.step !== null) groups[row.step - 1]?.push(row);
+      else if (row.source !== "stored") notStarted.push(row);
+      else if (row.workflowStatus === null) notInFlow.push(row);
+      else inFlow.push(row);
     }
-    return { groups, unknown };
+    return { groups, last: { notStarted, notInFlow, inFlow } };
   }, [rows]);
 
   return (
@@ -66,14 +73,17 @@ export function OrdersBoard({
             />
           );
         })}
-        {columns.unknown.length > 0 ? (
-          <Column
-            title={t("board.notInFlow")}
-            rows={columns.unknown}
-            onPeek={onPeek}
-            onMore={null}
-          />
-        ) : null}
+        {(["notStarted", "notInFlow", "inFlow"] as const).map((kind) =>
+          columns.last[kind].length > 0 ? (
+            <Column
+              key={kind}
+              title={t(`board.${kind}`)}
+              rows={columns.last[kind]}
+              onPeek={onPeek}
+              onMore={null}
+            />
+          ) : null,
+        )}
       </div>
     </ScrollRegion>
   );
