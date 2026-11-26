@@ -244,6 +244,7 @@ describe("OrdersWriteService.submitDraft", () => {
 
   interface Audited {
     action: string;
+    summary: string;
     changes: Record<string, unknown> | null | undefined;
     insideTransaction: boolean;
   }
@@ -256,6 +257,8 @@ describe("OrdersWriteService.submitDraft", () => {
       handoff?: () => Promise<HandoffAnswer>;
       customerKnown?: boolean;
       itemKnown?: boolean;
+      readBack?: () => Promise<unknown>;
+      auditFailsFor?: string;
     } = {},
   ) {
     const steps: string[] = [];
@@ -301,10 +304,17 @@ describe("OrdersWriteService.submitDraft", () => {
       },
     };
     const audit = {
-      record: (input: { action: string; changes?: Audited["changes"] }) => {
+      record: (input: {
+        action: string;
+        summary: string;
+        changes?: Audited["changes"];
+      }) => {
         steps.push(`audit:${input.action}`);
+        if (options.auditFailsFor === input.action)
+          return Promise.reject(new Error("the audit write failed"));
         audited.push({
           action: input.action,
+          summary: input.summary,
           changes: input.changes,
           insideTransaction: open,
         });
@@ -338,7 +348,10 @@ describe("OrdersWriteService.submitDraft", () => {
       {
         one: () => {
           steps.push("read-back");
-          return Promise.resolve({ orderNo: "SO-20261110-0001" });
+          return (
+            options.readBack?.() ??
+            Promise.resolve({ orderNo: "SO-20261110-0001" })
+          );
         },
       } as unknown as OrdersService,
       handoff as unknown as OrderHandoff,
@@ -398,6 +411,9 @@ describe("OrdersWriteService.submitDraft", () => {
       poVersionNo: 1,
       workflowEffect: "applied",
     });
+    expect(audited[0]?.summary).toBe(
+      "Synthetic Support submitted order SO-20261110-0001",
+    );
     const text = JSON.stringify(audited[0]);
     for (const secret of ["95.91", "31.97", "I-0001", "C-0001", "PO-1"])
       expect(text).not.toContain(secret);
@@ -465,6 +481,9 @@ describe("OrdersWriteService.submitDraft", () => {
     expect(audited).toEqual([
       {
         action: "order.submit.refused",
+        // A person reads this in the audit viewer: no "workflow" in it.
+        summary:
+          "Synthetic Support's submit of order SO-20261110-0001 was refused by the order flow",
         changes: { refusedBy: "workflow", code: "CONFLICT", version: 2 },
         insideTransaction: false,
       },
@@ -507,5 +526,51 @@ describe("OrdersWriteService.submitDraft", () => {
     ]);
     expect(noCustomer.steps).toEqual([]);
     expect(noItem.steps).toEqual([]);
+  });
+
+  it("gives the caller a failing label reader's error after the submit has committed, and the order stays submitted", async () => {
+    // Chosen, not forgotten: a swallowed failure would say that no team holds
+    // an order that a team may hold (ADR 0073).
+    const { service, steps, audited } = buildSubmit({
+      readBack: () => Promise.reject(new Error("the label reader is down")),
+    });
+    await expect(
+      service.submitDraft(draft.orderNo, send, actor, info, when),
+    ).rejects.toThrow("the label reader is down");
+    expect(steps).toEqual([
+      "begin",
+      "update",
+      "handoff",
+      "audit:order.submitted",
+      "commit",
+      "read-back",
+    ]);
+    expect(audited.map((a) => a.action)).toEqual(["order.submitted"]);
+  });
+
+  it("gives the caller the refusal row's own failure, not the refusal, and writes no order.submitted row", async () => {
+    // An unaudited refusal is worse than a 500 on a double fault: the order is
+    // a draft either way (ADR 0073).
+    const refusal = new ConflictError(
+      "The order cannot start: synthetic reason.",
+    );
+    const { service, steps } = buildSubmit({
+      handoff: () => Promise.reject(refusal),
+      auditFailsFor: "order.submit.refused",
+    });
+    const error: unknown = await service
+      .submitDraft(draft.orderNo, send, actor, info, when)
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBe(refusal);
+    expect((error as Error).message).toBe("the audit write failed");
+    expect(steps).not.toContain("audit:order.submitted");
+    expect(steps).toEqual([
+      "begin",
+      "update",
+      "handoff",
+      "rollback",
+      "audit:order.submit.refused",
+    ]);
   });
 });

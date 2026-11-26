@@ -293,7 +293,7 @@ export class OrdersWriteService {
         action: "order.submit.refused",
         entityType: "Order",
         entityId: orderNo,
-        summary: `${actor.displayName}'s submit of order ${orderNo} was refused by the workflow`,
+        summary: `${actor.displayName}'s submit of order ${orderNo} was refused by the order flow`,
         changes: {
           refusedBy: "workflow",
           code: error.refusal.code,

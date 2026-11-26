@@ -23,6 +23,7 @@ function service(
   stock: Record<string, string>,
   names: Record<string, string> = {},
   held: Record<string, string> = {},
+  readerFails: Error | null = null,
 ) {
   const asked: string[][] = [];
   const listed: (string | undefined)[] = [];
@@ -50,6 +51,7 @@ function service(
   const workflow = {
     statusOfMany: (nos: readonly string[]) => {
       workflowAsks.push([...nos]);
+      if (readerFails) return Promise.reject(readerFails);
       return Promise.resolve(
         new Map(
           nos
@@ -321,6 +323,24 @@ describe("the orders service", () => {
       });
       const detail = await svc.one("SO-20261108-0010", "SUPPORT");
       expect(detail.shortageCount).toBe(1);
+    });
+
+    it("rejects the whole list when the label reader rejects, and says nothing false in its place", async () => {
+      // Chosen (ADR 0073): a swallowed failure would show "No team has a task
+      // for it" for an order that a team may hold.
+      const { svc } = service(
+        [submitted("SO-20261108-0010")],
+        {},
+        {},
+        {},
+        new Error("the label reader is down"),
+      );
+      await expect(svc.list(query, "SUPPORT")).rejects.toThrow(
+        "the label reader is down",
+      );
+      await expect(svc.one("SO-20261108-0010", "SUPPORT")).rejects.toThrow(
+        "the label reader is down",
+      );
     });
   });
 });
