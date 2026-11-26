@@ -168,6 +168,17 @@ describe("the notice of a submitted order", () => {
     ).toBeNull();
   });
 
+  it("gives the audit link the same touch height as the activity link beside it", async () => {
+    signIn("AUDITOR");
+    stubApi({ specs: [TYPED] });
+    open();
+    const region = await notice();
+    const classes = (name: string | RegExp) =>
+      within(region).getByRole("link", { name }).className.split(" ");
+    expect(classes(/audit trail/)).toContain("pointer-coarse:min-h-11");
+    expect(classes(/See who submitted/)).toContain("pointer-coarse:min-h-11");
+  });
+
   it("takes focus once after a submit and not on a later visit or a reload (the mark expires)", async () => {
     stubApi({ specs: [TYPED] });
     markSubmittedFocus(NO);

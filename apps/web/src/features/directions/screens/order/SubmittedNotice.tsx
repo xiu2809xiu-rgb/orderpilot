@@ -78,6 +78,7 @@ export function SubmittedNotice({ detail }: { detail: SalesOrderDetail }) {
             entity="Order"
             id={orderNo}
             subject={t("order.submitted.auditSubject", { orderNo })}
+            className="pointer-coarse:min-h-11"
           />
         </p>
       </div>
