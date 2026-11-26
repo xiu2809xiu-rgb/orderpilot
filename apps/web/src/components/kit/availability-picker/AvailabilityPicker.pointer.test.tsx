@@ -12,6 +12,7 @@ import {
   REPEAT_REACH_PX,
   REPEAT_WINDOW_MS,
   markOpened,
+  msSinceOpened,
   repeatsOpeningPress,
 } from "./openingPress";
 
@@ -97,7 +98,9 @@ describe("picking with the pointer", () => {
     await open();
     const choice = item("Focusing");
     const now = vi.spyOn(performance, "now");
-    const start = performance.now();
+    // Counted from the opening itself, not from this moment: finding the menu
+    // takes longer on a busy machine, and the windows are the opening's.
+    const start = performance.now() - msSinceOpened();
     // The tap that opened the pill: its click lands here, 300 ms in, with no press.
     now.mockReturnValue(start + 300);
     fireEvent.click(choice, { detail: 1 });
@@ -130,7 +133,9 @@ describe("picking with the pointer", () => {
     await open();
     const first = item("Available");
     const now = vi.spyOn(performance, "now");
-    const start = performance.now();
+    // Counted from the opening itself, not from this moment: finding the menu
+    // takes longer on a busy machine, and the windows are the opening's.
+    const start = performance.now() - msSinceOpened();
     // The pill has been in the page for 100 ms: too soon to be a choice.
     now.mockReturnValue(start + 100);
     fireEvent.pointerDown(first);
