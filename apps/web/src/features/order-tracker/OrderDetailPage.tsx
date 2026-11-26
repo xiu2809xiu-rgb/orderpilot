@@ -65,7 +65,8 @@ export default function OrderDetailPage() {
           <span className="sr-only">{tl("states.loading")}</span>
           <PageHeaderSkeleton />
           <Skeleton
-            className="h-24 w-full animate-none rounded-xl"
+            still
+            className="h-24 w-full rounded-xl"
             aria-hidden="true"
           />
           <SectionCardSkeleton lines={4} />

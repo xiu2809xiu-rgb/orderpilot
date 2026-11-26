@@ -11,15 +11,15 @@ import {
 } from "@/components/ui/table";
 
 // Every block is the height of the text it stands for, so that nothing moves
-// when the data arrives. They do not pulse: work screens stay still.
-const still = "animate-none";
+// when the data arrives. They are `still` Skeletons, with no shimmer band: work
+// screens, tables and lists stay still.
 
 /** Stands in for PageHeader: a title line and one line of context. */
 export function PageHeaderSkeleton() {
   return (
     <div className="space-y-2" aria-hidden="true">
-      <Skeleton className={`${still} h-8 w-56`} />
-      <Skeleton className={`${still} h-5 w-96 max-w-full`} />
+      <Skeleton still className="h-8 w-56" />
+      <Skeleton still className="h-5 w-96 max-w-full" />
     </div>
   );
 }
@@ -29,11 +29,11 @@ export function SectionCardSkeleton({ lines = 3 }: { lines?: number }) {
   return (
     <Card aria-hidden="true">
       <CardHeader>
-        <Skeleton className={`${still} h-7 w-40`} />
+        <Skeleton still className="h-7 w-40" />
       </CardHeader>
       <CardContent className="space-y-3">
         {Array.from({ length: lines }, (_, index) => (
-          <Skeleton key={index} className={`${still} h-5 w-full`} />
+          <Skeleton still key={index} className="h-5 w-full" />
         ))}
       </CardContent>
     </Card>
@@ -58,7 +58,7 @@ export function TableSkeleton({
           <TableRow className="hover:bg-transparent">
             {Array.from({ length: columns }, (_, index) => (
               <TableHead key={index} className="h-9 px-3">
-                <Skeleton className={`${still} h-4 w-20`} />
+                <Skeleton still className="h-4 w-20" />
               </TableHead>
             ))}
           </TableRow>
@@ -68,7 +68,7 @@ export function TableSkeleton({
             <TableRow key={row} className="hover:bg-transparent">
               {Array.from({ length: columns }, (_, index) => (
                 <TableCell key={index} className="px-3 py-2">
-                  <Skeleton className={`${still} h-5 w-3/4`} />
+                  <Skeleton still className="h-5 w-3/4" />
                 </TableCell>
               ))}
             </TableRow>
@@ -87,7 +87,7 @@ export function ListPageSkeleton() {
       <span className="sr-only">{t("states.loading")}</span>
       <PageHeaderSkeleton />
       <div className="space-y-s2" aria-hidden="true">
-        <Skeleton className={`${still} h-9 w-full max-w-xs`} />
+        <Skeleton still className="h-9 w-full max-w-xs" />
         <TableSkeleton />
       </div>
     </div>

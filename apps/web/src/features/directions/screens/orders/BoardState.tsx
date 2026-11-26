@@ -41,9 +41,9 @@ export function BoardState({
       <div className="od-board" aria-hidden="true">
         {Array.from({ length: 4 }, (_, column) => (
           <div key={column} className="od-column flex flex-col gap-2">
-            <Skeleton className="h-8 animate-none" />
+            <Skeleton still className="h-8" />
             {Array.from({ length: 3 }, (_, card) => (
-              <Skeleton key={card} className="h-[4.5rem] animate-none" />
+              <Skeleton still key={card} className="h-[4.5rem]" />
             ))}
           </div>
         ))}

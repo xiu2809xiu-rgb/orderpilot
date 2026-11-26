@@ -13,10 +13,10 @@ export function RowSkeletons({ rows = 4 }: { rows?: number }) {
       {Array.from({ length: rows }, (_, index) => (
         <div key={index} className="flex items-center gap-4" aria-hidden="true">
           <div className="flex flex-1 flex-col gap-2">
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-4 w-1/3" />
+            <Skeleton still className="h-4 w-2/3" />
+            <Skeleton still className="h-4 w-1/3" />
           </div>
-          <Skeleton className="h-8 w-24" />
+          <Skeleton still className="h-8 w-24" />
         </div>
       ))}
     </div>
