@@ -348,6 +348,9 @@ test.describe("New order and draft editing", () => {
 // run uses a PO number no earlier run used (freshPo) and a stack that is
 // started clean by CI keeps none of them. On a persistent stack the customer
 // C-0001 simply gains open orders, which no other spec counts.
+//
+// These tests were written without being run: the builders had no browser or
+// Docker. The first run, on a Docker build, is the first time they are seen.
 
 /** Today on Singapore's calendar, as the form's date fields hold it. */
 function todayInSingapore(): string {
@@ -432,11 +435,11 @@ test.describe("Submit an order", () => {
       await expect(
         page.getByRole("button", { name: /^Submitted\./ }),
       ).toBeVisible();
-      // The page says that nobody holds it, and says it in its own words.
-      await expect(
-        page.getByText("Not in the order flow").first(),
-      ).toBeVisible();
-      await expect(page.getByText("Nobody", { exact: true })).toBeVisible();
+      // The status card says that nobody holds it, in its own words. It is
+      // found by what it holds, so no other match on the page can pass for it.
+      const card = page.locator("dl", { has: page.getByText("Current Stage") });
+      await expect(card.getByText("Not in the order flow")).toBeVisible();
+      await expect(card.getByText("Nobody", { exact: true })).toBeVisible();
       await expect(
         page.getByRole("table", { name: "Lines of the order" }),
       ).toBeVisible();
@@ -455,6 +458,22 @@ test.describe("Submit an order", () => {
       const notice = page.getByRole("region", { name: SUBMITTED_NOTICE });
       await expect(notice).toBeVisible();
       await expect(notice).not.toBeFocused();
+    });
+
+    await test.step("the orders list shows it with the stage word and Nobody, and its peek says the same", async () => {
+      await page.goto(`/orders?q=${orderNo}`);
+      const row = page.getByRole("row", { name: new RegExp(orderNo) });
+      await expect(row).toBeVisible();
+      await expect(row.getByText("Not in the order flow")).toBeVisible();
+      await expect(row.getByText("Nobody", { exact: true })).toBeVisible();
+      // The customer's cell opens the peek, as the orders spec does.
+      await row.getByRole("cell").nth(2).click();
+      const peek = page.getByRole("dialog");
+      await expect(peek.getByText(orderNo)).toBeVisible();
+      await expect(peek.getByText("Not in the order flow")).toBeVisible();
+      await expect(peek.getByText("Nobody", { exact: true })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(peek).toHaveCount(0);
     });
 
     await test.step("the server refuses a second submit, saying it is already submitted", async () => {
