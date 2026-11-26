@@ -109,11 +109,28 @@ export function TimelineTitle({
   );
 }
 
-export function TimelineDate({ className, ...props }: ComponentProps<"time">) {
+export function TimelineDate({
+  className,
+  quiet = false,
+  ...props
+}: ComponentProps<"time"> & {
+  /**
+   * A line that only says which order or whose it is, under a title that
+   * leads: faint and normal weight. Only for a timeline that sits on a card or
+   * a panel, where the faint tier keeps 4.5:1.
+   */
+  quiet?: boolean;
+}) {
   return (
     <time
       data-slot="timeline-date"
-      className={cn("numeral fs-14 block text-muted-foreground", className)}
+      className={cn(
+        "fs-14 block",
+        quiet
+          ? "tabular-nums text-faint-foreground"
+          : "numeral text-muted-foreground",
+        className,
+      )}
       {...props}
     />
   );

@@ -17,6 +17,12 @@ interface ThoughtLineProps {
   timer?: string;
   /** The name of the button that opens and closes the steps. */
   toggleLabel: string;
+  /**
+   * The settled line as a secondary mark: the label in the body tier and the
+   * timer in the faint tier, both in normal weight, for a place where the
+   * answer that follows is what a person reads. Only on a card or a panel.
+   */
+  quiet?: boolean;
   className?: string;
 }
 
@@ -35,6 +41,7 @@ export function ThoughtLine({
   working,
   timer,
   toggleLabel,
+  quiet = false,
   className,
 }: ThoughtLineProps) {
   const listId = useId();
@@ -59,10 +66,26 @@ export function ThoughtLine({
       {working ? (
         <ShinyText className="fs-14">{label}</ShinyText>
       ) : (
-        <span className="fs-14 text-foreground">{doneLabel}</span>
+        <span
+          className={cn(
+            "fs-14",
+            quiet ? "text-muted-foreground" : "text-foreground",
+          )}
+        >
+          {doneLabel}
+        </span>
       )}
       {timer ? (
-        <span className="numeral fs-14 text-muted-foreground">{timer}</span>
+        <span
+          className={cn(
+            "fs-14",
+            quiet
+              ? "tabular-nums text-faint-foreground"
+              : "numeral text-muted-foreground",
+          )}
+        >
+          {timer}
+        </span>
       ) : null}
     </>
   );
