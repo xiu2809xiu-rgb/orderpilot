@@ -127,6 +127,16 @@ describe("one order at /orders/:orderNo", () => {
     );
   });
 
+  it("gives a submitted order the notice for a stored order with no workflow status", async () => {
+    open(SUBMITTED.orderNo, "SUPPORT");
+    expect(
+      await screen.findByRole("region", {
+        name: "Submitted. No team has a task for it",
+      }),
+    ).toBeVisible();
+    expect(screen.getByText("Not in the order flow")).toBeVisible();
+  });
+
   it("gives a void order the order page, struck through, and says it cannot be changed", async () => {
     open(VOID.orderNo, "SUPPORT");
     expect(await heading(VOID.orderNo)).toBeVisible();

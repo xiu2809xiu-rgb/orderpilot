@@ -22,3 +22,14 @@ export class DuplicateOrderError extends DomainError {
     ]);
   }
 }
+
+/**
+ * The port said no. Thrown inside the submit transaction so that it rolls
+ * back, and used outside it only to tell that the refusal came from the
+ * workflow, so one audit row can be written after the rollback (ADR 0073).
+ */
+export class HandoffRefusedError extends Error {
+  constructor(readonly refusal: DomainError) {
+    super(refusal.message);
+  }
+}

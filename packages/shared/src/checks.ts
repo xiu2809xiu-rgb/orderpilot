@@ -71,6 +71,11 @@ export const checkResultSchema = z.object({
   tolerance: toleranceSchema,
   evidence: z.array(evidenceRefSchema),
   checkedAt: z.iso.datetime(),
+  /**
+   * The PO version this result ran on. Null or missing means it was not
+   * recorded: no check has run on a stored order, and sample results leave it null.
+   */
+  poVersionNo: z.int().min(1).nullable().optional(),
 });
 export type CheckResult = z.infer<typeof checkResultSchema>;
 

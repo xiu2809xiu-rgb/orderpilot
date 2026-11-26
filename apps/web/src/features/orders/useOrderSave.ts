@@ -11,6 +11,7 @@ import {
   ordersUpdate,
 } from "@/lib/api/generated/endpoints/orders/orders";
 import { ApiError } from "@/lib/api/errors";
+import { formKey } from "./formKey";
 import type { OrderNotice } from "./OrderNotices";
 import type { OrderFormOutput } from "./orderFormSchema";
 import {
@@ -19,6 +20,7 @@ import {
   toPatchBody,
   type OrderForm,
 } from "./orderFormValues";
+import type { CreateSalesOrderBody } from "@orderpilot/shared";
 
 type Answer = Awaited<ReturnType<typeof ordersCreate>>;
 
@@ -55,12 +57,21 @@ export function useOrderSave(options: {
   const onSave = useCallback(
     async (values: OrderFormOutput): Promise<Answer> => {
       setNotice(null);
+      if (orderNo !== null) {
+        try {
+          return await ordersUpdate(orderNo, toPatchBody(values, priceMasked));
+        } catch (error) {
+          throw noticeFrom(error, form, setNotice, null, "");
+        }
+      }
+      // The body and the form's key as they were sent: a repeated PO number is
+      // only true of this body, and may become a revision of it.
+      const body = toCreateBody(values, priceMasked);
+      const key = formKey(form.getValues());
       try {
-        return orderNo === null
-          ? await ordersCreate(toCreateBody(values, priceMasked))
-          : await ordersUpdate(orderNo, toPatchBody(values, priceMasked));
+        return await ordersCreate(body);
       } catch (error) {
-        throw noticeFrom(error, form, setNotice, orderNo !== null);
+        throw noticeFrom(error, form, setNotice, body, key);
       }
     },
     [form, orderNo, priceMasked],
@@ -100,12 +111,14 @@ function noticeFrom(
   error: unknown,
   form: OrderForm,
   setNotice: (notice: OrderNotice) => void,
-  saved: boolean,
+  /** The body of a refused create; null for the update of a draft. */
+  body: CreateSalesOrderBody | null,
+  key: string,
 ): unknown {
   if (!(error instanceof ApiError) || error.code !== "CONFLICT") return error;
   const existing = existingOrderOf(error.details);
   if (existing === null) {
-    if (saved) setNotice({ kind: "stale" });
+    if (body === null) setNotice({ kind: "stale" });
     return error;
   }
   setNotice({
@@ -113,6 +126,9 @@ function noticeFrom(
     orderNo: existing,
     customerNo: form.getValues("customer")?.number ?? "",
     po: form.getValues("externalDocumentNo"),
+    fromCreate: body !== null,
+    body,
+    formKey: key,
   });
   return new ApiError(
     error.code,

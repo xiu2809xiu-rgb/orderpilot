@@ -10,8 +10,8 @@ import type { OrderForm } from "./orderFormValues";
 
 /**
  * What the order's action bar offers. A new order has Save and Save and new, a
- * saved draft has Save and Void, and anything else has nothing: the bar draws
- * only what the role holds, and the server refuses the rest again.
+ * saved draft has Save, Submit order and Void, and anything else has nothing:
+ * the bar draws only what the role holds, and the server refuses the rest again.
  * Void sends the version the form was typed against, so a draft someone else
  * changed is refused instead of voided over their work.
  */
@@ -20,8 +20,10 @@ export function useOrderActions(options: {
   /** Null while the order is new. */
   orderNo: string | null;
   editable: boolean;
+  /** Submit order, from `useSubmitOrder`: null unless the order is a saved draft. */
+  submit: DocumentAction | null;
 }): DocumentAction[] {
-  const { form, orderNo, editable } = options;
+  const { form, orderNo, editable, submit } = options;
   const { t } = useTranslation("orders");
   const queryClient = useQueryClient();
   return useMemo<DocumentAction[]>(() => {
@@ -34,6 +36,7 @@ export function useOrderActions(options: {
     }
     return [
       { id: "save", kind: "save", permission: "orders.edit" },
+      ...(submit ? [submit] : []),
       {
         id: "void",
         kind: "void",
@@ -55,5 +58,5 @@ export function useOrderActions(options: {
         },
       },
     ];
-  }, [editable, orderNo, form, queryClient, t]);
+  }, [editable, orderNo, form, queryClient, submit, t]);
 }

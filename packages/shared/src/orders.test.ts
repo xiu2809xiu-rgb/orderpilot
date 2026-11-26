@@ -7,6 +7,7 @@ import {
   createSalesOrderSchema,
   existingOrderOf,
   patchSalesOrderSchema,
+  submitSalesOrderSchema,
   voidSalesOrderSchema,
   salesOrderDetailSchema,
   salesOrderListSchema,
@@ -81,6 +82,7 @@ describe("the orders responses", () => {
       prepaymentPercent: "30",
       navisionNo: null,
       version: null,
+      poVersionNo: null,
       lines: [
         {
           lineNo: 1,
@@ -95,6 +97,22 @@ describe("the orders responses", () => {
       ],
     };
     expect(salesOrderDetailSchema.safeParse(detail).success).toBe(true);
+  });
+  it("refuses a detail without poVersionNo", () => {
+    const detail = {
+      ...row,
+      prepaymentPercent: "30",
+      navisionNo: null,
+      version: null,
+      lines: [],
+    };
+    expect(salesOrderDetailSchema.safeParse(detail).success).toBe(false);
+    expect(
+      salesOrderDetailSchema.safeParse({ ...detail, poVersionNo: 0 }).success,
+    ).toBe(false);
+    expect(
+      salesOrderDetailSchema.safeParse({ ...detail, poVersionNo: 2 }).success,
+    ).toBe(true);
   });
   it("refuses an unknown source", () => {
     expect(
@@ -215,11 +233,22 @@ describe("the order write contract", () => {
         .success,
     ).toBe(true);
   });
+  it("accepts a version of 1 or more", () => {
+    expect(submitSalesOrderSchema.parse({ version: 1 })).toEqual({
+      version: 1,
+    });
+    expect(submitSalesOrderSchema.safeParse({ version: 7 }).success).toBe(true);
+  });
+  it("refuses a missing, zero, negative or fractional version", () => {
+    for (const body of [{}, { version: 0 }, { version: -1 }, { version: 1.5 }])
+      expect(submitSalesOrderSchema.safeParse(body).success).toBe(false);
+  });
   it("writes every body and the stock answer as OpenAPI output", () => {
     for (const schema of [
       createSalesOrderSchema,
       patchSalesOrderSchema,
       voidSalesOrderSchema,
+      submitSalesOrderSchema,
       availableStockResponseSchema,
     ]) {
       expect(() =>

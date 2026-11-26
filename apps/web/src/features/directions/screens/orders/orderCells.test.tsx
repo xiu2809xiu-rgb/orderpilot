@@ -94,6 +94,37 @@ describe("the Stage cell", () => {
     render(<StageCell row={row} today={TODAY} dots />);
     expect(screen.getByText("Not started")).toBeVisible();
   });
+
+  it.each(["draft", "submitted", "void"] as const)(
+    "says Not in the order flow for a %s order entered here with no status",
+    (state) => {
+      const row = makeRow({
+        source: "stored",
+        captureState: state,
+        step: null,
+        status: null,
+        workflowStatus: null,
+        overdue: null,
+      });
+      render(<StageCell row={row} today={TODAY} dots />);
+      expect(screen.getByText("Not in the order flow")).toBeVisible();
+      expect(screen.queryByText("Not started")).toBeNull();
+    },
+  );
+
+  it("shows the workflow's label of an order entered here that a team holds", () => {
+    const row = makeRow({
+      source: "stored",
+      captureState: "submitted",
+      step: null,
+      status: null,
+      workflowStatus: "Waiting for payment",
+      overdue: null,
+    });
+    render(<StageCell row={row} today={TODAY} dots />);
+    expect(screen.getByText("Waiting for payment")).toBeVisible();
+    expect(screen.queryByText("Not in the order flow")).toBeNull();
+  });
 });
 
 describe("what a narrow window leaves out", () => {

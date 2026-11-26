@@ -92,6 +92,8 @@
     "done": "Done",
     "notSet": "Not set",
     "notStarted": "Not started",
+    "notInFlow": "Not in the order flow",
+    "heldNobody": "Nobody",
     "notEntered": "Not entered here",
     "hidden": "Hidden",
     "covered": "Covered",
@@ -142,6 +144,8 @@
     "region": "Orders by stage",
     "done": "Done",
     "notStarted": "Not started",
+    "notInFlow": "Not in the order flow",
+    "inFlow": "In the order flow",
     "empty": "No orders",
     "more_one": "Show {{count}} more in the list",
     "more_other": "Show {{count}} more in the list",
@@ -154,6 +158,7 @@
     "status": "Status",
     "journey": "Journey",
     "noJourney": "This order has no journey yet: the tracker does not know it.",
+    "noJourneyTypedHere": "This order has no journey: it is not in the order flow.",
     "open": "Open order",
     "region": "Order summary"
   },
@@ -208,7 +213,19 @@
         "short": "{{quantity}} short on {{item}}",
         "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",
         "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
+      },
+      "stock": {
+        "short": "Stock today: {{quantity}} short on {{item}}. No team has been asked to hold this order.",
+        "shortMore_one": "Stock today: {{quantity}} short on {{item}} and {{count}} more item. No team has been asked to hold this order.",
+        "shortMore_other": "Stock today: {{quantity}} short on {{item}} and {{count}} more items. No team has been asked to hold this order."
       }
+    },
+    "submitted": {
+      "title": "Submitted. No team has a task for it",
+      "body": "This order is entered and saved. It is not approved. Keep handling it as you do today: it does not appear in the Order tracker. It counts as an open order on the customer's page and on its items' pages.",
+      "mistake": "If it was submitted by mistake: OrderPilot cannot cancel it, and its PO number stays with it. If the customer sends a corrected PO with the same number, enter it in New order and confirm that it revises this order. Otherwise tell whoever looks after OrderPilot.",
+      "who": "See who submitted it, and when",
+      "auditSubject": "order {{orderNo}}"
     },
     "latest": {
       "stepDone": "Latest: {{name}} marked {{step}} as done, {{when}}",
@@ -250,8 +267,11 @@
       "lines": "Lines",
       "documents": "Documents",
       "checks": "Checks",
-      "activity": "Activity"
+      "activity": "Activity",
+      "versions": "Versions"
     },
+    "poVersionChip": "PO version {{n}}",
+    "poVersionChipLabel": "PO version {{n}}. Open the Versions tab.",
     "lines": {
       "region": "Order lines",
       "caption": "Lines of the order",
@@ -263,16 +283,91 @@
       "amount": "Amount",
       "stock": "Stock",
       "total": "Order total",
-      "none": "The lines of this order are not available."
+      "none": "The lines of this order are not available.",
+      "currentVersion": "These are the lines of PO version {{n}}, the current one. Earlier versions are on the Versions tab."
     },
     "checks": {
       "emptyTitle": "No checks have run yet",
       "emptyBody": "Checks run once the documents of this order have been read.",
-      "matches": "Matched to Business Central"
+      "typedHereTitle": "Not checked",
+      "typedHereBody": "Orders typed in here are not checked. Checks run on documents that have been read.",
+      "matches": "Matched to Business Central",
+      "ranOn": "Ran on PO version {{n}}",
+      "notRecorded": "PO version not recorded",
+      "typedHereVersionsBody": "Orders typed in here are not checked, and that includes every PO version of this order. Checks run on documents that have been read."
+    },
+    "versions": {
+      "title": "PO versions",
+      "sampleOne": "This sample has one PO version, and nothing is stored for it.",
+      "draftNone": "A draft has no PO versions yet. It becomes PO version 1 when you submit it.",
+      "voidNone": "This order is void and cannot take a PO version.",
+      "noTask": "Nobody was told about PO version {{n}}, because no team holds this order. Tell the people who handle it.",
+      "onlyOne": "Only PO version 1 exists.",
+      "howToRevise": "To add a revised PO, enter it in New order with the same customer and PO number, then confirm that it revises this order.",
+      "listLabel": "PO versions, newest first",
+      "row": "PO version {{n}}",
+      "current": "Current",
+      "superseded": "Superseded",
+      "draftStarted": "Draft started {{when}} by {{who}}",
+      "draftStartedNoName": "Draft started {{when}}",
+      "confirmed": "Confirmed {{when}} by {{who}}",
+      "confirmedNoName": "Confirmed {{when}}",
+      "replaced": "Superseded by PO version {{next}} on {{when}}",
+      "lines_one": "{{count}} line",
+      "lines_other": "{{count}} lines",
+      "view": "View lines",
+      "hide": "Hide lines",
+      "viewLabel": "Lines of PO version {{n}}",
+      "viewFor": "View lines of PO version {{n}}",
+      "hideFor": "Hide lines of PO version {{n}}",
+      "linesLoading": "Loading the lines",
+      "compareFrom": "Earlier PO version",
+      "compareTo": "Later PO version",
+      "diffTitle": "Differences between PO version {{from}} and PO version {{to}}",
+      "identical": "PO version {{to}} has the same dates, quantities and prices as PO version {{from}}.",
+      "identicalMasked": "PO version {{to}} has the same dates and quantities as PO version {{from}}. Prices are not compared for your role.",
+      "pricesNotCompared": "Prices are not compared for your role.",
+      "header": {
+        "orderDate": "Order date",
+        "shipmentDate": "Shipment date",
+        "prepaymentPercent": "Prepayment",
+        "currencyCode": "Currency",
+        "total": "Total"
+      },
+      "notSet": "Not set",
+      "same": "Same",
+      "changed": "Changed",
+      "change": "{{from}} to {{to}}",
+      "changedFull": "{{what}} changed from {{from}} to {{to}}",
+      "status": {
+        "added": "Added",
+        "removed": "Removed",
+        "changed": "Changed",
+        "unchanged": "Unchanged",
+        "moved": "Moved",
+        "unchangedMasked": "Same quantity"
+      },
+      "col": {
+        "item": "Item",
+        "status": "Status",
+        "quantity": "Quantity",
+        "unitPrice": "Unit price"
+      },
+      "region": "Differences by line",
+      "caption": "Lines that differ between the two PO versions",
+      "moved": "Moved from line {{from}} to line {{to}}",
+      "counts": "{{added}} added, {{removed}} removed, {{changed}} changed, {{moved}} moved, {{unchanged}} unchanged",
+      "countsMasked": "{{added}} added, {{removed}} removed, {{changed}} changed, {{moved}} moved, {{unchanged}} with the same quantity",
+      "onlyMoved": "Only the order of the lines differs between these PO versions.",
+      "showUnchanged_one": "Show the {{count}} unchanged line",
+      "showUnchanged_other": "Show the {{count}} unchanged lines",
+      "hideUnchanged": "Hide the unchanged lines",
+      "loading": "Loading PO versions",
+      "diffLoading": "Working out the differences"
     },
     "activity": {
-      "emptyTitle": "Nothing has happened yet",
-      "emptyBody": "Events appear here as the order moves through its steps.",
+      "emptyTitle": "No steps to show",
+      "emptyBody": "What people did to this order is listed below.",
       "note": "What happened on the order, newest first. Nothing is posted from this page. Business Central stays the system of record.",
       "current": "Current step",
       "by": "{{actor}}, {{when}}"
@@ -315,6 +410,7 @@
       "none": "No file in the demo set"
     },
     "noChecks": "No check has read this document yet.",
+    "typedHere": "No PO file is stored for an order typed in here.",
     "received": "Received {{date}}",
     "flow": {
       "confirmed": "Confirmed",

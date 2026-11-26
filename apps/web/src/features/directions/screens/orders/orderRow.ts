@@ -111,14 +111,49 @@ export function isOpen(row: OrderRow): boolean {
   return row.captureState !== "void";
 }
 
+/** What the two rules below read: the order's entry state, its source and area 2's label. */
+export interface EntryFacts {
+  captureState: OrderCaptureState | null;
+  source: OrderSource;
+  workflowStatus: string | null;
+}
+
 /**
- * An order whose entry state says the tracker and the workflow have never
- * heard of it: a draft is still being entered, and a void one was dropped
- * before it started. Asking either would only collect a 404 and a console
- * error.
+ * A submitted order that no team holds: area 2 reports no status for it. It is
+ * stored and saved, but nobody has a task on it, and the page says so.
  */
-export function isUntracked(state: OrderCaptureState | null): boolean {
-  return state === "draft" || state === "void";
+export function isTypedHere(row: EntryFacts): boolean {
+  return (
+    row.source === "stored" &&
+    row.captureState === "submitted" &&
+    row.workflowStatus === null
+  );
+}
+
+/**
+ * An order the tracker and the flow have never heard of: a draft is still
+ * being entered, a void one was dropped before it started, and a submitted one
+ * no team holds is not in the tracker, which knows only the demo set. Asking
+ * either would only collect a 404 and a console error. A submitted order that
+ * has a status is asked again, by itself, once one arrives.
+ */
+export function isUntracked(row: EntryFacts): boolean {
+  return (
+    row.captureState === "draft" ||
+    row.captureState === "void" ||
+    isTypedHere(row)
+  );
+}
+
+/**
+ * The word for an order with no stage at all. An order entered here says it is
+ * not in the order flow; a sample the tracker has no status for was never
+ * started. The caller draws it only when no label exists.
+ */
+export function stageWordKey(
+  row: Pick<EntryFacts, "source">,
+): "cells.notInFlow" | "cells.notStarted" {
+  return row.source === "stored" ? "cells.notInFlow" : "cells.notStarted";
 }
 
 /** The position of a tracker step id, 1 to 9, or null. */

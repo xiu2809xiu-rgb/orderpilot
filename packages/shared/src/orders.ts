@@ -72,7 +72,7 @@ export const salesOrderRowSchema = z.object({
   externalDocumentNo: z.string().min(1),
   orderDate: z.string().min(1),
   shipmentDate: z.string().nullable(),
-  /** Area 2's label as text. Null for a stored order: it has no workflow yet. */
+  /** Area 2's label as text. Null for a stored order the workflow does not hold. */
   workflowStatus: z.string().min(1).nullable(),
   /** Masked with the selling price: a total gives the prices away. */
   amount: maskedFieldSchema,
@@ -102,6 +102,11 @@ export const salesOrderDetailSchema = salesOrderRowSchema.extend({
   navisionNo: z.string().min(1).nullable(),
   /** Counts the saves of a draft. Null for a sample: it cannot be edited. */
   version: z.int().min(1).nullable(),
+  /**
+   * The PO version this order holds now. Null for a sample, a draft and a void
+   * order: only a submitted order has a PO version (ADR 0074).
+   */
+  poVersionNo: z.int().min(1).nullable(),
   lines: z.array(salesOrderLineSchema),
 });
 export type SalesOrderDetail = z.infer<typeof salesOrderDetailSchema>;
@@ -155,7 +160,7 @@ export const SHIPMENT_BEFORE_ORDER_MESSAGE =
 // The fields apart from the cross-field check, which is a refinement: a
 // refinement is lost on .partial(), so the patch is built from this and
 // carries the check itself.
-const createSalesOrderFields = z.object({
+export const createSalesOrderFields = z.object({
   customerNo: navisionNoSchema,
   externalDocumentNo: z.string().trim().min(1).max(ORDER_PO_MAX_LENGTH),
   orderDate: z.iso.date(),
@@ -192,6 +197,10 @@ export const voidSalesOrderSchema = z.object({
   reason: z.string().trim().min(1).max(500),
 });
 export type VoidSalesOrderBody = z.infer<typeof voidSalesOrderSchema>;
+
+/** Submitting sends only the version the person read: the edit token of ADR 0047. */
+export const submitSalesOrderSchema = z.object({ version: z.int().min(1) });
+export type SubmitSalesOrderBody = z.infer<typeof submitSalesOrderSchema>;
 
 /**
  * The 409 for a repeated customer and PO number keeps the one error envelope.

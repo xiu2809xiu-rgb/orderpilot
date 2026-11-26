@@ -13,29 +13,33 @@ enum OrderCaptureState {
 /// A sales order made in OrderPilot. Customers and items are matched on their
 /// Business Central numbers, kept here as plain text, never on names.
 model SalesOrder {
-  id                 String            @id @default(uuid(7)) @db.Uuid
+  id                 String                @id @default(uuid(7)) @db.Uuid
   /// OrderPilot's own number, `SO-20261108-0001`, from the record number service.
-  orderNo            String            @unique
+  orderNo            String                @unique
   /// Holds the record's Business Central number. The column keeps its first name,
   /// so no migration renames it (ADR 0048). Stays null until the order exists
   /// in Business Central (ADR 0046).
   navisionNo         String?
-  captureState       OrderCaptureState @default(DRAFT)
+  captureState       OrderCaptureState     @default(DRAFT)
   customerNo         String
   /// The customer's PO number. One live order per customer and PO number is held
   /// by a partial unique index written by hand in the migration (ADR 0047).
   externalDocumentNo String
-  orderDate          DateTime          @db.Date
-  shipmentDate       DateTime?         @db.Date
-  currencyCode       String            @default("USD")
-  prepaymentPercent  Decimal           @default(0) @db.Decimal(5, 2)
+  orderDate          DateTime              @db.Date
+  shipmentDate       DateTime?             @db.Date
+  currencyCode       String                @default("USD")
+  prepaymentPercent  Decimal               @default(0) @db.Decimal(5, 2)
   /// The person who made it, as a plain id: no relation into another area's table.
-  createdBy          String            @db.Uuid
-  createdAt          DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
+  createdBy          String                @db.Uuid
+  createdAt          DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime              @updatedAt @db.Timestamptz(3)
   /// Counts the saves of a draft, so that a stale form is refused (ADR 0047).
-  version            Int               @default(1)
+  version            Int                   @default(1)
+  /// Which PO version this row holds. 1 until a person confirms a revised PO; each
+  /// confirmation moves it by one (ADR 0074). Not the edit token: that is `version`.
+  poVersionNo        Int                   @default(1)
   lines              SalesOrderLine[]
+  poVersions         SalesOrderPoVersion[]
 
   // The lookup for a repeated PO. The unique rule itself is the partial index in
   // the migration, which this schema cannot express. The list reads in memory
@@ -58,4 +62,46 @@ model SalesOrderLine {
 
   @@unique([orderId, lineNo])
   @@index([itemNo])
+}
+
+/// A PO version that a later one replaced, copied out at the moment it was replaced.
+/// Insert-only: triggers in the migrations refuse UPDATE and DELETE, a deferred one
+/// refuses a line under a sealed copy, and the foreign keys refuse to delete the order
+/// or the version. The PO number, the customer and
+/// the Business Central number are the order's own and are read from it. A column
+/// added to SalesOrder or SalesOrderLine must be classified in the drift test
+/// (test/database/po-version-drift.test.ts) as copied here or left out with a reason.
+model SalesOrderPoVersion {
+  id                String                    @id @default(uuid(7)) @db.Uuid
+  orderId           String                    @db.Uuid
+  order             SalesOrder                @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  poVersionNo       Int
+  orderDate         DateTime                  @db.Date
+  shipmentDate      DateTime?                 @db.Date
+  currencyCode      String
+  prepaymentPercent Decimal                   @db.Decimal(5, 2)
+  /// When the next version was confirmed, and by whom (a plain id, as `createdBy` is).
+  supersededAt      DateTime                  @db.Timestamptz(3)
+  supersededBy      String                    @db.Uuid
+  /// How many lines the copy was written with. A deferred trigger refuses, at
+  /// commit, a copy whose lines do not number this, so a sealed copy takes no new line.
+  lineCount         Int
+  lines             SalesOrderPoVersionLine[]
+
+  @@unique([orderId, poVersionNo])
+}
+
+/// One line of a copied PO version. Insert-only, as its version is.
+model SalesOrderPoVersionLine {
+  id          String              @id @default(uuid(7)) @db.Uuid
+  versionId   String              @db.Uuid
+  version     SalesOrderPoVersion @relation(fields: [versionId], references: [id], onDelete: Restrict)
+  lineNo      Int
+  itemNo      String
+  description String
+  quantity    Decimal             @db.Decimal(18, 3)
+  unitPrice   Decimal             @db.Decimal(18, 2)
+  qtyToShip   Decimal             @db.Decimal(18, 3)
+
+  @@unique([versionId, lineNo])
 }

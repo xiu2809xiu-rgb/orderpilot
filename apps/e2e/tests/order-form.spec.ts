@@ -1,11 +1,17 @@
 import { randomInt } from "node:crypto";
-import type {
-  CreateSalesOrderBody,
-  PatchSalesOrderBody,
-  VoidSalesOrderBody,
+import {
+  errorEnvelopeSchema,
+  existingOrderOf,
+  salesOrderResponseSchema,
+  type ConfirmPoVersionBody,
+  type CreateSalesOrderBody,
+  type PatchSalesOrderBody,
+  type SubmitSalesOrderBody,
+  type VoidSalesOrderBody,
 } from "@orderpilot/shared";
 import type { Page } from "@playwright/test";
 import {
+  callAs,
   checkPage,
   expect,
   expectNoButton,
@@ -336,5 +342,665 @@ test.describe("New order and draft editing", () => {
     await expect(
       page.getByRole("option", { name: "Start a new order" }),
     ).toHaveCount(0);
+  });
+});
+
+// P-114: Submit an order. These tests leave submitted orders behind, and a
+// submitted order cannot be voided or changed by anyone until P-50, so every
+// run uses a PO number no earlier run used (freshPo) and a stack that is
+// started clean by CI keeps none of them. On a persistent stack the customer
+// C-0001 simply gains open orders, which no other spec counts.
+//
+// These tests were written without being run: the builders had no browser or
+// Docker. The first run, on a Docker build, is the first time they are seen.
+
+/** Today on Singapore's calendar, as the form's date fields hold it. */
+function todayInSingapore(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Singapore" });
+}
+
+/**
+ * A submitted order made through the API, for a spec that only reads it. It is
+ * created and submitted by Support, exactly as the page does, so the order is
+ * the same one the page would have made.
+ */
+async function submittedOrderFor(po: string): Promise<string> {
+  const create = {
+    customerNo: "C-0001",
+    externalDocumentNo: po,
+    orderDate: todayInSingapore(),
+    shipmentDate: null,
+    prepaymentPercent: "100",
+    lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+  } satisfies CreateSalesOrderBody;
+  const made = await callAs("SUPPORT", "POST", "/orders", create);
+  expect(made.status, "the draft is created").toBe(201);
+  const draft = salesOrderResponseSchema.parse(made.body).data;
+  const body = { version: draft.version ?? 1 } satisfies SubmitSalesOrderBody;
+  const sent = await callAs(
+    "SUPPORT",
+    "POST",
+    `/orders/${draft.orderNo}/submit`,
+    body,
+  );
+  expect(sent.status, "the draft is submitted").toBe(200);
+  return draft.orderNo;
+}
+
+const SUBMITTED_NOTICE = "Submitted. No team has a task for it";
+
+/** Presses Submit order on the draft's form and returns the dialog it opens. */
+async function askToSubmit(page: Page) {
+  const submit = page.getByRole("button", {
+    name: "Submit order",
+    exact: true,
+  });
+  await expect(submit).toBeVisible();
+  // Right after a save the bar still says "Saving." and a press only explains.
+  await expect(submit).not.toHaveAttribute("aria-disabled", "true");
+  await submit.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+test.describe("Submit an order", () => {
+  test("Support submits a draft, the page says it is submitted and no team has a task, and nothing can change it", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const po = freshPo();
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, po);
+    // A clean saved draft: Submit order is the button to press.
+    const dialog = await askToSubmit(page);
+    await expect(
+      dialog.getByRole("heading", { name: `Submit order ${orderNo}?` }),
+    ).toBeVisible();
+    await expect(dialog.getByText(/You cannot undo this/)).toBeVisible();
+    // Enter must never submit by habit: focus starts on the safe button.
+    await expect(
+      dialog.getByRole("button", { name: "Keep editing" }),
+    ).toBeFocused();
+
+    await test.step("confirming ends with a short toast that has no Undo, and the notice holds focus", async () => {
+      await dialog.getByRole("button", { name: "Submit order" }).click();
+      await expect(page.getByText(`Order ${orderNo} submitted`)).toBeVisible();
+      await expect(page.getByRole("button", { name: "Undo" })).toHaveCount(0);
+      const notice = page.getByRole("region", { name: SUBMITTED_NOTICE });
+      await expect(notice).toBeVisible();
+      await expect(notice).toBeFocused();
+      await expect(notice).toContainText("It is not approved.");
+      await expect(
+        page.getByRole("heading", { level: 1, name: orderNo }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^Submitted\./ }),
+      ).toBeVisible();
+      // The status card says that nobody holds it, in its own words. It is
+      // found by what it holds, so no other match on the page can pass for it.
+      const card = page.locator("dl", { has: page.getByText("Current Stage") });
+      await expect(card.getByText("Not in the order flow")).toBeVisible();
+      await expect(card.getByText("Nobody", { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("table", { name: "Lines of the order" }),
+      ).toBeVisible();
+    });
+
+    await test.step("nothing on the page can change it", async () => {
+      for (const name of ["Save", "Void", "Submit order"]) {
+        await expect(
+          page.getByRole("button", { name, exact: true }),
+        ).toHaveCount(0);
+      }
+    });
+
+    await test.step("a reload keeps the page and does not take focus again", async () => {
+      await page.reload();
+      const notice = page.getByRole("region", { name: SUBMITTED_NOTICE });
+      await expect(notice).toBeVisible();
+      await expect(notice).not.toBeFocused();
+    });
+
+    await test.step("the orders list shows it with the stage word and Nobody, and its peek says the same", async () => {
+      await page.goto(`/orders?q=${orderNo}`);
+      const row = page.getByRole("row", { name: new RegExp(orderNo) });
+      await expect(row).toBeVisible();
+      await expect(row.getByText("Not in the order flow")).toBeVisible();
+      await expect(row.getByText("Nobody", { exact: true })).toBeVisible();
+      // The customer's cell opens the peek, as the orders spec does.
+      await row.getByRole("cell").nth(2).click();
+      const peek = page.getByRole("dialog");
+      await expect(peek.getByText(orderNo)).toBeVisible();
+      // The peek says it twice, in its facts and in the journey's sentence:
+      // the facts' words are the whole of their element.
+      await expect(
+        peek.getByText("Not in the order flow", { exact: true }),
+      ).toBeVisible();
+      await expect(peek.getByText("Nobody", { exact: true })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(peek).toHaveCount(0);
+    });
+
+    await test.step("the server refuses a second submit, saying it is already submitted", async () => {
+      const again = await callAs(
+        "SUPPORT",
+        "POST",
+        `/orders/${orderNo}/submit`,
+        {
+          version: 2,
+        } satisfies SubmitSalesOrderBody,
+      );
+      expect(again.status).toBe(409);
+      const envelope = errorEnvelopeSchema.parse(again.body);
+      expect(envelope.error.code).toBe("CONFLICT");
+      expect(envelope.error.message).toContain("is already submitted");
+    });
+
+    await test.step("the same PO number is a repeat, and the notice says what can be done", async () => {
+      await page.goto("/orders/new");
+      await fillNewOrder(page, po);
+      await saveButton(page).click();
+      await expect(page.getByText("This order already exists")).toBeVisible();
+      // The notice reads the order it names: submitted, so it may take the PO as
+      // its next PO version, and this role may say that it does.
+      await expect(
+        page.getByText(
+          new RegExp(`${orderNo} is submitted: order date .*PO version 1`),
+        ),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: `Open ${orderNo}` }),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: `This PO revises ${orderNo}` })
+        .click();
+      // The same dates, quantities and prices as the order holds: nothing to confirm.
+      await expect(
+        page.getByRole("region", { name: "This PO matches PO version 1" }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(/so there is nothing to confirm/),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^Confirm PO version/ }),
+      ).toHaveCount(0);
+    });
+  });
+
+  test("Keep editing sends nothing, and the draft stays a draft with its button back in focus", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, freshPo());
+    const dialog = await askToSubmit(page);
+    await dialog.getByRole("button", { name: "Keep editing" }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Submit order", exact: true }),
+    ).toBeFocused();
+    await expect(
+      page.getByRole("heading", { name: `Sales order ${orderNo}` }),
+    ).toBeVisible();
+    await voidDraft(page, orderNo);
+  });
+
+  test("a Product Manager is offered Submit order on a draft too", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, "PRODUCT_MANAGER");
+    const orderNo = await createOrder(page, freshPo());
+    await expect(
+      page.getByRole("button", { name: "Submit order", exact: true }),
+    ).toBeVisible();
+    await voidDraft(page, orderNo);
+  });
+
+  test("Warehouse reads a submitted order with its prices hidden and cannot submit one", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const orderNo = await submittedOrderFor(freshPo());
+    await signInAs(page, "WAREHOUSE");
+    await page.goto(`/orders/${orderNo}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: orderNo }),
+    ).toBeVisible();
+    const notice = page.getByRole("region", { name: SUBMITTED_NOTICE });
+    await expect(notice).toBeVisible();
+    // Only a role that may edit orders reads what a mistake means.
+    await expect(page.getByText(/submitted by mistake/)).toHaveCount(0);
+    await expect(
+      page.getByRole("table", { name: "Lines of the order" }),
+    ).toBeVisible();
+    await expect(page.getByText(/USD\s?[\d,]+\.\d{2}/)).toHaveCount(0);
+    for (const name of ["Save", "Void", "Submit order"]) {
+      await expect(page.getByRole("button", { name, exact: true })).toHaveCount(
+        0,
+      );
+    }
+    await expectRefused("WAREHOUSE", "POST", `/orders/${orderNo}/submit`, {
+      version: 2,
+    } satisfies SubmitSalesOrderBody);
+  });
+
+  test("the open dialog and the submitted page fit and pass the accessibility check", async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, freshPo());
+    const dialog = await askToSubmit(page);
+    await checkPage(page);
+    await dialog.getByRole("button", { name: "Submit order" }).click();
+    await expect(
+      page.getByRole("region", { name: SUBMITTED_NOTICE }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: orderNo }),
+    ).toBeVisible();
+    await checkPage(page);
+  });
+});
+
+// P-89: PO versions. These tests leave submitted orders with two PO versions
+// behind them, and nothing can cancel or void a submitted order until P-50, so
+// every run uses a PO number no earlier run used (freshPo). On a persistent stack
+// the customer C-0001 simply gains open orders, which no other spec counts.
+//
+// Like the P-114 tests, these were written without being run: the builders had no
+// browser or Docker. The first run, on a Docker build, is the first time they are
+// seen, and the first things to look at are the focus steps and the 390 px fit.
+
+/** A day this many days after today in Singapore, as a date field holds it. */
+function daysAhead(days: number): string {
+  const day = new Date(`${todayInSingapore()}T00:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + days);
+  return day.toISOString().slice(0, 10);
+}
+
+/** Creates and submits an order through the API, as Support, and returns its number. */
+async function submitThroughApi(create: CreateSalesOrderBody): Promise<string> {
+  const made = await callAs("SUPPORT", "POST", "/orders", create);
+  expect(made.status, "the draft is created").toBe(201);
+  const draft = salesOrderResponseSchema.parse(made.body).data;
+  const sent = await callAs(
+    "SUPPORT",
+    "POST",
+    `/orders/${draft.orderNo}/submit`,
+    { version: draft.version ?? 1 } satisfies SubmitSalesOrderBody,
+  );
+  expect(sent.status, "the draft is submitted").toBe(200);
+  return draft.orderNo;
+}
+
+/**
+ * A submitted order whose prepayment and shipment date differ from what the New
+ * order form starts with, so that a re-sent PO shows header differences.
+ */
+function submittedOrderWithTerms(po: string): Promise<string> {
+  return submitThroughApi({
+    customerNo: "C-0001",
+    externalDocumentNo: po,
+    orderDate: todayInSingapore(),
+    shipmentDate: daysAhead(30),
+    prepaymentPercent: "30",
+    lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+  });
+}
+
+/** Confirms a revised PO through the API, as Support, and returns the status. */
+async function reviseThroughApi(
+  orderNo: string,
+  body: CreateSalesOrderBody,
+  expectedPoVersionNo = 1,
+): Promise<number> {
+  const sent = await callAs(
+    "SUPPORT",
+    "POST",
+    `/orders/${orderNo}/po-versions`,
+    {
+      ...body,
+      confirmed: true,
+      expectedPoVersionNo,
+    } satisfies ConfirmPoVersionBody,
+  );
+  return sent.status;
+}
+
+/**
+ * At 390 by 844, the page's main panel does not scroll sideways and the table of
+ * differences, whatever its width, scrolls inside its own region: scrolling that
+ * region to its end moves the region and nothing else. `checkPage` measures only
+ * the document, and the shell scrolls inside `main`, so `main` is measured here.
+ * (Written without a browser run: the first run on a Docker build is its test.)
+ */
+async function expectDifferencesContained(page: Page): Promise<void> {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const region = page.getByRole("region", { name: "Differences by line" });
+  await expect(region).toBeVisible();
+  const main = page.locator("main");
+  const fit = () =>
+    main.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth }));
+  const before = await fit();
+  expect(before.scroll, "main does not scroll sideways").toBeLessThanOrEqual(
+    before.client,
+  );
+  const inside = await region.evaluate((el) => {
+    const table = el.querySelector("table");
+    return {
+      overflowX: getComputedStyle(el).overflowX,
+      tableWidth: table?.getBoundingClientRect().width ?? 0,
+      regionWidth: el.clientWidth,
+    };
+  });
+  expect(["auto", "scroll"], "the region holds the overflow").toContain(
+    inside.overflowX,
+  );
+  expect(inside.tableWidth).toBeGreaterThan(0);
+  if (inside.tableWidth > inside.regionWidth) {
+    // The table is wider than the region: it scrolls there, and main stays put.
+    await region.evaluate((el) => {
+      el.scrollLeft = el.scrollWidth;
+    });
+    expect(await region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    const after = await fit();
+    expect(after.scroll).toBeLessThanOrEqual(after.client);
+    expect(await main.evaluate((el) => el.scrollLeft)).toBe(0);
+  }
+}
+
+const versionsTab = (page: Page) =>
+  page.getByRole("tabpanel", { name: "Versions" });
+
+test.describe("PO versions", () => {
+  test("Support re-sends a submitted order's PO, confirms it as PO version 2, and sees both versions with the difference", async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    const po = freshPo();
+    const orderNo = await submittedOrderWithTerms(po);
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders/new");
+    // The same customer and PO number, with quantity 3 where the order has 2.
+    await fillNewOrder(page, po);
+    await page.getByRole("textbox", { name: "Quantity, line 1" }).fill("3");
+    await saveButton(page).click();
+    await expect(page.getByText("This order already exists")).toBeVisible();
+    await page
+      .getByRole("button", { name: `This PO revises ${orderNo}` })
+      .click();
+
+    const panel = page.getByRole("region", {
+      name: `Add this PO as PO version 2 of ${orderNo}`,
+    });
+    await expect(panel).toBeVisible();
+    await expect(panel.getByRole("heading", { level: 2 })).toBeFocused();
+    // The header first: the form starts with 100% and no shipment date.
+    const header = panel.locator("dl").first();
+    await expect(header.getByText("Prepayment")).toBeVisible();
+    await expect(header.getByText("30.00% to 100.00%")).toBeVisible();
+    await expect(header.getByText(/to Not set/)).toBeVisible();
+    // The line: quantity 2 to 3.
+    await expect(panel.getByRole("cell", { name: /2 to 3/ })).toBeVisible();
+    // One primary button, and the form's own bar is not drawn.
+    await expect(saveButton(page)).toHaveCount(0);
+
+    await test.step("keeping the order's dates and prepayment puts them back in the form", async () => {
+      await panel
+        .getByRole("button", { name: "Keep the order's dates and prepayment" })
+        .click();
+      await expect(
+        panel.getByText("Now using the order's dates and prepayment."),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("textbox", { name: /Prepayment/ }),
+      ).toHaveValue("30.00");
+      await expect(header.getByText("Same")).toHaveCount(4);
+    });
+
+    await test.step("Confirm ends on the Versions tab with a toast, and focus on its heading", async () => {
+      await panel.getByRole("button", { name: "Confirm PO version 2" }).click();
+      await expect(
+        page.getByText(`PO version 2 saved on ${orderNo}`),
+      ).toBeVisible();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === `/orders/${orderNo}` &&
+          url.searchParams.get("tab") === "versions",
+      );
+      await expect(
+        versionsTab(page).getByRole("heading", { name: "PO versions" }),
+      ).toBeFocused();
+      const rows = versionsTab(page)
+        .getByRole("list", { name: "PO versions, newest first" })
+        .getByRole("listitem");
+      await expect(rows).toHaveCount(2);
+      await expect(rows.nth(0)).toContainText("PO version 2");
+      await expect(rows.nth(0)).toContainText("Current");
+      await expect(rows.nth(1)).toContainText("PO version 1");
+      await expect(rows.nth(1)).toContainText("Superseded");
+      await expect(rows.nth(1)).toContainText("Draft started");
+      // The comparison of 1 and 2 shows the quantity, and nobody holds the order.
+      await expect(
+        versionsTab(page).getByRole("cell", { name: /2 to 3/ }),
+      ).toBeVisible();
+      await expect(
+        versionsTab(page).getByText(/Nobody was told about PO version 2/),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", {
+          name: "PO version 2. Open the Versions tab.",
+        }),
+      ).toBeVisible();
+    });
+
+    await test.step("a reload keeps it and does not take focus again", async () => {
+      await page.reload();
+      const heading = versionsTab(page).getByRole("heading", {
+        name: "PO versions",
+      });
+      await expect(heading).toBeVisible();
+      await expect(heading).not.toBeFocused();
+      await expect(
+        versionsTab(page).getByRole("listitem").first(),
+      ).toContainText("PO version 2");
+    });
+
+    await test.step("a second confirmation with the old number is refused, naming the number the order is at", async () => {
+      const again = await callAs(
+        "SUPPORT",
+        "POST",
+        `/orders/${orderNo}/po-versions`,
+        {
+          customerNo: "C-0001",
+          externalDocumentNo: po,
+          orderDate: todayInSingapore(),
+          shipmentDate: null,
+          prepaymentPercent: "100",
+          lines: [{ itemNo: "I-0001", quantity: "4", unitPrice: "857.00" }],
+          confirmed: true,
+          expectedPoVersionNo: 1,
+        } satisfies ConfirmPoVersionBody,
+      );
+      expect(again.status).toBe(409);
+      const envelope = errorEnvelopeSchema.parse(again.body);
+      expect(envelope.error.details).toContainEqual({
+        path: "currentPoVersionNo",
+        message: "2",
+      });
+    });
+
+    await test.step("the same PO sent as a new order is still refused, naming the order", async () => {
+      const resent = await callAs("SUPPORT", "POST", "/orders", {
+        customerNo: "C-0001",
+        externalDocumentNo: po,
+        orderDate: todayInSingapore(),
+        shipmentDate: null,
+        prepaymentPercent: "100",
+        lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+      } satisfies CreateSalesOrderBody);
+      expect(resent.status).toBe(409);
+      const envelope = errorEnvelopeSchema.parse(resent.body);
+      expect(existingOrderOf(envelope.error.details)).toBe(orderNo);
+    });
+  });
+
+  test("Warehouse reads the versions with prices masked and has no way to add one", async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(180_000);
+    const po = freshPo();
+    const orderNo = await submittedOrderFor(po);
+    // An order that has never been revised, for the sentence about how to add a
+    // revised PO: it is drawn only at PO version 1, and only for a role that
+    // may edit.
+    const single = await submittedOrderFor(freshPo());
+    const revised = {
+      customerNo: "C-0001",
+      externalDocumentNo: po,
+      orderDate: todayInSingapore(),
+      shipmentDate: null,
+      prepaymentPercent: "100",
+      lines: [{ itemNo: "I-0001", quantity: "3", unitPrice: "857.00" }],
+    } satisfies CreateSalesOrderBody;
+    expect(await reviseThroughApi(orderNo, revised)).toBe(201);
+    await signInAs(page, "WAREHOUSE");
+    await page.goto(`/orders/${orderNo}?tab=versions`);
+    await expect(
+      versionsTab(page).getByRole("heading", { name: "PO versions" }),
+    ).toBeVisible();
+    await expect(versionsTab(page).getByRole("listitem").first()).toContainText(
+      "PO version 2",
+    );
+    await expect(
+      versionsTab(page).getByText("Prices are not compared for your role."),
+    ).toBeVisible();
+    await expect(page.getByText(/USD\s?[\d,]+\.\d{2}/)).toHaveCount(0);
+    // The way to add a revised PO starts at New order: the Orders list has no
+    // link to it for Warehouse, and an order's page never had one.
+    await page.goto("/orders");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Orders" }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "New order" })).toHaveCount(0);
+    const howTo = /To add a revised PO, enter it in New order/;
+    await page.goto(`/orders/${single}?tab=versions`);
+    await expect(
+      versionsTab(page).getByText("Only PO version 1 exists."),
+    ).toBeVisible();
+    await expect(versionsTab(page).getByText(howTo)).toHaveCount(0);
+    // The same page for Support says how, and its Orders list has the link.
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    try {
+      const support = await context.newPage();
+      await signInAs(support, "SUPPORT");
+      await support.goto(`/orders/${single}?tab=versions`);
+      await expect(
+        versionsTab(support).getByText("Only PO version 1 exists."),
+      ).toBeVisible();
+      await expect(versionsTab(support).getByText(howTo)).toBeVisible();
+      await support.goto("/orders");
+      await expect(
+        support.getByRole("link", { name: "New order" }),
+      ).toBeVisible();
+    } finally {
+      await context.close();
+    }
+    await expectRefused("WAREHOUSE", "POST", `/orders/${orderNo}/po-versions`, {
+      ...revised,
+      confirmed: true,
+      expectedPoVersionNo: 2,
+    } satisfies ConfirmPoVersionBody);
+    await expectRefused(
+      "WAREHOUSE",
+      "POST",
+      `/orders/${orderNo}/po-versions/preview`,
+      revised,
+    );
+  });
+
+  test("a draft's Versions tab says it has no PO versions", async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, freshPo());
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    try {
+      const other = await context.newPage();
+      await signInAs(other, "WAREHOUSE");
+      await other.goto(`/orders/${orderNo}?tab=versions`);
+      await expect(
+        other.getByText(
+          "A draft has no PO versions yet. It becomes PO version 1 when you submit it.",
+        ),
+      ).toBeVisible();
+    } finally {
+      await context.close();
+    }
+    await voidDraft(page, orderNo);
+  });
+
+  test("the open panel and the Versions tab fit and pass the accessibility check", async ({
+    page,
+  }) => {
+    test.setTimeout(240_000);
+    // Twelve lines are stored. The form below sends one of them again, so the
+    // panel's table lists it as changed and the other eleven as removed:
+    // twelve rows, which the table of differences must hold at 390 px.
+    const lines = Array.from({ length: 12 }, (_, i) => ({
+      itemNo: `I-${String(i + 1).padStart(4, "0")}`,
+      quantity: "2",
+      unitPrice: "857.00",
+    }));
+    const po = freshPo();
+    const create = {
+      customerNo: "C-0001",
+      externalDocumentNo: po,
+      orderDate: todayInSingapore(),
+      shipmentDate: null,
+      prepaymentPercent: "100",
+      lines,
+    } satisfies CreateSalesOrderBody;
+    const orderNo = await submitThroughApi(create);
+    await signInAs(page, "SUPPORT");
+    const wide = page.viewportSize();
+
+    await test.step("the open panel", async () => {
+      // The form sends one line again, with quantity 3, so the order's other lines come out removed.
+      await page.goto("/orders/new");
+      await fillNewOrder(page, po);
+      await page.getByRole("textbox", { name: "Quantity, line 1" }).fill("3");
+      await saveButton(page).click();
+      await page
+        .getByRole("button", { name: `This PO revises ${orderNo}` })
+        .click();
+      await expect(
+        page.getByRole("region", {
+          name: `Add this PO as PO version 2 of ${orderNo}`,
+        }),
+      ).toBeVisible();
+      await expectDifferencesContained(page);
+      await checkPage(page);
+    });
+
+    await test.step("the Versions tab of an order with twelve lines", async () => {
+      expect(
+        await reviseThroughApi(orderNo, {
+          ...create,
+          lines: lines.map((line) => ({ ...line, quantity: "3" })),
+        }),
+      ).toBe(201);
+      await page.goto(`/orders/${orderNo}?tab=versions`);
+      await expect(versionsTab(page).getByRole("table")).toBeVisible();
+      await expectDifferencesContained(page);
+      await checkPage(page);
+    });
+    if (wide) await page.setViewportSize(wide);
   });
 });

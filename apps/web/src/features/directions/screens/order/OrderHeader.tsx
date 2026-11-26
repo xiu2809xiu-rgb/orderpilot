@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { opticalStyle } from "@/lib/opticalEdge";
 import { EntryBadge } from "./EntryBadge";
 import { EntryMeaning } from "./EntryMeaning";
+import { PoVersionChip } from "./versions/PoVersionChip";
 
 /**
  * The head of the order page, in one line: the number with its entry badge
@@ -32,6 +33,7 @@ export function OrderHeader({
           {orderNo}
         </h1>
         {detail ? <EntryBadge detail={detail} /> : null}
+        <PoVersionChip poVersionNo={detail?.poVersionNo ?? null} />
         <span className="od-title-customer fs-14">
           <span className="text-foreground">{customerName}</span>
           <span className="numeral od-customer-no">{customerNo}</span>

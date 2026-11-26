@@ -58,5 +58,11 @@ export type OrdersUpdate200Data = {
      * @nullable
      */
   version: number | null;
+  /**
+     * @minimum 1
+     * @maximum 9007199254740991
+     * @nullable
+     */
+  poVersionNo: number | null;
   lines: OrdersUpdate200DataLinesItem[];
 };

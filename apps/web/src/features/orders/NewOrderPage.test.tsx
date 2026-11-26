@@ -171,10 +171,16 @@ describe("the New order page", () => {
       name: "Open SO-20261108-0007",
     });
     expect(link).toHaveAttribute("href", "/orders/SO-20261108-0007");
-    // True for a revised PO too: it promises nothing that is not built.
+    // The fixed words say nothing of what can be done: that is the state
+    // sentence's, which reads the order the notice names.
     expect(
       screen.getByText(
-        "This customer and PO number already have an order, SO-20261108-0007. Open it to make changes.",
+        "This customer and PO number already have an order, SO-20261108-0007. Open it to see it.",
+      ),
+    ).toBeVisible();
+    expect(
+      await screen.findByText(
+        "SO-20261108-0007 is still a draft. Open it to edit it.",
       ),
     ).toBeVisible();
     expect(
@@ -182,7 +188,9 @@ describe("the New order page", () => {
     ).toBeVisible();
     // The number is in the notice only: no bullet of its own on the form.
     expect(screen.queryAllByRole("listitem")).toEqual([]);
-    expect(screen.getAllByText(/SO-20261108-0007/)).toHaveLength(2);
+    // The order's number is in the notice's body, its state sentence and its
+    // link, and nowhere else.
+    expect(screen.getAllByText(/SO-20261108-0007/)).toHaveLength(3);
     await user.type(screen.getByRole("textbox", { name: /PO number/ }), "X");
     expect(screen.queryByRole("link", { name: /Open SO-/ })).toBeNull();
   });

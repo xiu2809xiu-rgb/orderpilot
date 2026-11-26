@@ -31,7 +31,8 @@ export interface OrderFactsOverdue {
 /**
  * One order as everything else asks for it, whether it is a sample or a stored
  * row. Neither kind invents what it does not have: a sample has no capture
- * state, and a stored order has no workflow status and no owner yet.
+ * state, and a stored order has no owner and carries no workflow status: the
+ * orders service overlays area 2's label for a submitted one (ADR 0073).
  */
 export interface OrderFacts {
   readonly orderNo: string;
@@ -48,6 +49,8 @@ export interface OrderFacts {
   readonly navisionNo: string | null;
   /** Counts the saves of a stored order. Null for a sample: it cannot be edited. */
   readonly version: number | null;
+  /** The PO version a stored order holds now (ADR 0074). Null for a sample. */
+  readonly poVersionNo: number | null;
   /** Area 2's label as text, or null when the order has no workflow. */
   readonly workflowStatus: string | null;
   readonly total: string;

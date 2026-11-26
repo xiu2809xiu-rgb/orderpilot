@@ -3,6 +3,7 @@ import { DEFAULT_ROLE_PERMISSIONS } from "./permissions.js";
 import {
   KPI_IDS,
   checkCompletedSchema,
+  checkResultSchema,
   kpiSetSchema,
   trackerQuerySchema,
 } from "./checks.js";
@@ -59,5 +60,42 @@ describe("area 3 contracts", () => {
     for (const role of ROLES) {
       expect(DEFAULT_ROLE_PERMISSIONS[role].length).toBeGreaterThan(0);
     }
+  });
+
+  it("accepts a result with no poVersionNo, with null and with 2", () => {
+    const result = {
+      id: "r-1",
+      ruleId: "mock.sample",
+      ruleLabel: "Sample",
+      orderNo: "SO-20261108-0001",
+      outcome: "pass",
+      expected: "1",
+      actual: "1",
+      tolerance: { label: "Quantity", value: "0" },
+      evidence: [],
+      checkedAt: "2026-11-08T09:00:00.000Z",
+    };
+    for (const extra of [{}, { poVersionNo: null }, { poVersionNo: 2 }])
+      expect(checkResultSchema.safeParse({ ...result, ...extra }).success).toBe(
+        true,
+      );
+  });
+
+  it("refuses a result on PO version 0", () => {
+    expect(
+      checkResultSchema.safeParse({
+        id: "r-1",
+        ruleId: "mock.sample",
+        ruleLabel: "Sample",
+        orderNo: "SO-20261108-0001",
+        outcome: "pass",
+        expected: "1",
+        actual: "1",
+        tolerance: { label: "Quantity", value: "0" },
+        evidence: [],
+        checkedAt: "2026-11-08T09:00:00.000Z",
+        poVersionNo: 0,
+      }).success,
+    ).toBe(false);
   });
 });

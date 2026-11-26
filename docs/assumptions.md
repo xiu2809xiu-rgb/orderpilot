@@ -77,6 +77,8 @@ Our own readings of what Spectra said. Each stays an assumption until Spectra co
 | A-44 | The one place for every document of an invoice is an OrderPilot cabinet with an audit pack, and an optional copy to a shared folder later                                                | Documents are filed into Spectra's own document system instead      | Q-33, Q-35 | Open   |
 | A-45 | Live reporting means near-live: read-only views in PostgreSQL that Power BI reads by DirectQuery, while OrderPilot's own dashboards stay the real-time view                              | The views are refreshed by a schedule, or the licence rules it out  | Q-47       | Open   |
 | A-46 | Business Central's built-in copilot is not part of our design                                                                                                                            | We would need to say how OrderPilot and the copilot divide the work | Q-11       | Open   |
+| A-47 | A hold for stock has no timer, and the tracker shows how long an order has been stuck                                                                                                    | Spectra names a time after which a held order is released           | Q-51       | Open   |
+| A-48 | Stock that arrives does not lift a hold by itself, because holding an order for stock is a back order                                                                                    | Spectra says a held order may go ahead as first written             | Q-52       | Open   |
 
 ## What the briefing said
 

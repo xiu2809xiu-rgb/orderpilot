@@ -50,6 +50,7 @@ function toDomain(row: Row): SalesOrder {
     prepaymentPercent: row.prepaymentPercent.toFixed(2),
     createdBy: row.createdBy,
     version: row.version,
+    poVersionNo: row.poVersionNo,
     lines: row.lines.map((line) => ({
       lineNo: line.lineNo,
       itemNo: line.itemNo,
@@ -170,6 +171,23 @@ export class SalesOrderRepository {
     const { count } = await this.database.client.salesOrder.updateMany({
       where: { orderNo, version: expectedVersion, captureState: "DRAFT" },
       data: { captureState: "VOID", version: { increment: 1 } },
+    });
+    return count > 0;
+  }
+
+  /**
+   * Moves a draft to submitted under the same guard as `update`. Nothing else
+   * changes: the lines stay as they were read, and the PO number keeps its
+   * place in the unique index because only void frees it. False means it
+   * refused and the caller re-reads to say why.
+   */
+  async markSubmitted(
+    orderNo: string,
+    expectedVersion: number,
+  ): Promise<boolean> {
+    const { count } = await this.database.client.salesOrder.updateMany({
+      where: { orderNo, version: expectedVersion, captureState: "DRAFT" },
+      data: { captureState: "SUBMITTED", version: { increment: 1 } },
     });
     return count > 0;
   }

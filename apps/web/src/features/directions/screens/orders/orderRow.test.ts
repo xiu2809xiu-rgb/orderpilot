@@ -8,8 +8,11 @@ import {
   ageInDays,
   isHeldUp,
   isOpen,
+  isTypedHere,
+  isUntracked,
   joinOrders,
   positionOf,
+  stageWordKey,
   stepOfStatus,
 } from "./orderRow";
 
@@ -137,5 +140,37 @@ describe("ageInDays and positionOf", () => {
     expect(positionOf("poIn")).toBe(1);
     expect(positionOf("awbAndPermit")).toBe(9);
     expect(positionOf("nope")).toBeNull();
+  });
+});
+
+describe("isUntracked and the stage word", () => {
+  const entry = (
+    captureState: "draft" | "submitted" | "void" | null,
+    source: "stored" | "sample",
+    workflowStatus: string | null,
+  ) => ({ captureState, source, workflowStatus });
+
+  it("is true for a stored submitted order with no status and false with one", () => {
+    expect(isUntracked(entry("submitted", "stored", null))).toBe(true);
+    expect(
+      isUntracked(entry("submitted", "stored", "Waiting for payment")),
+    ).toBe(false);
+    expect(isTypedHere(entry("submitted", "stored", null))).toBe(true);
+    expect(
+      isTypedHere(entry("submitted", "stored", "Waiting for payment")),
+    ).toBe(false);
+  });
+
+  it("is true for a draft and a void order whatever the status, and false for a sample", () => {
+    expect(isUntracked(entry("draft", "stored", null))).toBe(true);
+    expect(isUntracked(entry("void", "stored", null))).toBe(true);
+    expect(isUntracked(entry(null, "sample", null))).toBe(false);
+    expect(isTypedHere(entry("draft", "stored", null))).toBe(false);
+    expect(isTypedHere(entry(null, "sample", null))).toBe(false);
+  });
+
+  it("says an order entered here is not in the order flow, and keeps Not started for a sample", () => {
+    expect(stageWordKey({ source: "stored" })).toBe("cells.notInFlow");
+    expect(stageWordKey({ source: "sample" })).toBe("cells.notStarted");
   });
 });

@@ -2,14 +2,14 @@ import { useTranslation } from "react-i18next";
 import { JourneyRail } from "@/components/parts/JourneyRail";
 import { heldLine, heldReasons } from "./heldReasons";
 import { AgeCell } from "./OrderFigures";
-import type { OrderRow } from "./orderRow";
+import { stageWordKey, type OrderRow } from "./orderRow";
 
 /**
  * Where the order is, in Spectra's words, with what a person needs next to it:
  * how old the order is and whether it is late, and, for a held order, why. The
  * nine-dot rail adds a line to every row, so it shows only where the window
- * has room (`dots`). An order the tracker does not know, such as a draft
- * entered here, has no journey yet and says so in words.
+ * has room (`dots`). An order the tracker does not know, such as one entered
+ * here, has no journey and says so in words.
  */
 export function StageCell({
   row,
@@ -35,7 +35,7 @@ export function StageCell({
       ) : null}
       {row.step === null ? (
         <span className="od-stage-label text-muted-foreground">
-          {label || t("cells.notStarted")}
+          {label || t(stageWordKey(row))}
         </span>
       ) : (
         <span className="od-stage-label" title={label}>

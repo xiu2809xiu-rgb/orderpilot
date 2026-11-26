@@ -68,6 +68,11 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/operation-log/{entityType}/{entityId}",
       "/api/v1/orders",
       "/api/v1/orders/{orderNo}",
+      "/api/v1/orders/{orderNo}/po-versions",
+      "/api/v1/orders/{orderNo}/po-versions/diff",
+      "/api/v1/orders/{orderNo}/po-versions/preview",
+      "/api/v1/orders/{orderNo}/po-versions/{poVersionNo}",
+      "/api/v1/orders/{orderNo}/submit",
       "/api/v1/orders/{orderNo}/void",
       "/api/v1/system/checks",
       "/api/v1/system/checks/status",
@@ -131,5 +136,18 @@ describe("the OpenAPI document (what orval reads)", () => {
     expect(JSON.stringify(checks?.responses["200"])).toContain(
       '"required":["data","meta"]',
     );
+  });
+
+  it("keeps the largest value of the PO version path parameter", async () => {
+    const { paths } = await documentOf();
+    const one =
+      paths["/api/v1/orders/{orderNo}/po-versions/{poVersionNo}"]?.get;
+    const parameter = one?.parameters?.find(
+      (p) => "name" in p && p.name === "poVersionNo",
+    );
+    expect(parameter).toMatchObject({
+      in: "path",
+      schema: { type: "integer", minimum: 1, maximum: 2147483647 },
+    });
   });
 });

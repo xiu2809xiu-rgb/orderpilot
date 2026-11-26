@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DocumentForm,
+  type DocumentAction,
   type DocumentRecordState,
 } from "@/components/document-form";
 import { useZodForm } from "@/components/form";
@@ -14,10 +15,10 @@ import {
   type PriceMask,
 } from "@/components/lines-grid";
 import { todayInSingapore } from "@/lib/format";
-import { CAPTURE_FAMILY } from "./captureFamily";
 import { LineContext } from "./LineContext";
 import { OrderHeaderFields } from "./OrderHeaderFields";
 import { OrderNotices, type ReadOnlyReason } from "./OrderNotices";
+import { draftKeyOf, statusOf, tabsOf } from "./orderDocumentParts";
 import {
   makeOrderFormSchema,
   type OrderFormInput,
@@ -28,6 +29,11 @@ import { searchItems } from "./orderSearches";
 import { useLineColumns } from "./useLineColumns";
 import { useOrderActions } from "./useOrderActions";
 import { useOrderSave } from "./useOrderSave";
+import { usePoRevision } from "./usePoRevision";
+import { useSubmitOrder } from "./useSubmitOrder";
+
+/** The bar draws nothing while the revision panel is open, so the view has one primary button. */
+const NO_ACTIONS: readonly DocumentAction[] = [];
 
 interface OrderDocumentProps {
   /** Null while the order is new. */
@@ -54,7 +60,10 @@ export function OrderDocument({
   readOnly,
   onReload,
 }: OrderDocumentProps) {
-  const { t } = useTranslation("orders");
+  // The second namespace is the panel's: its words load with the page, because
+  // a namespace that loads when the panel opens suspends the whole page behind
+  // its skeleton, and the form's draft is read again when the page comes back.
+  const { t } = useTranslation(["orders", "directions-orders"]);
   const orderNo = record?.orderNo ?? null;
   const schema = useMemo(
     () => makeOrderFormSchema(t, priceMasked),
@@ -66,10 +75,22 @@ export function OrderDocument({
     prepare: withoutBlankTail,
   });
   const save = useOrderSave({ form, orderNo, priceMasked });
+  const revision = usePoRevision({ form, notice: save.notice });
+  // While the panel is open the form shows what a confirmation would send, so
+  // nothing in it can be changed.
+  const locked = readOnly !== null || revision.open;
+  const submit = useSubmitOrder({
+    form,
+    record,
+    serverPaths: save.serverPaths,
+    onReload,
+    canReopen: state === undefined,
+  });
   const actions = useOrderActions({
     form,
     orderNo,
     editable: readOnly === null,
+    submit: submit.action,
   });
   const columns = useLineColumns();
   const priceMask = useMemo<PriceMask | null>(
@@ -86,14 +107,6 @@ export function OrderDocument({
     return { ...base, exclude: [...(base.exclude ?? []), "lines.*.unit"] };
   }, [priceMasked]);
   const captureState = record?.captureState ?? null;
-  // A read-only page has a key of its own, or a draft typed against the
-  // editable page would come back over a void order.
-  const draftKey =
-    orderNo === null
-      ? "order.new"
-      : readOnly === null
-        ? `order.${orderNo}`
-        : `order.${orderNo}.read`;
 
   // A refused role is not starting an order, so the page does not say so.
   const pageTitle = orderNo
@@ -101,92 +114,84 @@ export function OrderDocument({
     : t(state?.kind === "denied" ? "title" : "form.newTitle");
 
   return (
-    <DocumentForm
-      formId="order-form"
-      form={form}
-      title={pageTitle}
-      number={orderNo ?? ""}
-      demo="synthetic"
-      back={{ to: "/orders", label: t("form.back") }}
-      sectionTitles={{
-        header: t("form.sections.header"),
-        lines: t("form.sections.lines"),
-      }}
-      formLabel={t("form.formLabel")}
-      {...(readOnly === null
-        ? {
-            description: t(
-              orderNo ? "form.draftDescription" : "form.newDescription",
-            ),
-          }
-        : {})}
-      notices={
-        <OrderNotices
-          notice={save.notice}
-          readOnly={readOnly}
-          onReload={() => {
-            // Drops the typed draft first, or the reload would bring it back.
-            form.reset();
-            onReload();
-          }}
-        />
-      }
-      header={<OrderHeaderFields form={form} readOnly={readOnly !== null} />}
-      lines={
-        <>
-          <LinesGrid
-            label={t("form.lines.tableLabel")}
-            columns={columns}
-            searchItems={searchItems}
-            readOnly={readOnly !== null}
-            priceMask={priceMask}
-            itemPrice="reference"
-            itemDescription="own"
-            footer={(totals: LineTotals) => (
-              <div className="space-y-s1">
-                <LinesFooter totals={totals} />
-                <p className="measure text-xs text-muted-foreground">
-                  {t("form.lines.hint")}
-                  {readOnly === null && !priceMasked ? (
-                    <> {t("form.lines.priceHint")}</>
-                  ) : null}
-                </p>
-              </div>
-            )}
+    <>
+      <DocumentForm
+        formId="order-form"
+        form={form}
+        title={pageTitle}
+        number={orderNo ?? ""}
+        demo="synthetic"
+        back={{ to: "/orders", label: t("form.back") }}
+        sectionTitles={{
+          header: t("form.sections.header"),
+          lines: t("form.sections.lines"),
+        }}
+        formLabel={t("form.formLabel")}
+        {...(readOnly === null
+          ? {
+              description: t(
+                orderNo ? "form.draftDescription" : "form.newDescription",
+              ),
+            }
+          : {})}
+        notices={
+          <OrderNotices
+            notice={save.notice}
+            readOnly={readOnly}
+            revision={revision}
+            onReload={() => {
+              // Drops the typed draft first, or the reload would bring it back.
+              form.reset();
+              onReload();
+            }}
           />
-          <LineContext
-            form={form}
-            priceMasked={priceMasked}
-            paused={captureState === "void"}
-            editable={readOnly === null}
-          />
-        </>
-      }
-      status={{
-        family: captureState ? CAPTURE_FAMILY[captureState] : "draft",
-        label: captureState
-          ? t(`captureStates.${captureState}`)
-          : t(record ? "sampleTag" : "form.statusNew"),
-      }}
-      actions={actions}
-      draftKey={draftKey}
-      draftOptions={draftOptions}
-      onSave={save.onSave}
-      onSaved={save.onSaved}
-      serverPaths={save.serverPaths}
-      nextValues={() => blankOrder(todayInSingapore())}
-      {...(readOnly
-        ? { saveBlocked: t(`form.notices.readOnly.${readOnly}`) }
-        : {})}
-      {...(state ? { state } : {})}
-      tabs={{
-        timeline: { content: null, emptyText: t("form.tabsEmpty") },
-        checks: { content: null, emptyText: t("form.tabsEmpty") },
-        documents: { content: null, emptyText: t("form.tabsEmpty") },
-        ...(orderNo
-          ? { log: { entityType: "Order" as const, entityId: orderNo } }
-          : {}),
-      }}
-    />
+        }
+        header={<OrderHeaderFields form={form} readOnly={locked} />}
+        lines={
+          <>
+            <LinesGrid
+              label={t("form.lines.tableLabel")}
+              columns={columns}
+              searchItems={searchItems}
+              readOnly={locked}
+              priceMask={priceMask}
+              itemPrice="reference"
+              itemDescription="own"
+              footer={(totals: LineTotals) => (
+                <div className="space-y-s1">
+                  <LinesFooter totals={totals} />
+                  <p className="measure text-xs text-muted-foreground">
+                    {t("form.lines.hint")}
+                    {readOnly === null && !priceMasked ? (
+                      <> {t("form.lines.priceHint")}</>
+                    ) : null}
+                  </p>
+                </div>
+              )}
+            />
+            <LineContext
+              form={form}
+              priceMasked={priceMasked}
+              paused={captureState === "void"}
+              editable={!locked}
+            />
+          </>
+        }
+        status={statusOf(t, record, captureState)}
+        actions={revision.open ? NO_ACTIONS : actions}
+        draftKey={draftKeyOf(orderNo, readOnly)}
+        draftOptions={draftOptions}
+        onSave={save.onSave}
+        onSaved={save.onSaved}
+        serverPaths={save.serverPaths}
+        nextValues={() => blankOrder(todayInSingapore())}
+        {...(readOnly
+          ? { saveBlocked: t(`form.notices.readOnly.${readOnly}`) }
+          : {})}
+        {...(state ? { state } : {})}
+        tabs={tabsOf(t, orderNo)}
+      />
+      {submit.dialog}
+    </>
   );
 }

@@ -11,6 +11,7 @@ import {
 import { NotFoundError } from "../../common/domain-error.js";
 import { CustomerLookup } from "../master-data/customer-lookup.js";
 import { StockLookup } from "../master-data/stock-lookup.js";
+import { WorkflowOrderStatusReader } from "../workflows/workflow-order-status-reader.js";
 import {
   ORDER_DIRECTORY,
   type OrderDirectory,
@@ -60,6 +61,8 @@ export class OrdersService {
     @Inject(StockLookup) private readonly stock: StockLookup,
     @Inject(CustomerLookup) private readonly customers: CustomerLookup,
     @Inject(OrderMasking) private readonly masking: OrderMasking,
+    @Inject(WorkflowOrderStatusReader)
+    private readonly workflow: WorkflowOrderStatusReader,
   ) {}
 
   /** Stored orders are judged against stock here, because the directory knows no stock. */
@@ -82,6 +85,40 @@ export class OrdersService {
         shortages: live.has(facts) ? calculator.of(facts.lines) : [],
       };
     });
+  }
+
+  /**
+   * Area 2's label for the submitted stored orders among these entries, null
+   * where its workflow holds none (ADR 0073). Area 1 only reads. It runs on
+   * the page being shown, after filter, sort and paging, because nothing
+   * filters or sorts on the label, so the one query is bounded by the page
+   * size. It must not run before `entries` builds its set of live orders,
+   * which compares the facts objects themselves.
+   */
+  private async withWorkflow(
+    entries: readonly OrderEntry[],
+  ): Promise<OrderEntry[]> {
+    const submitted = entries
+      .filter(
+        ({ facts }) =>
+          facts.source === "stored" && facts.captureState === "submitted",
+      )
+      .map(({ facts }) => facts.orderNo);
+    if (submitted.length === 0) return [...entries];
+    const held = await this.workflow.statusOfMany(submitted);
+    return entries.map((entry) =>
+      entry.facts.source === "stored" &&
+      entry.facts.captureState === "submitted"
+        ? {
+            ...entry,
+            facts: {
+              ...entry.facts,
+              workflowStatus:
+                held.get(entry.facts.orderNo)?.status.label ?? null,
+            },
+          }
+        : entry,
+    );
   }
 
   /** The names of the customers on the rows being shown, from master data by number. */
@@ -130,7 +167,9 @@ export class OrdersService {
       canSeeAmount,
     );
     const start = (query.page - 1) * query.pageSize;
-    const shown = found.slice(start, start + query.pageSize);
+    const shown = await this.withWorkflow(
+      found.slice(start, start + query.pageSize),
+    );
     const names = await this.namesFor(shown);
     return {
       items: shown.map((entry) => this.row(entry, role, names)),
@@ -143,7 +182,9 @@ export class OrdersService {
   async one(orderNo: string, role: Role): Promise<SalesOrderDetail> {
     const facts = await this.directory.find(orderNo);
     if (!facts) throw new NotFoundError("Order");
-    const [entry] = await this.entries([facts]);
+    const [bare] = await this.entries([facts]);
+    if (!bare) throw new NotFoundError("Order");
+    const [entry] = await this.withWorkflow([bare]);
     if (!entry) throw new NotFoundError("Order");
     const short = new Map(entry.shortages.map((s) => [s.itemNo, s.shortBy]));
     const names = await this.namesFor([entry]);
@@ -152,6 +193,9 @@ export class OrdersService {
       prepaymentPercent: facts.prepaymentPercent,
       navisionNo: facts.navisionNo,
       version: facts.version,
+      // Only a submitted order has a PO version: a draft is edited in place and a void order never was submitted (ADR 0074).
+      poVersionNo:
+        facts.captureState === "submitted" ? facts.poVersionNo : null,
       lines: facts.lines.map((line) => ({
         lineNo: line.lineNo,
         itemNo: line.itemNo,

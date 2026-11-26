@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import {
   afterEach,
   beforeAll,
@@ -12,6 +12,7 @@ import type { CheckResult, Role } from "@orderpilot/shared";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import { loadNamespaces, stubApi } from "../orders/ordersTestKit";
+import { ChecksTab } from "./ChecksTab";
 import { OrderPage } from "./OrderPage";
 import { renderWithToasts, stubTimeline } from "./orderPageTestKit";
 import { isPriceCheck } from "./priceChecks";
@@ -327,5 +328,70 @@ describe("what makes a check a money check, in the words of the check", () => {
     expect(isPriceCheck(totalQuantity)).toBe(false);
     // The word value does not make a check a money check.
     expect(isPriceCheck(quantity)).toBe(false);
+  });
+});
+
+describe("the PO version a check ran on", () => {
+  const draw = (currentPoVersionNo: number | null, checks: Check[]) =>
+    render(
+      <ChecksTab
+        checks={checks}
+        matches={[]}
+        priceMask={null}
+        typedHere={false}
+        currentPoVersionNo={currentPoVersionNo}
+      />,
+    );
+
+  it("shows 'Ran on PO version N' only when the result holds it", () => {
+    draw(2, [
+      { ...quantity, poVersionNo: 2 },
+      { ...price, id: "p2" },
+    ]);
+    expect(screen.getByText("Ran on PO version 2")).toBeVisible();
+    expect(screen.getAllByText(/Ran on PO version/)).toHaveLength(1);
+  });
+
+  it("shows 'PO version not recorded' for a result with none on an order above version 1", () => {
+    const view = draw(2, [quantity]);
+    expect(screen.getByText("PO version not recorded")).toBeVisible();
+    view.unmount();
+    // Version 1, a draft and a sample have nothing to say about it.
+    for (const current of [1, null]) {
+      const again = draw(current, [quantity]);
+      expect(screen.queryByText(/PO version/)).toBeNull();
+      again.unmount();
+    }
+  });
+
+  it("says typed-in orders are not checked, including every PO version, for a revised order", () => {
+    const view = render(
+      <ChecksTab
+        checks={[]}
+        matches={[]}
+        priceMask={null}
+        typedHere
+        currentPoVersionNo={2}
+      />,
+    );
+    expect(
+      screen.getByText(
+        "Orders typed in here are not checked, and that includes every PO version of this order. Checks run on documents that have been read.",
+      ),
+    ).toBeVisible();
+    view.rerender(
+      <ChecksTab
+        checks={[]}
+        matches={[]}
+        priceMask={null}
+        typedHere
+        currentPoVersionNo={1}
+      />,
+    );
+    expect(
+      screen.getByText(
+        "Orders typed in here are not checked. Checks run on documents that have been read.",
+      ),
+    ).toBeVisible();
   });
 });

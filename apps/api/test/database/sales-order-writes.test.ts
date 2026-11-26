@@ -145,6 +145,68 @@ describe("writing draft orders, against the real database", () => {
     });
   });
 
+  describe("submitting a draft", () => {
+    it("markSubmitted moves a draft at its version to submitted and bumps the version", async () => {
+      await orders.insert(draft("SO-20261110-0010", "PO-SUBMIT-1"));
+      expect(await orders.markSubmitted("SO-20261110-0010", 1)).toBe(true);
+      const after = await orders.findByNo("SO-20261110-0010");
+      expect(after?.captureState).toBe("submitted");
+      expect(after?.version).toBe(2);
+      expect(after?.lines).toHaveLength(2);
+    });
+
+    it("markSubmitted answers false and changes nothing for a stale version, a submitted order and a void order", async () => {
+      await orders.insert(draft("SO-20261110-0011", "PO-SUBMIT-2"));
+      expect(await orders.markSubmitted("SO-20261110-0011", 7)).toBe(false);
+      expect((await orders.findByNo("SO-20261110-0011"))?.version).toBe(1);
+      expect((await orders.findByNo("SO-20261110-0011"))?.captureState).toBe(
+        "draft",
+      );
+      // Already submitted (version 2 now): the right version still answers false.
+      expect(await orders.markSubmitted("SO-20261110-0010", 2)).toBe(false);
+      expect((await orders.findByNo("SO-20261110-0010"))?.version).toBe(2);
+      await orders.markVoid("SO-20261110-0011", 1);
+      expect(await orders.markSubmitted("SO-20261110-0011", 2)).toBe(false);
+      const closed = await orders.findByNo("SO-20261110-0011");
+      expect(closed?.captureState).toBe("void");
+      expect(closed?.version).toBe(2);
+    });
+
+    it("a submitted order still holds its customer and PO pair", async () => {
+      await orders.insert(draft("SO-20261110-0012", "PO-SUBMIT-5"));
+      expect(await orders.markSubmitted("SO-20261110-0012", 1)).toBe(true);
+      expect(await orders.findLiveByPo("C-10010", "po-submit-5")).toBe(
+        "SO-20261110-0012",
+      );
+      await expect(
+        orders.insert(draft("SO-20261110-0015", "PO-SUBMIT-5")),
+      ).rejects.toBeInstanceOf(OrderConflictError);
+    });
+
+    it("rolls the state back when the transaction throws after markSubmitted", async () => {
+      await orders.insert(draft("SO-20261110-0013", "PO-SUBMIT-3"));
+      await expect(
+        db.transaction(async () => {
+          expect(await orders.markSubmitted("SO-20261110-0013", 1)).toBe(true);
+          throw new Error("the handoff refused");
+        }),
+      ).rejects.toThrow("the handoff refused");
+      const after = await orders.findByNo("SO-20261110-0013");
+      expect(after?.captureState).toBe("draft");
+      expect(after?.version).toBe(1);
+    });
+
+    it("two guarded submits at once: one true, one false", async () => {
+      await orders.insert(draft("SO-20261110-0014", "PO-SUBMIT-4"));
+      const answers = await Promise.all([
+        orders.markSubmitted("SO-20261110-0014", 1),
+        orders.markSubmitted("SO-20261110-0014", 1),
+      ]);
+      expect(answers.filter(Boolean)).toHaveLength(1);
+      expect((await orders.findByNo("SO-20261110-0014"))?.version).toBe(2);
+    });
+  });
+
   it("refuses an update onto another live order's PO number", async () => {
     await orders.insert(draft("SO-20261110-0004", "PO-OTHER"));
     const second = await orders.findByNo("SO-20261110-0004");

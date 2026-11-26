@@ -42,6 +42,7 @@ export function draftDetail(
     prepaymentPercent: "100.00",
     navisionNo: null,
     version: 3,
+    poVersionNo: null,
     lines: [
       {
         lineNo: 1,
@@ -86,6 +87,9 @@ export interface Requests {
   posts: unknown[];
   patches: unknown[];
   voids: unknown[];
+  submits: unknown[];
+  /** How many times the order itself was read. */
+  orderReads: number;
   itemReads: number;
   stockReads: number;
   lastPriceReads: number;
@@ -120,6 +124,8 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
     posts: [],
     patches: [],
     voids: [],
+    submits: [],
+    orderReads: 0,
     itemReads: 0,
     stockReads: 0,
     lastPriceReads: 0,
@@ -198,9 +204,10 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
         meta: { mock: true },
       });
     }),
-    http.get("*/api/v1/orders/:orderNo", () =>
-      HttpResponse.json({ data: api.detail() }),
-    ),
+    http.get("*/api/v1/orders/:orderNo", () => {
+      requests.orderReads += 1;
+      return HttpResponse.json({ data: api.detail() });
+    }),
   );
   return { api, requests };
 }
