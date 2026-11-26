@@ -153,7 +153,7 @@ No control changed size. Fixed heights stay, a padding-sized part has its paddin
 - **A theme switch** opens the new theme as a circle from the control used, with a soft edge, over 420 ms (`lib/themeSwitch.ts`, `styles/theme-switch.css`). That is longer than a control's 150 to 250 ms because it crosses the whole window. A change that comes from the device (the choice is "system") cross-fades in 250 ms.
 - **Reduced motion:** the theme change and the page change are instant, the page's name does not glide, and the kit's moving items hold a still frame.
 - Tables and forms never animate while they are in use.
-- **Loading:** page and card skeletons shimmer, a faint band of light sweeping left to right in 1.6 s (`.dx-shimmer`, transform only), while tables and lists stay still (`<Skeleton still />`). Under reduced motion every skeleton is a still grey block, with the band removed. A progress bar (`components/common/ProgressBar.tsx`) shows only real progress: it glides between the real values it is given, never goes backwards and never runs on a timer.
+- **Loading:** a skeleton block that stands for a page head, a card, a tile, a chart or a panel shimmers, a faint band of light sweeping left to right in 1.6 s (`.dx-shimmer`, transform only). The rows of a table or a list, and the cards of a board, stay still (`<Skeleton still />`): a table is never animated while it is in use, and a wall of moving rows is not calm. Under reduced motion every skeleton is a still grey block, with the band removed. A progress bar (`components/common/ProgressBar.tsx`) shows only real progress: it glides between the real values it is given, never goes backwards and never runs on a timer.
 
 ## Scroll areas mark the side that has more
 
