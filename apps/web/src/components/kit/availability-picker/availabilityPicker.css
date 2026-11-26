@@ -31,8 +31,13 @@
   outline: none;
 }
 /* A pill that is folding takes no press: Radix keeps it mounted to the end of
-   its fold, and a press on it must reach what lies under it. */
+   its fold, and a press on it must reach what lies under it. The box Radix
+   puts round the pill is as big as the pill and lies over the trigger, so it
+   would take the press itself: it lets it through too. */
 .ap-pill[data-state="closed"] {
+  pointer-events: none;
+}
+[data-radix-popper-content-wrapper]:has(.ap-pill[data-state="closed"]) {
   pointer-events: none;
 }
 .dark .ap-pill {

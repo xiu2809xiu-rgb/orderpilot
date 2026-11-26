@@ -127,6 +127,15 @@ describe("the pill's sheet", () => {
     );
   });
 
+  it("takes no press on the box that Radix puts round a folding pill either, which lies over the trigger and would take the press itself", () => {
+    // Seen in a browser: elementsFromPoint at the ring's centre during the
+    // fold listed Radix's popper wrapper first, then the ring. The pill's own
+    // pointer-events: none cannot help while its wrapper takes the press.
+    expect(picker).toMatch(
+      /\[data-radix-popper-content-wrapper\]:has\(\.ap-pill\[data-state="closed"\]\)\s*\{[^}]*pointer-events:\s*none/,
+    );
+  });
+
   it("starts the leaving word's fade from the opacity that the caption hands it", () => {
     const keyframes = atRule(picker, "@keyframes ap-text-out");
     expect(keyframes).toMatch(/opacity:\s*var\(--ap-out-from, 1\)/);
