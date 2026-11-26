@@ -1,7 +1,8 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { axeViolations } from "@/test/axe";
 import { must } from "@/test/must";
 import { CountBadge } from "./CountBadge";
 import { FilterChips } from "./FilterChips";
@@ -114,23 +115,38 @@ describe("the count on a Filters button", () => {
 describe("a cleared applied-filter pill", () => {
   const IDS = ["a", "b", "c"];
 
-  function Row() {
+  /**
+   * The row as a page draws it. Without `above` nothing that takes focus
+   * precedes it, as on the exceptions list and the users tab; without
+   * `withClearAll` the row has no Clear all.
+   */
+  function Row({
+    above = true,
+    withClearAll = true,
+  }: {
+    above?: boolean;
+    withClearAll?: boolean;
+  }) {
     const [ids, setIds] = useState(IDS);
     return (
       <>
-        <button type="button">Filters</button>
+        {above ? <button type="button">Filters</button> : null}
         <FilterChips
           chips={ids.map((id) => ({ id, label: `Owner ${id}` }))}
           filters={Object.fromEntries(ids.map((id) => [id, "x"]))}
           onChange={(next) => {
             setIds(ids.filter((id) => id in next));
           }}
-          clearAll={{
-            label: "Clear all",
-            onClear: () => {
-              setIds([]);
-            },
-          }}
+          clearAll={
+            withClearAll
+              ? {
+                  label: "Clear all",
+                  onClear: () => {
+                    setIds([]);
+                  },
+                }
+              : undefined
+          }
         />
       </>
     );
@@ -186,5 +202,86 @@ describe("a cleared applied-filter pill", () => {
     expect(leaving()).toHaveLength(0);
     expect(within(screen.getByRole("list")).queryByText("Owner a")).toBeNull();
     expect(clear("b")).toHaveFocus();
+  });
+
+  it("stands where the pill stood, between its neighbours, while it fades", async () => {
+    stubReducedMotion(false);
+    const user = userEvent.setup();
+    render(<Row />);
+    await user.click(clear("b"));
+    const items = Array.from(must(document.querySelector("ul")).children);
+    expect(items.map((item) => item.hasAttribute("data-leaving"))).toEqual([
+      false,
+      true,
+      false,
+      false,
+    ]);
+    expect(items[0]).toHaveTextContent("Owner a");
+    expect(items[2]).toHaveTextContent("Owner c");
+  });
+
+  it("drops a ghost whose animation never ends after the fallback time", () => {
+    stubReducedMotion(false);
+    vi.useFakeTimers();
+    try {
+      render(<Row />);
+      fireEvent.click(clear("a"));
+      expect(leaving()).toHaveLength(1);
+      act(() => {
+        vi.advanceTimersByTime(399);
+      });
+      expect(leaving()).toHaveLength(1);
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      expect(leaving()).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("moves focus to the previous pill when the last of several goes and there is no Clear all", async () => {
+    stubReducedMotion(false);
+    const user = userEvent.setup();
+    render(<Row withClearAll={false} />);
+    await user.click(clear("c"));
+    expect(clear("b")).toHaveFocus();
+  });
+
+  it("moves focus to the page heading when only the pill goes and nothing above the row takes focus", async () => {
+    stubReducedMotion(false);
+    const user = userEvent.setup();
+    render(
+      <main>
+        <h1>Exceptions</h1>
+        <Row above={false} />
+      </main>,
+    );
+    await user.click(clear("a"));
+    await user.click(clear("b"));
+    await user.click(clear("c"));
+    expect(screen.getByRole("heading", { name: "Exceptions" })).toHaveFocus();
+  });
+
+  it("moves focus to the page heading when Clear all takes the row away and nothing above takes focus", async () => {
+    stubReducedMotion(false);
+    const user = userEvent.setup();
+    render(
+      <main>
+        <h1>Users</h1>
+        <Row above={false} />
+      </main>,
+    );
+    await user.click(screen.getByRole("button", { name: "Clear all" }));
+    expect(screen.getByRole("heading", { name: "Users" })).toHaveFocus();
+  });
+
+  it("has no accessibility violation with a row of pills and a ghost in it", async () => {
+    stubReducedMotion(false);
+    const user = userEvent.setup();
+    const { container } = render(<Row />);
+    await user.click(clear("a"));
+    expect(leaving()).toHaveLength(1);
+    expect(await axeViolations(container)).toEqual([]);
   });
 });
