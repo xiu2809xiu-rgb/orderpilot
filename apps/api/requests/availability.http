@@ -1,0 +1,51 @@
+### A person's availability (ADR 0070): Available, Focusing or Do not disturb.
+### Information for colleagues and nothing else: no reminder, escalation or
+### approval reads it. Any signed-in role may call all three routes; there is no
+### permission to give or take away. Sign in first (requests/auth.http), then
+### paste the op_csrf cookie value below. The PUT needs the CSRF header.
+### A change is not audited, by decision. Every answer sends Cache-Control: no-store.
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+
+### Your own availability. With nothing set: Available, with null times.
+### Without a session: 401 UNAUTHENTICATED.
+GET {{baseUrl}}/api/v1/availability/mine
+
+### Set your own to Do not disturb. The server stamps the time and it lasts 12 hours,
+### worked out when it is read. Setting it again renews the 12 hours.
+PUT {{baseUrl}}/api/v1/availability/mine
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "value": "DO_NOT_DISTURB" }
+
+### Focusing, the second state that is kept.
+PUT {{baseUrl}}/api/v1/availability/mine
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "value": "FOCUSING" }
+
+### Available leaves no row at all, and the times are null.
+PUT {{baseUrl}}/api/v1/availability/mine
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "value": "AVAILABLE" }
+
+### An extra key is refused: who is meant is always you, and the time is always
+### the server's. Answers 400 VALIDATION_FAILED. The write is limited to 30 a minute.
+PUT {{baseUrl}}/api/v1/availability/mine
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "value": "FOCUSING", "userId": "0192a000-0000-7000-8000-000000000001" }
+
+### Other people's availability by user id: 1 to 100 ids, separated by commas, no spaces.
+### Each entry holds the id, the value and the time and nothing more. An unknown id, a
+### disabled person and someone with nothing set all answer Available with a null time.
+### In demo mode GET /auth/options carries the ids of the demo accounts. Limited to 120 a minute.
+GET {{baseUrl}}/api/v1/availability?ids=0192a000-0000-7000-8000-000000000001,0192a000-0000-7000-8000-000000000002
+
+### 101 ids are refused: 400 VALIDATION_FAILED. So are no ids, a space and a non-uuid.
+GET {{baseUrl}}/api/v1/availability

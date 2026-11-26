@@ -1,0 +1,918 @@
+import AxeBuilder from "@axe-core/playwright";
+import { type Browser, type Locator, type Page } from "@playwright/test";
+import {
+  DEMO_PERSONAS,
+  myAvailabilityResponseSchema,
+  type Role,
+} from "@orderpilot/shared";
+import {
+  BASE_URL,
+  callAs,
+  checkPage,
+  expect,
+  test,
+  WCAG_TAGS,
+} from "../src/index.js";
+import { sessionFor, type StoredSession } from "../src/session.js";
+
+// Availability on the avatar (story C, ADR 0070). Base accounts only: the nine
+// demo personas that every stack has. SUPPORT sets it and PRODUCT_MANAGER
+// looks. Setting it changes no rule, so the other specs that use these two
+// roles are not affected. The spec puts SUPPORT back to Available before it
+// starts and after it ends, even when a test fails. A run killed in between
+// leaves a choice for at most 12 hours and harms nothing. A full run makes 20
+// writes: 9 set through the API, 7 puts back to Available and 4 picks made by
+// the app (the double-click test alone makes 8 of them, and a retry repeats a
+// test's writes; so does a round of that test whose real gap came out too long
+// on a slow runner, which is tried again at most twice). The stack's one shared
+// address allows 30 a minute, so even a run squeezed into one minute stays
+// under it. Count again when a test is added.
+
+const SETTER = "SUPPORT" satisfies Role;
+const LOOKER = "PRODUCT_MANAGER" satisfies Role;
+const PERSONA = DEMO_PERSONAS[SETTER];
+
+const held = new Map<Role, StoredSession>();
+
+function sessionOf(role: Role): StoredSession {
+  const session = held.get(role);
+  if (!session) throw new Error(`The spec holds no session for ${role}.`);
+  return session;
+}
+
+const call = (
+  role: Role,
+  method: Parameters<typeof callAs>[1],
+  route: string,
+  body?: unknown,
+) => callAs(role, method, route, body, sessionOf(role));
+
+async function putBack(): Promise<void> {
+  const { status } = await call(SETTER, "PUT", "/availability/mine", {
+    value: "AVAILABLE",
+  });
+  expect(status, "SUPPORT is put back to Available").toBe(200);
+}
+
+async function signIn(page: Page, role: Role): Promise<void> {
+  await page.context().addCookies(sessionOf(role).cookies);
+}
+
+/** A second browser context signed in as another account, for the colleague's view. */
+async function asLooker(browser: Browser) {
+  const context = await browser.newContext({
+    baseURL: BASE_URL,
+    storageState: sessionOf(LOOKER),
+  });
+  return { context, page: await context.newPage() };
+}
+
+test.describe.configure({ mode: "serial" });
+
+test.beforeAll(async () => {
+  for (const role of [SETTER, LOOKER] satisfies Role[]) {
+    held.set(role, await sessionFor(role));
+  }
+  await putBack();
+});
+
+test.afterAll(async () => {
+  await putBack();
+});
+
+const dot = (page: Page, value = "Available"): Locator =>
+  page.getByRole("button", { name: `Your availability: ${value}. Change` });
+const pill = (page: Page): Locator =>
+  page.getByRole("menu", { name: "Your availability" });
+const choice = (page: Page, name: string): Locator =>
+  pill(page).getByRole("menuitemradio", { name });
+
+/**
+ * A press on a choice counts once the pill has been in the page for a quarter
+ * of a second (the second click of a double click would otherwise land on the
+ * first choice), which no hand is faster than and a script is.
+ */
+async function pickByMouse(page: Page, name: string): Promise<void> {
+  await expect(pill(page)).toBeVisible();
+  await page.waitForTimeout(300);
+  await choice(page, name).click();
+}
+
+/**
+ * The shell loads its menu code, and the control its pill and spring, after
+ * the first paint (on idle, or at once on hover). Until they have arrived the
+ * trigger is a stand-in button: a press that straddles the swap to the real
+ * trigger opens nothing, and a press before the pill's code is in makes a
+ * second click land on the trigger and close the menu. A script presses the
+ * moment the control is visible, so a timed press waits for all three chunks
+ * and for the real trigger (Radix gives it an id). This tests the control, not
+ * that race.
+ */
+async function realTrigger(trigger: Locator): Promise<void> {
+  await expect(trigger).toBeVisible();
+  await trigger.hover();
+  await trigger
+    .page()
+    .waitForFunction(() =>
+      ["dropdown-menu-", "AvailabilityPicker-", "useChipSpring-"].every(
+        (name) =>
+          performance
+            .getEntriesByType("resource")
+            .some((entry) => entry.name.includes(name)),
+      ),
+    );
+  await expect(trigger).toHaveAttribute("id", /^radix-/);
+}
+
+/** The pill lies inside the viewport with room to spare. */
+async function expectInsideViewport(page: Page, spare = 8): Promise<void> {
+  // Radix draws the menu off screen (a box at y below zero) until it has
+  // measured the anchor, a frame or more after it appears: wait for a place,
+  // then for two reads, a frame apart, to agree.
+  await expect
+    .poll(async () => (await pill(page).boundingBox())?.y ?? -1, {
+      message: "the menu is placed",
+    })
+    .toBeGreaterThanOrEqual(0);
+  let box = await pill(page).boundingBox();
+  for (let tries = 0; tries < 20; tries += 1) {
+    await page.waitForTimeout(50);
+    const next = await pill(page).boundingBox();
+    const same = JSON.stringify(next) === JSON.stringify(box);
+    box = next;
+    if (same) break;
+  }
+  const view = page.viewportSize();
+  expect(box, "the pill has a box").not.toBeNull();
+  expect(view, "the page has a viewport").not.toBeNull();
+  if (!box || !view) return;
+  expect(box.x).toBeGreaterThanOrEqual(spare - 0.5);
+  expect(box.y).toBeGreaterThanOrEqual(spare - 0.5);
+  expect(box.x + box.width).toBeLessThanOrEqual(view.width - spare + 0.5);
+  expect(box.y + box.height).toBeLessThanOrEqual(view.height - spare + 0.5);
+}
+
+test("a person sets their availability from the avatar and it survives a reload", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  await page.goto("/");
+  await dot(page).click();
+  await expect(pill(page)).toBeVisible();
+  await expect(pill(page).getByRole("menuitemradio")).toHaveCount(3);
+  await pickByMouse(page, "Do not disturb");
+  await expect(
+    page.getByText(
+      "Do not disturb for 12 hours. Reminders and approvals still reach you.",
+    ),
+  ).toBeVisible();
+  await expect(dot(page, "Do not disturb")).toBeVisible();
+  await page.reload();
+  await expect(dot(page, "Do not disturb")).toBeVisible();
+  const { body } = await call(SETTER, "GET", "/availability/mine");
+  expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+    "DO_NOT_DISTURB",
+  );
+});
+
+test("a colleague sees it in the Demo role menu", async ({ browser }) => {
+  const { context, page } = await asLooker(browser);
+  try {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Demo role" }).click();
+    const row = page.getByRole("menuitem", { name: new RegExp(PERSONA) });
+    await expect(row).toContainText("Do not disturb");
+  } finally {
+    await context.close();
+  }
+});
+
+test("the mark on a colleague's dot in the Demo role menu keeps its dot's colour, not the row's muted text colour", async ({
+  browser,
+}) => {
+  const { context, page } = await asLooker(browser);
+  try {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Demo role" }).click();
+    const row = page.getByRole("menuitem", { name: new RegExp(PERSONA) });
+    await expect(row).toContainText("Do not disturb");
+    // A menu item paints every icon with no text colour class in its muted
+    // colour (components/ui/dropdown-menu); the mark must still draw in the
+    // colour its dot gives it, which is 4.5:1 on the dot's own tone.
+    const colours = await row.evaluate((item) => {
+      const dotEl = item.querySelector(".ap-dot");
+      const markEl = dotEl?.querySelector(".ap-mark");
+      const words = dotEl?.parentElement;
+      if (!dotEl || !markEl || !words) return null;
+      return {
+        dot: getComputedStyle(dotEl).color,
+        mark: getComputedStyle(markEl).color,
+        stroke: getComputedStyle(markEl).stroke,
+        muted: getComputedStyle(words).color,
+        tone: getComputedStyle(dotEl).backgroundColor,
+      };
+    });
+    expect(colours, "the row draws a dot with a mark").not.toBeNull();
+    if (!colours) return;
+    expect(colours.mark, "the mark's colour is its dot's").toBe(colours.dot);
+    expect(colours.stroke, "the mark is drawn in that colour").toBe(
+      colours.dot,
+    );
+    expect(colours.mark, "not the row's muted text").not.toBe(colours.muted);
+    expect(colours.mark, "not the dot's own tone").not.toBe(colours.tone);
+  } finally {
+    await context.close();
+  }
+});
+
+test("it is set back, and the colleague sees no words on that row", async ({
+  page,
+  browser,
+}) => {
+  await signIn(page, SETTER);
+  await page.goto("/");
+  await dot(page, "Do not disturb").click();
+  await pickByMouse(page, "Available");
+  await expect(dot(page)).toBeVisible();
+  const { context, page: other } = await asLooker(browser);
+  try {
+    await other.goto("/");
+    await other.getByRole("button", { name: "Demo role" }).click();
+    const row = other.getByRole("menuitem", { name: new RegExp(PERSONA) });
+    await expect(row).toBeVisible();
+    await expect(row).not.toContainText("Do not disturb");
+    await expect(row).not.toContainText("Focusing");
+  } finally {
+    await context.close();
+  }
+});
+
+test("the keyboard walk: Tab to the button, Enter, ArrowRight, Enter", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  await page.goto("/");
+  const button = dot(page);
+  await button.focus();
+  await expect(button).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(pill(page)).toBeVisible();
+  await expect(choice(page, "Available")).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(choice(page, "Focusing")).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(dot(page, "Focusing")).toBeFocused();
+  await putBack();
+});
+
+test("a press and a release of the mouse on the ring or the dot opens the menu and picks nothing", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await signIn(page, SETTER);
+  // A value that a stray pick of the first choice would change.
+  expect(
+    (
+      await call(SETTER, "PUT", "/availability/mine", {
+        value: "DO_NOT_DISTURB",
+      })
+    ).status,
+  ).toBe(200);
+  const puts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "PUT" && request.url().includes("/availability")) {
+      puts.push(request.url());
+    }
+  });
+  try {
+    for (const [route, trigger] of [
+      [
+        "/settings?section=account",
+        page.locator('.ap-trigger[data-skin="ring"]'),
+      ],
+      ["/", page.locator(".dx-person-dot")],
+    ] as const) {
+      await page.goto(route);
+      await realTrigger(trigger);
+      const box = await trigger.boundingBox();
+      expect(box, "the control has a box").not.toBeNull();
+      if (!box) return;
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      // A real click: the pill opens on the press and the release comes
+      // while it is still growing, over whatever it has grown under the pointer.
+      await page.mouse.down();
+      await page.waitForTimeout(120);
+      await page.mouse.up();
+      await expect(
+        pill(page),
+        `the menu stays open from ${route}`,
+      ).toBeVisible();
+      await expect(pill(page)).toHaveAttribute("data-settled", "");
+      await expect(pill(page).getByRole("menuitemradio")).toHaveCount(3);
+      const { body } = await call(SETTER, "GET", "/availability/mine");
+      expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+        "DO_NOT_DISTURB",
+      );
+      expect(puts, `no change is sent from ${route}`).toEqual([]);
+      await page.keyboard.press("Escape");
+      await expect(pill(page)).toHaveCount(0);
+    }
+  } finally {
+    await putBack();
+  }
+});
+
+test("a double click on the ring at gaps of 60, 200, 320 and 400 ms, and a triple click 300 ms apart, open the menu and pick nothing, and a press after a pause picks", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await signIn(page, SETTER);
+  const puts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "PUT" && request.url().includes("/availability")) {
+      puts.push(request.url());
+    }
+  });
+  const fromDoNotDisturb = async (): Promise<Locator> => {
+    // A value that a stray pick of the first choice would change.
+    expect(
+      (
+        await call(SETTER, "PUT", "/availability/mine", {
+          value: "DO_NOT_DISTURB",
+        })
+      ).status,
+    ).toBe(200);
+    puts.length = 0;
+    await page.goto("/settings?section=account");
+    const ring = page.locator('.ap-trigger[data-skin="ring"]');
+    await realTrigger(ring);
+    return ring;
+  };
+  const centreOf = async (ring: Locator) => {
+    const box = await ring.boundingBox();
+    expect(box, "the ring has a box").not.toBeNull();
+    return box
+      ? { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+      : { x: 0, y: 0 };
+  };
+  const mine = async () => {
+    const { body } = await call(SETTER, "GET", "/availability/mine");
+    return myAvailabilityResponseSchema.parse(body).data.value;
+  };
+  try {
+    // The pill opens over the ring, so the second click lands on its first
+    // choice. The quarter second stops a fast double click; the opening press
+    // said again at its place stops a slower one, within a fixed 500 ms, and a
+    // repeat restarts the half second, so a third click at the same gap is
+    // stopped too (a burst is one gesture only for the first second after the
+    // opening, and three clicks 300 ms apart end at 600 ms). The largest gap is 400 ms: 440 leaves too little room before
+    // the half second on a slow runner.
+    const rounds: { name: string; gaps: number[] }[] = [
+      { name: "a double click at 60 ms", gaps: [60] },
+      { name: "a double click at 200 ms", gaps: [200] },
+      { name: "a double click at 320 ms", gaps: [320] },
+      { name: "a double click at 400 ms", gaps: [400] },
+      { name: "a triple click 300 ms apart", gaps: [300, 300] },
+    ];
+    for (const { name, gaps } of rounds) {
+      // The gaps are aimed with the time a press itself takes taken off, and
+      // read back from the page's own clock: a slow runner stretches them, and
+      // a round whose real gap reached the half second says nothing about the
+      // rule, so it is tried again (three times at most).
+      let accepted = false;
+      for (let attempt = 1; attempt <= 3 && !accepted; attempt += 1) {
+        const ring = await fromDoNotDisturb();
+        await page.evaluate(() => {
+          const downs: number[] = [];
+          Object.assign(window, { pressTimes: downs });
+          document.addEventListener(
+            "pointerdown",
+            () => downs.push(performance.now()),
+            true,
+          );
+        });
+        const { x, y } = await centreOf(ring);
+        await page.mouse.move(x, y);
+        let pressedAt = Date.now();
+        await page.mouse.down();
+        await page.mouse.up();
+        for (const gap of gaps) {
+          await page.waitForTimeout(
+            Math.max(0, gap - (Date.now() - pressedAt)),
+          );
+          pressedAt = Date.now();
+          await page.mouse.down();
+          await page.mouse.up();
+        }
+        const times = await page.evaluate(
+          () => (window as unknown as { pressTimes: number[] }).pressTimes,
+        );
+        const real = times.slice(1).map((time, i) => time - (times[i] ?? 0));
+        const total = (times.at(-1) ?? 0) - (times[0] ?? 0);
+        const inRule = real.every((gap) => gap < 460) && total < 950;
+        if (!inRule && attempt < 3) continue;
+        expect(
+          inRule,
+          `${name}: real gaps ${real.map(Math.round).join(", ")} ms, together ${String(Math.round(total))} ms, must stay under the half second each and the first second together`,
+        ).toBe(true);
+        accepted = true;
+        // Open after the last click, so that a trigger that never opens cannot pass.
+        await expect(pill(page), `${name} leaves the menu open`).toBeVisible();
+        await page.waitForTimeout(900);
+        await expect(pill(page), `${name} still has it open`).toBeVisible();
+        expect(await mine(), `still Do not disturb after ${name}`).toBe(
+          "DO_NOT_DISTURB",
+        );
+        expect(puts, `no change is sent after ${name}`).toEqual([]);
+      }
+    }
+    // A person who waits has chosen: one press to open, a pause, one press
+    // and release at the same point picks the first choice.
+    const ring = await fromDoNotDisturb();
+    const { x, y } = await centreOf(ring);
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.up();
+    await expect(pill(page)).toBeVisible();
+    await page.waitForTimeout(700);
+    await page.mouse.down();
+    await page.mouse.up();
+    await expect
+      .poll(mine, { message: "Available is picked" })
+      .toBe("AVAILABLE");
+    expect(puts, "one change is sent").toHaveLength(1);
+  } finally {
+    await putBack();
+  }
+});
+
+test("a held Enter opens the menu and picks nothing, and the value is unchanged", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  // A value that a pick of the focused choice would send again.
+  expect(
+    (
+      await call(SETTER, "PUT", "/availability/mine", {
+        value: "DO_NOT_DISTURB",
+      })
+    ).status,
+  ).toBe(200);
+  const puts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "PUT" && request.url().includes("/availability")) {
+      puts.push(request.url());
+    }
+  });
+  try {
+    await page.goto("/");
+    await page.evaluate(() => {
+      const keys: { key: string; repeat: boolean }[] = [];
+      Object.assign(window, { heldKeys: keys });
+      document.addEventListener(
+        "keydown",
+        (event) => keys.push({ key: event.key, repeat: event.repeat }),
+        true,
+      );
+    });
+    await dot(page, "Do not disturb").focus();
+    // Pressed down and not released: Playwright sends a repeat for each press
+    // of a key that is already down, as the system does while it is held.
+    await page.keyboard.down("Enter");
+    await expect(pill(page)).toBeVisible();
+    await expect(choice(page, "Do not disturb")).toBeFocused();
+    for (let repeats = 0; repeats < 4; repeats += 1) {
+      await page.keyboard.down("Enter");
+      await page.waitForTimeout(60);
+    }
+    const keys = await page.evaluate(
+      () =>
+        (window as unknown as { heldKeys: { key: string; repeat: boolean }[] })
+          .heldKeys,
+    );
+    expect(
+      keys.map((k) => k.repeat),
+      "the page saw the key's repeats",
+    ).toEqual([false, true, true, true, true]);
+    await expect(pill(page), "the menu is still open").toBeVisible();
+    await page.keyboard.up("Enter");
+    expect(puts, "no change is sent").toEqual([]);
+    const { body } = await call(SETTER, "GET", "/availability/mine");
+    expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+      "DO_NOT_DISTURB",
+    );
+  } finally {
+    await putBack();
+  }
+});
+
+test("the caption follows the choice", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await signIn(page, SETTER);
+  await page.goto("/");
+  // By the keyboard, so that focus starts on the checked choice: a mouse that
+  // opens the menu leaves focus on the menu itself once the pill has grown out
+  // from under the pointer, and ArrowRight would then start from the first.
+  await dot(page).focus();
+  await page.keyboard.press("Enter");
+  await expect(pill(page)).toBeVisible();
+  // The pill is drawn scaled while it grows: measure it after the growth.
+  await expect(pill(page)).toHaveAttribute("data-settled", "");
+  const chip = pill(page).locator(".ap-chip");
+  await expect(chip).toBeVisible();
+  const centreOf = async (target: Locator): Promise<number> => {
+    const box = await target.boundingBox();
+    return box ? box.x + box.width / 2 : Number.NaN;
+  };
+  // The first caption is held 4 px inside the pill, so it is not centred under
+  // the first choice; the second is, and that is where it must arrive.
+  await page.keyboard.press("ArrowRight");
+  await expect(choice(page, "Focusing")).toBeFocused();
+  // The caption glides on a spring: it arrives under the second choice.
+  await expect
+    .poll(
+      async () =>
+        Math.abs(
+          (await centreOf(chip)) - (await centreOf(choice(page, "Focusing"))),
+        ),
+      { timeout: 3_000 },
+    )
+    .toBeLessThan(3);
+  await expect(chip).toHaveText("Focusing");
+});
+
+interface Ink {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+/**
+ * The box of the initials' glyphs, not the text's line box: the line box is
+ * taller than the letters (it holds the font's ascent and descent), so a dot
+ * that clears the letters would still "reach" it. The text's own box gives the
+ * baseline and the left edge; the canvas gives how far the glyphs reach from
+ * them.
+ */
+async function initialsInk(avatar: Locator): Promise<Ink> {
+  return avatar.evaluate(async (root) => {
+    await document.fonts.ready;
+    const holder = root.querySelector('[data-slot="avatar-fallback"]');
+    const text = holder?.textContent.trim() ?? "";
+    const node = holder?.firstChild;
+    if (!holder || !node || text === "") throw new Error("no initials");
+    const range = document.createRange();
+    range.selectNodeContents(holder);
+    const line = range.getBoundingClientRect();
+    const style = getComputedStyle(holder);
+    const context = document.createElement("canvas").getContext("2d");
+    if (!context) throw new Error("no canvas");
+    context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const m = context.measureText(text);
+    const baseline = line.top + m.fontBoundingBoxAscent;
+    return {
+      left: line.left - m.actualBoundingBoxLeft,
+      right: line.left + m.actualBoundingBoxRight,
+      top: baseline - m.actualBoundingBoxAscent,
+      bottom: baseline + m.actualBoundingBoxDescent,
+    };
+  });
+}
+
+/** The shortest distance from a point to a box. */
+function distanceTo(box: Ink, x: number, y: number): number {
+  const dx = Math.max(box.left - x, 0, x - box.right);
+  const dy = Math.max(box.top - y, 0, y - box.bottom);
+  return Math.hypot(dx, dy);
+}
+
+test("the dot on the account avatar clears the initials in the open panel and in the rail, and still overlaps the avatar", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  await page.goto("/");
+  const avatar = page
+    .getByRole("button", { name: /^Account menu/ })
+    .locator('[data-slot="avatar"]');
+  const check = async (where: string): Promise<void> => {
+    const ink = await initialsInk(avatar);
+    const dotBox = await dot(page).locator(".ap-dot").boundingBox();
+    const avatarBox = await avatar.boundingBox();
+    expect(dotBox, `the dot has a box ${where}`).not.toBeNull();
+    expect(avatarBox, `the avatar has a box ${where}`).not.toBeNull();
+    if (!dotBox || !avatarBox) return;
+    // The dot's circle with its 2 px rim.
+    const x = dotBox.x + dotBox.width / 2;
+    const y = dotBox.y + dotBox.height / 2;
+    const radius = dotBox.width / 2 + 2;
+    // The ink box is a little wider than the letters (about 1.2 px at its right
+    // edge for "MT" at 12 px: a scan of the pixels at 4x found the nearest letter
+    // pixel 9.5 px from the dot's centre where the box says 8.4), so the rim may
+    // touch the box by up to 1 px and still clear every letter drawn. The dot
+    // itself (7 px) must clear the box.
+    const BOX_OVERREACH = 1;
+    expect(
+      distanceTo(ink, x, y),
+      `the dot and its rim clear the initials ${where}`,
+    ).toBeGreaterThan(radius - BOX_OVERREACH);
+    // It still sits on the avatar's circle: the two circles overlap.
+    const across = Math.hypot(
+      x - (avatarBox.x + avatarBox.width / 2),
+      y - (avatarBox.y + avatarBox.height / 2),
+    );
+    expect(across, `the dot still overlaps the avatar ${where}`).toBeLessThan(
+      avatarBox.width / 2 + radius,
+    );
+  };
+  await expect(dot(page)).toBeVisible();
+  await check("in the open panel");
+  await page.getByRole("button", { name: "Collapse the panel" }).click();
+  await expect(dot(page)).toBeVisible();
+  await check("in the rail");
+  await page.getByRole("button", { name: "Expand the panel" }).click();
+});
+
+test("reduced motion removes the pill's animation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await signIn(page, SETTER);
+  await page.goto("/");
+  await dot(page).click();
+  await expect(pill(page)).toBeVisible();
+  await expect(pill(page)).toHaveCSS("animation-name", "none");
+  await page.keyboard.press("Escape");
+});
+
+test("the pill is never clipped, with the panel open and in the rail", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  await page.goto("/");
+  await dot(page).click();
+  await expect(pill(page)).toBeVisible();
+  await expectInsideViewport(page);
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Collapse the panel" }).click();
+  await dot(page).click();
+  await expect(pill(page)).toBeVisible();
+  await expectInsideViewport(page);
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Expand the panel" }).click();
+});
+
+test("the pages pass the accessibility check, and so does the open menu in light and dark", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  await page.goto("/settings?section=account");
+  await checkPage(page);
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto("/");
+    await dot(page).click();
+    await expect(pill(page)).toBeVisible();
+    // Radix hides the page behind any open menu with aria-hidden while its
+    // buttons stay focusable, and axe flags that for the account menu too:
+    // it is the menu library's way of holding focus, not this story's.
+    const { violations } = await new AxeBuilder({ page })
+      .withTags(WCAG_TAGS)
+      .disableRules(["aria-hidden-focus"])
+      .analyze();
+    expect(
+      violations.map((v) => `${v.id}: ${v.help}`),
+      `axe with the menu open in ${scheme}`,
+    ).toEqual([]);
+    await page.keyboard.press("Escape");
+  }
+});
+
+test.describe("on a phone with a touch screen", () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+  test("the control and every item are touch targets of 44 px, and the words sit under the orbs", async ({
+    page,
+  }) => {
+    await signIn(page, SETTER);
+    await page.goto("/");
+    expect(
+      await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
+      "touch emulation gives a coarse pointer",
+    ).toBe(true);
+    await page.getByRole("button", { name: "Open navigation menu" }).click();
+    const button = dot(page);
+    await expect(button).toBeVisible();
+    // Read by polling: the shell swaps its stand-in button for the real one
+    // once the menu's code has arrived, and a read in between finds no box.
+    await expect
+      .poll(async () => (await button.boundingBox())?.width ?? 0)
+      .toBeGreaterThanOrEqual(43.5);
+    await expect
+      .poll(async () => (await button.boundingBox())?.height ?? 0)
+      .toBeGreaterThanOrEqual(43.5);
+    await button.tap();
+    await expect(pill(page)).toBeVisible();
+    for (const item of await pill(page).getByRole("menuitemradio").all()) {
+      const itemBox = await item.boundingBox();
+      expect(itemBox?.height).toBeGreaterThanOrEqual(43.5);
+      expect(itemBox?.width).toBeGreaterThanOrEqual(43.5);
+    }
+    // The words are drawn under the orbs on a touch screen.
+    // (The hidden measuring copy of each word is not the one that is drawn.)
+    const label = choice(page, "Do not disturb").locator(".ap-label");
+    await expect(label).toBeVisible();
+    const orbBox = await choice(page, "Do not disturb")
+      .locator(".ap-orb")
+      .boundingBox();
+    const labelBox = await label.boundingBox();
+    expect(labelBox?.y ?? 0).toBeGreaterThanOrEqual(
+      (orbBox?.y ?? 0) + (orbBox?.height ?? 0) - 0.5,
+    );
+    // After an arrow key the focus ring is round the 44 px orb: the 80 px item
+    // has no outline of its own, since a ring round it would touch the pill's
+    // edges and cut through the words under the orb.
+    await page.keyboard.press("ArrowRight");
+    const focused = pill(page).locator('[role="menuitemradio"]:focus');
+    await expect(focused).toHaveCount(1);
+    const rings = await focused.evaluate((item) => {
+      const orbEl = item.querySelector(".ap-orb");
+      const orb = orbEl ? getComputedStyle(orbEl) : null;
+      return {
+        itemStyle: getComputedStyle(item).outlineStyle,
+        orbStyle: orb?.outlineStyle ?? "no orb",
+      };
+    });
+    expect(rings.itemStyle, "the item has no outline of its own").toBe("none");
+    expect(rings.orbStyle, "its orb has the ring").toBe("solid");
+    // Poll for the width: under reduced motion (which these tests run with) a
+    // ring that has just appeared still shows the browser's default 3px for the
+    // frame that its near-zero transition takes to reach 2px.
+    await expect
+      .poll(() =>
+        focused.evaluate(
+          (item) =>
+            getComputedStyle(item.querySelector(".ap-orb") ?? item)
+              .outlineWidth,
+        ),
+      )
+      .toBe("2px");
+    await expectInsideViewport(page);
+  });
+
+  test("a finger on the dot in the phone menu or on the ring in Settings opens the menu and picks nothing", async ({
+    page,
+  }) => {
+    // A tap is followed by a click, and the pill has grown under the finger:
+    // that click must not pick the choice it lands on. A value that a stray
+    // pick would change.
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await signIn(page, SETTER);
+    expect(
+      (
+        await call(SETTER, "PUT", "/availability/mine", {
+          value: "DO_NOT_DISTURB",
+        })
+      ).status,
+    ).toBe(200);
+    const puts: string[] = [];
+    page.on("request", (request) => {
+      if (
+        request.method() === "PUT" &&
+        request.url().includes("/availability")
+      ) {
+        puts.push(request.url());
+      }
+    });
+    const tapCentre = async (target: Locator): Promise<void> => {
+      // The phone menu slides in: tap where the control has come to rest.
+      let box = await target.boundingBox();
+      for (let tries = 0; tries < 20; tries += 1) {
+        await page.waitForTimeout(100);
+        const next = await target.boundingBox();
+        const same = JSON.stringify(next) === JSON.stringify(box);
+        box = next;
+        if (same) break;
+      }
+      expect(box, "the control has a box").not.toBeNull();
+      if (!box) return;
+      await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    };
+    try {
+      await page.goto("/");
+      await page.getByRole("button", { name: "Open navigation menu" }).click();
+      await expect(dot(page, "Do not disturb")).toBeVisible();
+      await tapCentre(dot(page, "Do not disturb"));
+      await expect(pill(page)).toBeVisible();
+      await expect(pill(page)).toHaveAttribute("data-settled", "");
+      await page.waitForTimeout(400);
+      await expect(
+        pill(page),
+        "the phone menu's pill stays open",
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(pill(page)).toHaveCount(0);
+
+      await page.goto("/settings?section=account");
+      const ring = page.locator('.ap-trigger[data-skin="ring"]');
+      await expect(ring).toBeVisible();
+      await tapCentre(ring);
+      await expect(pill(page)).toBeVisible();
+      await expect(pill(page)).toHaveAttribute("data-settled", "");
+      await page.waitForTimeout(400);
+      await expect(pill(page), "the ring's pill stays open").toBeVisible();
+      const { body } = await call(SETTER, "GET", "/availability/mine");
+      expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+        "DO_NOT_DISTURB",
+      );
+      expect(puts, "a tap sends no change").toEqual([]);
+    } finally {
+      await putBack();
+    }
+  });
+
+  test("a tap on the avatar's centre opens the account menu, not availability", async ({
+    page,
+  }) => {
+    await signIn(page, SETTER);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Open navigation menu" }).click();
+    const avatar = page
+      .getByRole("button", { name: /^Account menu/ })
+      .locator('[data-slot="avatar"]');
+    const box = await avatar.boundingBox();
+    expect(box, "the avatar has a box").not.toBeNull();
+    if (!box) return;
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(
+      page.getByRole("menuitem", { name: "Sign out" }),
+    ).toBeVisible();
+    await expect(pill(page)).toHaveCount(0);
+  });
+});
+
+test.describe("on the narrowest screen", () => {
+  test.use({ hasTouch: true, viewport: { width: 320, height: 640 } });
+
+  test("the pill stays inside the screen from the phone menu and from Settings, also when opened by the button with the ring off screen", async ({
+    page,
+  }) => {
+    await signIn(page, SETTER);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Open navigation menu" }).click();
+    await dot(page).tap();
+    await expect(pill(page)).toBeVisible();
+    await expectInsideViewport(page);
+    await page.keyboard.press("Escape");
+    await page.reload();
+
+    await page.goto("/settings?section=account");
+    const change = page.getByRole("button", { name: "Change availability" });
+    await expect(change).toBeVisible();
+    // Scroll so that the ring starts off screen: the button scrolls it back.
+    await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+    await change.scrollIntoViewIfNeeded();
+    await change.tap();
+    await expect(pill(page)).toBeVisible();
+    await expectInsideViewport(page);
+    await page.keyboard.press("Escape");
+    await expect(change).toBeFocused();
+  });
+});
+
+test.describe("on a tablet with a touch screen", () => {
+  test.use({ hasTouch: true, viewport: { width: 1024, height: 768 } });
+
+  test("a tap on the avatar's centre opens the account menu, in the open panel and in the 64 px rail", async ({
+    page,
+  }) => {
+    await signIn(page, SETTER);
+    await page.goto("/");
+    expect(
+      await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
+      "touch emulation gives a coarse pointer",
+    ).toBe(true);
+    const avatar = page
+      .getByRole("button", { name: /^Account menu/ })
+      .locator('[data-slot="avatar"]');
+    const tapAvatar = async (where: string): Promise<void> => {
+      const box = await avatar.boundingBox();
+      expect(box, `the avatar has a box ${where}`).not.toBeNull();
+      if (!box) return;
+      await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+      await expect(
+        page.getByRole("menuitem", { name: "Sign out" }),
+        `the account menu opens ${where}`,
+      ).toBeVisible();
+      await expect(pill(page)).toHaveCount(0);
+      await page.keyboard.press("Escape");
+      await expect(
+        page.getByRole("menuitem", { name: "Sign out" }),
+      ).toHaveCount(0);
+    };
+    await tapAvatar("in the open panel");
+    await page.getByRole("button", { name: "Collapse the panel" }).click();
+    await tapAvatar("in the rail");
+    await page.getByRole("button", { name: "Expand the panel" }).click();
+  });
+});

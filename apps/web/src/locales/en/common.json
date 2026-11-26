@@ -136,6 +136,26 @@
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
   },
+  "availability": {
+    "trigger": "Your availability: {{value}}. Change",
+    "values": {
+      "AVAILABLE": "Available",
+      "FOCUSING": "Focusing",
+      "DO_NOT_DISTURB": "Do not disturb"
+    },
+    "dotLabel": "Availability: {{value}}",
+    "saving": "Saving your availability",
+    "set": {
+      "AVAILABLE": "You are available",
+      "FOCUSING": "Focusing for {{hours}} hours. Reminders and approvals still reach you.",
+      "DO_NOT_DISTURB": "Do not disturb for {{hours}} hours. Reminders and approvals still reach you."
+    },
+    "failed": "Your availability was not changed",
+    "menu": {
+      "label": "Your availability",
+      "hint": "Reminders and approvals still reach you. It goes back to Available after {{hours}} hours."
+    }
+  },
   "demo": {
     "switcher": "Demo role",
     "switcherHint": "Switch to another role. An order on screen stays open for a role that may read orders, and each role keeps its own open records.",
@@ -181,7 +201,13 @@
       "CONFLICT": "Someone else changed this first. Reload and try again.",
       "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
       "UPSTREAM_UNAVAILABLE": "A connected system is not answering. Try again soon.",
-      "INTERNAL_ERROR": "The server had a problem. Try again, and quote the trace ID if it continues."
+      "INTERNAL_ERROR": "The server had a problem. Try again, and quote the trace ID if it continues.",
+      "TWO_STEP_REQUIRED": "Enter the code from your authenticator app to finish signing in.",
+      "TWO_STEP_CHALLENGE_ENDED": "This sign-in has ended. Enter your email and password again.",
+      "TWO_STEP_CODE_INVALID": "That code did not work. Wait for the next code and try again. If it keeps failing, check that your phone's clock is set automatically.",
+      "TWO_STEP_LOCKED": "Too many wrong codes. Wait a while, or use a recovery code.",
+      "TWO_STEP_SETUP_ENDED": "The setup ended. Start again to get a new key.",
+      "PASSWORD_INCORRECT": "The password is not right."
     },
     "notFound": {
       "title": "Page not found",

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -19,6 +19,10 @@ interface PasswordFormProps {
   alert: ReactNode;
   /** Runs when a field changes, so a failure from the last attempt can go. */
   onEdit?: () => void;
+  /** When this number changes the password is emptied: it must not sit in a hidden field during the second step. */
+  clearPasswordSignal?: number;
+  /** When this number changes the password field takes focus, as the second step closes. */
+  focusPasswordSignal?: number;
 }
 
 /**
@@ -34,6 +38,8 @@ export function PasswordForm({
   busy,
   alert,
   onEdit,
+  clearPasswordSignal = 0,
+  focusPasswordSignal = 0,
 }: PasswordFormProps) {
   const { t } = useTranslation("signin");
   const [shown, setShown] = useState(false);
@@ -56,6 +62,13 @@ export function PasswordForm({
     defaultValues: { email: defaultEmail, password: "" },
   });
   const { errors, isSubmitting } = form.formState;
+  const { resetField, setFocus } = form;
+  useEffect(() => {
+    if (clearPasswordSignal > 0) resetField("password");
+  }, [clearPasswordSignal, resetField]);
+  useEffect(() => {
+    if (focusPasswordSignal > 0) setFocus("password");
+  }, [focusPasswordSignal, setFocus]);
   const EyeIcon = shown ? EyeOff : Eye;
 
   return (

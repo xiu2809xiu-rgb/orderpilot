@@ -1,0 +1,343 @@
+/* The availability pill: three orbs and a caption, in a glass box that grows
+   out of its trigger. Colours are the app's tokens. The pill is in a portal, so
+   nothing clips it. Every movement is scale, translate or opacity; the pill's
+   own size is never animated, and its backdrop blur is on from the first frame
+   (switched on after the growth, the page's words showed through the box and
+   then vanished with a jolt). The growth is the one spring, written as a
+   linear() easing by pickerMotion.ts and handed in as --ap-spring and
+   --ap-grow; data-settled marks the end of it. */
+
+.ap-pill {
+  /* From the trigger's box to the pill's: 24 by 24 against 166 by 96. */
+  --ap-from-x: calc(24 / 166);
+  --ap-from-y: calc(24 / 96);
+  position: relative;
+  z-index: 50;
+  box-sizing: border-box;
+  /* The box is the content (164 by 94) and the 1 px border on each side. */
+  inline-size: 166px;
+  block-size: 96px;
+  border: 1px solid var(--border-strong);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--popover) 78%, transparent);
+  color: var(--foreground);
+  box-shadow:
+    var(--shadow-pop),
+    inset 0 1px 0 rgb(255 255 255 / 0.5);
+  /* The glass is on from the first frame: switched on after the growth, it made
+     the page's words show through the growing box and then vanish with a jolt. */
+  backdrop-filter: blur(12px) saturate(160%);
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  outline: none;
+}
+/* A pill that is folding takes no press: Radix keeps it mounted to the end of
+   its fold, and a press on it must reach what lies under it. The box Radix
+   puts round the pill is as big as the pill and lies over the trigger, so it
+   would take the press itself: it lets it through too. */
+.ap-pill[data-state="closed"] {
+  pointer-events: none;
+}
+[data-radix-popper-content-wrapper]:has(.ap-pill[data-state="closed"]) {
+  pointer-events: none;
+}
+.dark .ap-pill {
+  box-shadow:
+    var(--shadow-pop),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+}
+.ap-pill[data-skin="ring"] {
+  --ap-from-x: calc(32 / 166);
+  --ap-from-y: calc(32 / 96);
+}
+
+.ap-orbs {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  gap: 8px;
+  padding: 8px 8px 0;
+}
+.ap-item {
+  --ap-tone: var(--success);
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: start;
+  box-sizing: border-box;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  outline: none;
+  transition: scale var(--motion-fast) var(--ease-out);
+}
+.ap-item[data-value="AVAILABLE"] {
+  --ap-tone: var(--success);
+}
+.ap-item[data-value="FOCUSING"] {
+  --ap-tone: var(--warning);
+}
+.ap-item[data-value="DO_NOT_DISTURB"] {
+  --ap-tone: var(--destructive);
+}
+.ap-item[data-highlighted] {
+  scale: 1.06;
+}
+.ap-item:active {
+  scale: 0.94;
+}
+/* The app's ring is outside the orb at an offset of 4 px, and the checked
+   mark is inside it, so the two are never the same circle. */
+.ap-item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+.ap-orb {
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--ap-tone);
+  /* White in light and near black in dark, and 4.5:1 on every tone in both:
+     availabilityTones.test.ts measures it. */
+  color: var(--destructive-foreground);
+}
+.ap-orb svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+.ap-item[aria-checked="true"] .ap-orb {
+  box-shadow: inset 0 0 0 2px var(--foreground);
+}
+
+/* On a fine pointer the words are clipped, not removed, so each item keeps its
+   name; the caption shows them. */
+.ap-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ap-chip {
+  position: absolute;
+  inset-block-start: 58px;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--ap-chip-w, 72) * 1px);
+  block-size: 28px;
+  translate: calc(var(--ap-chip-x, 0) * 1px) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--popover) 90%, transparent);
+  color: var(--foreground);
+  font-size: var(--type-12);
+  line-height: 1rem;
+  white-space: nowrap;
+}
+/* The old and the new word share the capsule's one cell, each centred. */
+.ap-chip-text {
+  grid-area: 1 / 1;
+}
+.ap-measure {
+  position: absolute;
+  display: flex;
+  gap: 1rem;
+  visibility: hidden;
+  pointer-events: none;
+  font-size: var(--type-12);
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+/* A finger, or no hover: the words go under the orbs and every box is 44 px or more. */
+@media (pointer: coarse), (hover: none) {
+  .ap-pill {
+    --ap-from-x: calc(44 / 266);
+    --ap-from-y: calc(44 / 98);
+    /* The content (264 by 96) and the border, 8 px short of the screen's edge. */
+    inline-size: min(266px, calc(100vw - 16px));
+    block-size: 98px;
+  }
+  .ap-pill[data-skin="ring"] {
+    --ap-from-x: calc(44 / 266);
+    --ap-from-y: calc(44 / 98);
+  }
+  .ap-orbs {
+    grid-template-columns: repeat(3, 80px);
+    gap: 4px;
+    padding: 8px;
+  }
+  .ap-item {
+    inline-size: 80px;
+    block-size: 80px;
+    gap: 4px;
+    /* The lift of the highlighted choice is about its orb and not about the 80 px
+       box: about the box the orb rose 1 px more and its focus ring came within
+       0.6 px of the pill's top edge. */
+    transform-origin: 50% 22px;
+  }
+  /* The item is an 80 px box with the words under the orb, and a ring round it
+     would touch the pill's edges and cut through the words. The ring goes round
+     the 44 px orb, as on a fine pointer. */
+  .ap-item:focus-visible {
+    outline: none;
+  }
+  .ap-item:focus-visible .ap-orb {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
+  }
+  .ap-label {
+    position: static;
+    inline-size: auto;
+    block-size: 32px;
+    clip-path: none;
+    overflow: visible;
+    text-align: center;
+    white-space: normal;
+    font-size: var(--type-12);
+    line-height: 1rem;
+  }
+  .ap-chip,
+  .ap-measure {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The size grows on the spring; the pill is solid long before it has
+     finished growing, so the page does not show through the box. */
+  .ap-pill[data-state="open"] {
+    animation:
+      ap-grow var(--ap-grow, 400ms) var(--ap-spring, ease-out) both,
+      ap-fade var(--motion-fast) var(--ease-out) both;
+  }
+  .ap-pill[data-state="closed"] {
+    animation: ap-fold var(--motion-fast) var(--ease-out) both;
+  }
+  .ap-pill[data-state="open"] .ap-item {
+    animation: ap-orb-in var(--motion-fast) var(--ease-out) both;
+    animation-delay: calc(var(--ap-i, 0) * 30ms);
+  }
+  /* The caption's box is still catching up with a longer word when it changes,
+     so the new word waits for it, and never spills out of its outline. */
+  .ap-chip-text {
+    animation: ap-text-in var(--motion-fast) var(--ease-out) 60ms both;
+  }
+  /* The word that is leaving fades out where it stands, and is gone when the
+     fade ends (CaptionWords removes it). It fades in a straight line: on the
+     ease-out curve it was below 15 percent by 50 ms, before the 60 ms wait of
+     the new word was over, and the capsule showed almost nothing for a moment. */
+  .ap-chip-text[data-leaving] {
+    animation: ap-text-out var(--motion-fast) linear both;
+  }
+}
+@keyframes ap-grow {
+  from {
+    scale: var(--ap-from-x) var(--ap-from-y);
+  }
+  to {
+    scale: 1 1;
+  }
+}
+@keyframes ap-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ap-fold {
+  from {
+    scale: 1 1;
+    opacity: 1;
+  }
+  to {
+    scale: var(--ap-from-x) var(--ap-from-y);
+    opacity: 0;
+  }
+}
+@keyframes ap-orb-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ap-text-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* The word starts from the opacity that it had when the caption moved on
+   (CaptionWords works it out from the time since it arrived). */
+@keyframes ap-text-out {
+  from {
+    opacity: var(--ap-out-from, 1);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: nothing moves, and the state still changes. The global rule
+   cuts durations to nothing, but an animation still waits out its delay, so the
+   part says it itself. The glass is drawn at once, since no growth precedes it. */
+@media (prefers-reduced-motion: reduce) {
+  .ap-pill,
+  .ap-pill .ap-item,
+  .ap-chip-text {
+    animation: none;
+  }
+}
+
+/* Forced colours: the shape is what remains. */
+@media (forced-colors: active) {
+  .ap-pill {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .ap-orb {
+    forced-color-adjust: none;
+    background: ButtonFace;
+    color: ButtonText;
+    border: 2px solid ButtonText;
+    box-shadow: none;
+  }
+  .ap-item[aria-checked="true"] .ap-orb {
+    background: Highlight;
+    color: HighlightText;
+    box-shadow: none;
+  }
+  .ap-item:focus-visible {
+    outline: 3px solid Highlight;
+  }
+  .ap-chip {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+}
+
+/* The same on a finger: the ring is on the orb and not on the 80 px item. This
+   comes after the rule above, which would give the item its outline again. */
+@media (forced-colors: active) and ((pointer: coarse) or (hover: none)) {
+  .ap-item:focus-visible {
+    outline: none;
+  }
+  .ap-item:focus-visible .ap-orb {
+    outline: 3px solid Highlight;
+    outline-offset: 4px;
+  }
+}

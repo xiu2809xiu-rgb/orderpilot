@@ -360,6 +360,11 @@
                               "displayName": {
                                 "type": "string",
                                 "minLength": 1
+                              },
+                              "userId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                               }
                             },
                             "required": ["role", "displayName"],
@@ -378,7 +383,7 @@
             }
           }
         },
-        "summary": "What the sign-in page offers",
+        "summary": "What the sign-in page offers. In demo mode each demo account also carries its id",
         "tags": ["Auth"]
       }
     },
@@ -508,7 +513,7 @@
             }
           }
         },
-        "summary": "Sign in with an email and a password",
+        "summary": "Sign in with an email and a password. With two-step on it answers 401 TWO_STEP_REQUIRED and a challenge cookie instead of a session",
         "tags": ["Auth"]
       }
     },
@@ -756,6 +761,594 @@
           }
         },
         "summary": "The signed-in user, their permissions and expiry",
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/two-step": {
+      "get": {
+        "operationId": "TwoStep_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": ["off", "on"]
+                        },
+                        "hasPassword": {
+                          "type": "boolean"
+                        },
+                        "demoSignInSkips": {
+                          "type": "boolean"
+                        },
+                        "demoAdminBlocked": {
+                          "type": "boolean"
+                        },
+                        "enabledAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "recoveryCodesLeft": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "lastLockedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "hasPassword",
+                        "demoSignInSkips",
+                        "demoAdminBlocked",
+                        "enabledAt",
+                        "recoveryCodesLeft",
+                        "lastLockedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Whether two-step verification is on, for the account card",
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/two-step/setup": {
+      "post": {
+        "operationId": "TwoStep_setup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "setupKey": {
+                          "type": "string",
+                          "minLength": 32,
+                          "maxLength": 32
+                        },
+                        "otpauthUri": {
+                          "type": "string",
+                          "format": "starts_with",
+                          "pattern": "^otpauth:\\/\\/totp\\/.*"
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": ["setupKey", "otpauthUri", "expiresAt"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Start turning two-step on: a new secret and its setup key. Needs the password of a password session",
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/two-step/enable": {
+      "post": {
+        "operationId": "TwoStep_enable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": ["code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recoveryCodes": {
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string",
+                              "enum": ["off", "on"]
+                            },
+                            "hasPassword": {
+                              "type": "boolean"
+                            },
+                            "demoSignInSkips": {
+                              "type": "boolean"
+                            },
+                            "demoAdminBlocked": {
+                              "type": "boolean"
+                            },
+                            "enabledAt": {
+                              "nullable": true,
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "recoveryCodesLeft": {
+                              "nullable": true,
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "lastLockedAt": {
+                              "nullable": true,
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "state",
+                            "hasPassword",
+                            "demoSignInSkips",
+                            "demoAdminBlocked",
+                            "enabledAt",
+                            "recoveryCodesLeft",
+                            "lastLockedAt"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": ["recoveryCodes", "status"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Confirm the setup with the first code. Switches two-step on and shows ten recovery codes once",
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/two-step/disable": {
+      "post": {
+        "operationId": "TwoStep_disable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "recoveryCode": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 40
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": ["off", "on"]
+                        },
+                        "hasPassword": {
+                          "type": "boolean"
+                        },
+                        "demoSignInSkips": {
+                          "type": "boolean"
+                        },
+                        "demoAdminBlocked": {
+                          "type": "boolean"
+                        },
+                        "enabledAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "recoveryCodesLeft": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "lastLockedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "hasPassword",
+                        "demoSignInSkips",
+                        "demoAdminBlocked",
+                        "enabledAt",
+                        "recoveryCodesLeft",
+                        "lastLockedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Turn two-step off. Needs a current code or a recovery code, and the password of a password session",
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/two-step/recovery-codes": {
+      "post": {
+        "operationId": "TwoStep_newCodes",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": ["code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recoveryCodes": {
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string",
+                              "enum": ["off", "on"]
+                            },
+                            "hasPassword": {
+                              "type": "boolean"
+                            },
+                            "demoSignInSkips": {
+                              "type": "boolean"
+                            },
+                            "demoAdminBlocked": {
+                              "type": "boolean"
+                            },
+                            "enabledAt": {
+                              "nullable": true,
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "recoveryCodesLeft": {
+                              "nullable": true,
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "lastLockedAt": {
+                              "nullable": true,
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "state",
+                            "hasPassword",
+                            "demoSignInSkips",
+                            "demoAdminBlocked",
+                            "enabledAt",
+                            "recoveryCodesLeft",
+                            "lastLockedAt"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": ["recoveryCodes", "status"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Make ten new recovery codes. Needs a current code. The old codes stop working",
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/two-step/verify": {
+      "post": {
+        "operationId": "TwoStep_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "recoveryCode": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 40
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "displayName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "SYSTEM_ADMIN",
+                                "PRODUCT_MANAGER",
+                                "APPROVER",
+                                "SUPPORT",
+                                "WAREHOUSE",
+                                "FINANCE",
+                                "LOGISTICS",
+                                "MANAGEMENT",
+                                "AUDITOR"
+                              ]
+                            }
+                          },
+                          "required": ["id", "displayName", "email", "role"],
+                          "additionalProperties": false
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "orders.create",
+                              "orders.edit",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post",
+                              "workflows.read",
+                              "spr.read",
+                              "workflows.inboxes.any",
+                              "tasks.complete",
+                              "masking.customerNote",
+                              "spr.route"
+                            ]
+                          }
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "demo": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["user", "permissions", "expiresAt", "demo"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "method": {
+                          "type": "string",
+                          "enum": ["code", "recovery-code"]
+                        },
+                        "recoveryCodesLeft": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "lockedRecently": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "method",
+                        "recoveryCodesLeft",
+                        "lockedRecently"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Finish a password sign-in with a code from the authenticator app or a recovery code. The challenge cookie is the credential",
         "tags": ["Auth"]
       }
     },
@@ -9459,7 +10052,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -9674,7 +10273,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -9856,7 +10461,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -10042,7 +10653,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -10818,7 +11435,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -11236,7 +11859,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -11690,7 +12319,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -12131,7 +12766,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -13749,6 +14390,175 @@
         "tags": ["Operation log"]
       }
     },
+    "/api/v1/availability/mine": {
+      "get": {
+        "operationId": "Availability_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string",
+                          "enum": ["AVAILABLE", "FOCUSING", "DO_NOT_DISTURB"]
+                        },
+                        "setAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "expiresAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": ["value", "setAt", "expiresAt"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The caller's own availability and when it ends. Available, with null times, when nothing is set",
+        "tags": ["Availability"]
+      },
+      "put": {
+        "operationId": "Availability_set",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "enum": ["AVAILABLE", "FOCUSING", "DO_NOT_DISTURB"]
+                  }
+                },
+                "required": ["value"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string",
+                          "enum": ["AVAILABLE", "FOCUSING", "DO_NOT_DISTURB"]
+                        },
+                        "setAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "expiresAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": ["value", "setAt", "expiresAt"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Set the caller's own availability. The server stamps the time. Available leaves no row; a repeat renews the 12 hours",
+        "tags": ["Availability"]
+      }
+    },
+    "/api/v1/availability": {
+      "get": {
+        "operationId": "Availability_lookup",
+        "parameters": [
+          {
+            "name": "ids",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 3700
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "value": {
+                            "type": "string",
+                            "enum": ["AVAILABLE", "FOCUSING", "DO_NOT_DISTURB"]
+                          },
+                          "setAt": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": ["userId", "value", "setAt"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Other people's availability by user id: the id, the value and the time, nothing more. Every id gets an entry, and an unknown one looks like a person with nothing set",
+        "tags": ["Availability"]
+      }
+    },
     "/api/v1/ai/status": {
       "get": {
         "operationId": "Ai_getStatus",
@@ -13934,7 +14744,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -13975,6 +14791,1026 @@
         },
         "summary": "Send one fixed synthetic prompt through the gateway and report how it went. Audited",
         "tags": ["AI"]
+      }
+    },
+    "/api/v1/profile-pictures/mine": {
+      "get": {
+        "operationId": "ProfilePictures_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "approved": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "decidedAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": ["id", "decidedAt"],
+                          "additionalProperties": false
+                        },
+                        "pending": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "ai": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string",
+                                  "enum": ["CHECKED", "NOT_ALLOWED", "NOT_RUN"]
+                                }
+                              },
+                              "required": ["status"],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": ["id", "createdAt", "ai"],
+                          "additionalProperties": false
+                        },
+                        "notice": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["REJECTED", "TAKEN_DOWN"]
+                            },
+                            "reasonCode": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "note": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "decidedAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "reasonCode",
+                            "note",
+                            "decidedAt"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "uploads": {
+                          "type": "object",
+                          "properties": {
+                            "used": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": ["used", "limit"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": ["approved", "pending", "notice", "uploads"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Your own profile pictures: the approved one, the one waiting for review, the last decision against you, and your uploads left",
+        "tags": ["Profile pictures"]
+      }
+    },
+    "/api/v1/profile-pictures/{id}/withdraw": {
+      "post": {
+        "operationId": "ProfilePictures_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "approved": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "decidedAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": ["id", "decidedAt"],
+                          "additionalProperties": false
+                        },
+                        "pending": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "ai": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string",
+                                  "enum": ["CHECKED", "NOT_ALLOWED", "NOT_RUN"]
+                                }
+                              },
+                              "required": ["status"],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": ["id", "createdAt", "ai"],
+                          "additionalProperties": false
+                        },
+                        "notice": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["REJECTED", "TAKEN_DOWN"]
+                            },
+                            "reasonCode": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "note": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "decidedAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "reasonCode",
+                            "note",
+                            "decidedAt"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "uploads": {
+                          "type": "object",
+                          "properties": {
+                            "used": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": ["used", "limit"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": ["approved", "pending", "notice", "uploads"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Take back your own picture, waiting or approved. One that is already gone answers the same way and changes nothing",
+        "tags": ["Profile pictures"]
+      }
+    },
+    "/api/v1/profile-pictures": {
+      "get": {
+        "operationId": "PictureReview_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "PENDING",
+              "type": "string",
+              "enum": ["PENDING", "APPROVED"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "APPROVED",
+                              "REJECTED",
+                              "REMOVED"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "decidedAt": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "width": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "byteSize": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "owner": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "displayName": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "email": {
+                                "type": "string",
+                                "format": "email",
+                                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                              },
+                              "role": {
+                                "type": "string",
+                                "enum": [
+                                  "SYSTEM_ADMIN",
+                                  "PRODUCT_MANAGER",
+                                  "APPROVER",
+                                  "SUPPORT",
+                                  "WAREHOUSE",
+                                  "FINANCE",
+                                  "LOGISTICS",
+                                  "MANAGEMENT",
+                                  "AUDITOR"
+                                ]
+                              }
+                            },
+                            "required": ["id", "displayName", "email", "role"],
+                            "additionalProperties": false
+                          },
+                          "ai": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": ["CHECKED", "NOT_ALLOWED", "NOT_RUN"]
+                              },
+                              "verdict": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": ["LOOKS_FINE", "NEEDS_A_CLOSER_LOOK"]
+                              },
+                              "concerns": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "nudity_or_sexual_content",
+                                    "violence_or_gore",
+                                    "hateful_symbol_or_text",
+                                    "offensive_gesture",
+                                    "weapon",
+                                    "drugs_or_alcohol",
+                                    "personal_documents_visible",
+                                    "unusable_image",
+                                    "other"
+                                  ]
+                                }
+                              },
+                              "note": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "why": {
+                                "nullable": true,
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "verdict",
+                              "concerns",
+                              "note",
+                              "why"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "status",
+                          "createdAt",
+                          "decidedAt",
+                          "width",
+                          "byteSize",
+                          "owner",
+                          "ai"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["page", "pageSize", "total"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Pictures waiting for review, or approved ones, oldest first. Never your own, never a disabled person's",
+        "tags": ["Profile pictures"]
+      }
+    },
+    "/api/v1/profile-pictures/{id}/approve": {
+      "post": {
+        "operationId": "PictureReview_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["PENDING", "APPROVED", "REJECTED", "REMOVED"]
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "decidedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "width": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "byteSize": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "owner": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "displayName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "SYSTEM_ADMIN",
+                                "PRODUCT_MANAGER",
+                                "APPROVER",
+                                "SUPPORT",
+                                "WAREHOUSE",
+                                "FINANCE",
+                                "LOGISTICS",
+                                "MANAGEMENT",
+                                "AUDITOR"
+                              ]
+                            }
+                          },
+                          "required": ["id", "displayName", "email", "role"],
+                          "additionalProperties": false
+                        },
+                        "ai": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": ["CHECKED", "NOT_ALLOWED", "NOT_RUN"]
+                            },
+                            "verdict": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["LOOKS_FINE", "NEEDS_A_CLOSER_LOOK"]
+                            },
+                            "concerns": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "nudity_or_sexual_content",
+                                  "violence_or_gore",
+                                  "hateful_symbol_or_text",
+                                  "offensive_gesture",
+                                  "weapon",
+                                  "drugs_or_alcohol",
+                                  "personal_documents_visible",
+                                  "unusable_image",
+                                  "other"
+                                ]
+                              }
+                            },
+                            "note": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "why": {
+                              "nullable": true,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "verdict",
+                            "concerns",
+                            "note",
+                            "why"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "status",
+                        "createdAt",
+                        "decidedAt",
+                        "width",
+                        "byteSize",
+                        "owner",
+                        "ai"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Approve a pending picture. Any earlier approved picture of that person steps aside. Never your own",
+        "tags": ["Profile pictures"]
+      }
+    },
+    "/api/v1/profile-pictures/{id}/reject": {
+      "post": {
+        "operationId": "PictureReview_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string",
+                    "enum": [
+                      "not_suitable",
+                      "offensive",
+                      "not_clear",
+                      "not_you",
+                      "personal_information",
+                      "other"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "required": ["reasonCode"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["PENDING", "APPROVED", "REJECTED", "REMOVED"]
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "decidedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "width": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "byteSize": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "owner": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "displayName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "SYSTEM_ADMIN",
+                                "PRODUCT_MANAGER",
+                                "APPROVER",
+                                "SUPPORT",
+                                "WAREHOUSE",
+                                "FINANCE",
+                                "LOGISTICS",
+                                "MANAGEMENT",
+                                "AUDITOR"
+                              ]
+                            }
+                          },
+                          "required": ["id", "displayName", "email", "role"],
+                          "additionalProperties": false
+                        },
+                        "ai": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": ["CHECKED", "NOT_ALLOWED", "NOT_RUN"]
+                            },
+                            "verdict": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["LOOKS_FINE", "NEEDS_A_CLOSER_LOOK"]
+                            },
+                            "concerns": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "nudity_or_sexual_content",
+                                  "violence_or_gore",
+                                  "hateful_symbol_or_text",
+                                  "offensive_gesture",
+                                  "weapon",
+                                  "drugs_or_alcohol",
+                                  "personal_documents_visible",
+                                  "unusable_image",
+                                  "other"
+                                ]
+                              }
+                            },
+                            "note": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "why": {
+                              "nullable": true,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "verdict",
+                            "concerns",
+                            "note",
+                            "why"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "status",
+                        "createdAt",
+                        "decidedAt",
+                        "width",
+                        "byteSize",
+                        "owner",
+                        "ai"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Reject a pending picture with a reason from the list. Another reason needs a note. The picture is deleted",
+        "tags": ["Profile pictures"]
+      }
+    },
+    "/api/v1/profile-pictures/{id}/take-down": {
+      "post": {
+        "operationId": "PictureReview_takeDown",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string",
+                    "enum": [
+                      "not_suitable",
+                      "offensive",
+                      "not_clear",
+                      "not_you",
+                      "personal_information",
+                      "other",
+                      "reported"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                },
+                "required": ["reasonCode"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["PENDING", "APPROVED", "REJECTED", "REMOVED"]
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "decidedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "width": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "byteSize": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "owner": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "displayName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "SYSTEM_ADMIN",
+                                "PRODUCT_MANAGER",
+                                "APPROVER",
+                                "SUPPORT",
+                                "WAREHOUSE",
+                                "FINANCE",
+                                "LOGISTICS",
+                                "MANAGEMENT",
+                                "AUDITOR"
+                              ]
+                            }
+                          },
+                          "required": ["id", "displayName", "email", "role"],
+                          "additionalProperties": false
+                        },
+                        "ai": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": ["CHECKED", "NOT_ALLOWED", "NOT_RUN"]
+                            },
+                            "verdict": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["LOOKS_FINE", "NEEDS_A_CLOSER_LOOK"]
+                            },
+                            "concerns": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "nudity_or_sexual_content",
+                                  "violence_or_gore",
+                                  "hateful_symbol_or_text",
+                                  "offensive_gesture",
+                                  "weapon",
+                                  "drugs_or_alcohol",
+                                  "personal_documents_visible",
+                                  "unusable_image",
+                                  "other"
+                                ]
+                              }
+                            },
+                            "note": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "why": {
+                              "nullable": true,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "verdict",
+                            "concerns",
+                            "note",
+                            "why"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "status",
+                        "createdAt",
+                        "decidedAt",
+                        "width",
+                        "byteSize",
+                        "owner",
+                        "ai"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Take down an approved picture with a reason. The owner reads it, and the picture is deleted",
+        "tags": ["Profile pictures"]
       }
     },
     "/api/v1/users": {
@@ -14414,6 +16250,55 @@
           }
         },
         "summary": "Enable a disabled user",
+        "tags": ["Users"]
+      }
+    },
+    "/api/v1/users/{id}/two-step/reset": {
+      "post": {
+        "operationId": "Users_resetTwoStep",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "wasOn": {
+                          "type": "boolean"
+                        },
+                        "sessionsEnded": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["wasOn", "sessionsEnded"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Reset another person's two-step verification and end all their sessions. Never your own. Refused in production",
         "tags": ["Users"]
       }
     }

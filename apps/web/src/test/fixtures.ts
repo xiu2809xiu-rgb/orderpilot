@@ -110,6 +110,37 @@ export function mockApi(initial: Partial<MockApiState> = {}) {
         state.session = sessionFor("SUPPORT");
         return Promise.resolve(json(200, { data: state.session }));
       }
+      // The Settings account card asks for it; "off" keeps every older test as it was.
+      case "GET /auth/two-step":
+        return Promise.resolve(
+          json(200, {
+            data: {
+              state: "off",
+              hasPassword: true,
+              demoSignInSkips: state.demoMode,
+              demoAdminBlocked: false,
+              enabledAt: null,
+              recoveryCodesLeft: null,
+              lastLockedAt: null,
+            },
+          }),
+        );
+      // The shell asks for the person's availability: Available, so no test sees a 404 here.
+      case "GET /availability/mine":
+        return Promise.resolve(
+          json(200, {
+            data: { value: "AVAILABLE", setAt: null, expiresAt: null },
+          }),
+        );
+      case "GET /availability":
+        return Promise.resolve(
+          json(200, {
+            data: (url.searchParams.get("ids") ?? "")
+              .split(",")
+              .filter((id) => id !== "")
+              .map((userId) => ({ userId, value: "AVAILABLE", setAt: null })),
+          }),
+        );
       case "POST /auth/refresh":
         return Promise.resolve(
           state.refreshWorks && state.session

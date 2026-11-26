@@ -1,0 +1,353 @@
+/* The code field: six drawn cells over one real input. Colours are the app's
+   tokens, so light and dark need nothing of their own. The width is fluid: six
+   equal columns and a gap that shrinks with the screen, so no transform scales
+   it and the focus ring keeps its size. Every moving rule is under
+   prefers-reduced-motion: no-preference; the global rule in index.css already
+   cuts transitions to nothing, and a still field shows each state by colour,
+   text and aria-invalid alone. Durations are the motion tokens; codeFieldMotion.ts
+   holds the same numbers for the spring and the parent timers. */
+.cf {
+  --cf-h: 3.5rem;
+  --cf-pill: 11rem;
+  --cf-gap: clamp(4px, 2vw, 8px);
+  --cf-edge: var(--input);
+  --cf-cell-bg: var(--control-bg);
+  --cf-ink: var(--foreground);
+  --cf-ease: var(--ease-out);
+  --cf-shake: 240ms;
+  --cf-spin: 750ms;
+
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.cf-field {
+  display: flex;
+  justify-content: center;
+  inline-size: 100%;
+}
+
+/* The shell is the pill. In the input state it is only a frame: the cells draw
+   themselves. It is the touch target, so it is as tall as the field. */
+.cf-shell {
+  position: relative;
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  block-size: var(--cf-h);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--cf-ink);
+  transition:
+    inline-size var(--motion-base) var(--cf-ease),
+    background-color var(--motion-base) var(--cf-ease),
+    border-color var(--motion-base) var(--cf-ease);
+}
+
+.cf-cells {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--cf-gap);
+  block-size: 100%;
+  transform-origin: center;
+  transition:
+    opacity var(--motion-base) var(--cf-ease),
+    visibility 0s linear 0s;
+}
+
+.cf-cell {
+  display: grid;
+  place-items: center;
+  min-inline-size: 0;
+  overflow: hidden;
+  border: 1px solid var(--cf-edge);
+  border-radius: var(--radius-control);
+  background-color: var(--cf-cell-bg);
+  color: var(--cf-ink);
+  transition:
+    background-color var(--motion-fast) var(--cf-ease),
+    border-color var(--motion-fast) var(--cf-ease),
+    color var(--motion-fast) var(--cf-ease);
+}
+
+.cf-digit {
+  display: block;
+  transition:
+    transform var(--motion-fast) var(--cf-ease),
+    opacity var(--motion-fast) var(--cf-ease);
+}
+
+.cf[data-state="input"]:not([data-disabled]) .cf-shell:hover .cf-cell {
+  border-color: var(--ring);
+}
+
+/* The ring is one cell wide and moves by --cf-i cells: a cell's width (the
+   ring's own 100%) plus a gap for each. It covers the cell's own edge. */
+.cf-ring {
+  --cf-i: 0;
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: calc((100% - 5 * var(--cf-gap)) / 6);
+  border: 2px solid var(--ring);
+  border-radius: var(--radius-control);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(var(--cf-i) * (100% + var(--cf-gap))));
+  transition: opacity var(--motion-fast) var(--cf-ease);
+}
+
+.cf[data-focused][data-state="input"] .cf-ring {
+  opacity: 1;
+}
+
+.cf-caret {
+  inline-size: 1px;
+  block-size: 1.375rem;
+  background: var(--cf-ink);
+  visibility: hidden;
+}
+
+.cf-ring[data-caret] .cf-caret {
+  visibility: visible;
+}
+
+/* The one real input lies over the cells and is nearly clear, so autofill,
+   caret and selection still work and nothing of it is seen. 16 px keeps iOS
+   from zooming on focus. */
+.cf-input {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  outline: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: var(--type-16);
+  opacity: 0.01;
+  cursor: text;
+}
+
+.cf-input::selection {
+  background: transparent;
+  color: transparent;
+}
+
+.cf[data-disabled] .cf-input {
+  cursor: not-allowed;
+}
+
+.cf[data-disabled] .cf-cells {
+  opacity: 0.55;
+}
+
+/* The pills: "Verifying" and "Verified" sit in the shell, hidden until their state. */
+.cf-pill {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  font-size: var(--type-16);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--motion-fast) var(--cf-ease),
+    visibility 0s linear var(--motion-fast);
+}
+
+.cf-verifying {
+  color: var(--muted-foreground);
+}
+
+.cf-success {
+  color: var(--success);
+}
+
+.cf-hint {
+  margin: 0.5rem 0 0;
+  text-align: center;
+}
+
+/* Verifying: the cells fade, the shell folds to the pill, the label arrives. */
+.cf[data-state="verifying"] .cf-shell {
+  inline-size: var(--cf-pill);
+  border-color: var(--input);
+  background-color: var(--control-bg);
+}
+
+.cf[data-state="verifying"] .cf-cells {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--motion-base) var(--cf-ease),
+    visibility 0s linear var(--motion-base);
+}
+
+.cf[data-state="verifying"] .cf-digit {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.cf[data-state="verifying"] .cf-verifying {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--motion-fast) var(--cf-ease) 80ms,
+    visibility 0s linear 0s;
+}
+
+/* Wrong: red cells, red digits, and the shake. */
+.cf[data-state="error"] .cf-cell {
+  --cf-edge: var(--destructive);
+  --cf-cell-bg: var(--destructive-surface);
+  --cf-ink: var(--destructive);
+}
+
+/* Right: the shell fills green and shows the check. */
+.cf[data-state="success"] .cf-shell {
+  inline-size: var(--cf-pill);
+  border-color: var(--success);
+  background-color: var(--success-surface);
+}
+
+.cf[data-state="success"] .cf-cells {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--motion-base) var(--cf-ease),
+    visibility 0s linear var(--motion-base);
+}
+
+.cf[data-state="success"] .cf-success {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--motion-fast) var(--cf-ease) 80ms,
+    visibility 0s linear 0s;
+}
+
+@media (forced-colors: active) {
+  .cf-ring {
+    border-color: Highlight;
+  }
+
+  /* The shell's transparent edge is forced to a visible colour; Canvas hides it again. */
+  .cf[data-state="input"] .cf-shell {
+    border-color: Canvas;
+  }
+
+  .cf-input {
+    forced-color-adjust: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* On mount: the shell unfolds from the pill width, the cells fade in. */
+  .cf[data-intro][data-state="input"] .cf-shell {
+    animation: cf-unfold var(--motion-slow) var(--cf-ease) backwards;
+  }
+
+  .cf[data-intro][data-state="input"] .cf-cells {
+    animation: cf-cells-in var(--motion-slow) var(--cf-ease) backwards;
+  }
+
+  .cf-digit {
+    animation: cf-rise var(--motion-fast) var(--cf-ease) backwards;
+  }
+
+  .cf[data-state="error"] .cf-shell {
+    animation: cf-shake var(--cf-shake) var(--cf-ease) backwards;
+  }
+
+  .cf[data-state="verifying"] .cf-spinner {
+    animation: cf-spin var(--cf-spin) linear infinite;
+  }
+
+  .cf-ring[data-caret] .cf-caret {
+    animation: cf-blink 1.1s steps(1, end) infinite;
+  }
+
+  .cf[data-state="success"] .cf-success svg {
+    animation: cf-pop var(--motion-slow) var(--cf-ease) backwards;
+  }
+}
+
+@keyframes cf-unfold {
+  from {
+    inline-size: var(--cf-pill);
+  }
+}
+
+@keyframes cf-cells-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.76);
+  }
+}
+
+@keyframes cf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes cf-shake {
+  20% {
+    transform: translateX(-8px);
+  }
+
+  40% {
+    transform: translateX(8px);
+  }
+
+  60% {
+    transform: translateX(-5px);
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes cf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cf-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes cf-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}

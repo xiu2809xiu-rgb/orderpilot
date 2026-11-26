@@ -24,12 +24,11 @@ export function renderSettings(
   {
     role = "SUPPORT",
     route = "/settings",
-  }: { role?: Role; route?: string } = {},
+    // A test that must know when a query has been answered brings its own client.
+    client = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+  }: { role?: Role; route?: string; client?: QueryClient } = {},
 ) {
   useSessionStore.getState().setSession(sessionFor(role));
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>

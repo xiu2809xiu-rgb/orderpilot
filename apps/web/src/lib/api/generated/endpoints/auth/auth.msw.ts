@@ -23,11 +23,17 @@ import type {
   AuthMe200,
   AuthOptions200,
   AuthRefresh200,
-  DemoAuthDemoLogin200
+  DemoAuthDemoLogin200,
+  TwoStepDisable200,
+  TwoStepEnable200,
+  TwoStepNewCodes200,
+  TwoStepSetup200,
+  TwoStepStatus200,
+  TwoStepVerify200
 } from '../../model';
 
 
-export const getAuthOptionsResponseMock = (overrideResponse: Partial<Extract<AuthOptions200, object>> = {}): AuthOptions200 => ({data: {demoMode: faker.datatype.boolean(), demoRoles: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), displayName: faker.string.alpha({length: {min: 1, max: 20}})}))}, ...overrideResponse})
+export const getAuthOptionsResponseMock = (overrideResponse: Partial<Extract<AuthOptions200, object>> = {}): AuthOptions200 => ({data: {demoMode: faker.datatype.boolean(), demoRoles: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), displayName: faker.string.alpha({length: {min: 1, max: 20}}), userId: faker.helpers.arrayElement([faker.string.uuid(), undefined])}))}, ...overrideResponse})
 
 export const getAuthLoginResponseMock = (overrideResponse: Partial<Extract<AuthLogin200, object>> = {}): AuthLogin200 => ({data: {user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 1, max: 20}}), email: faker.internet.email(), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const)}, permissions: faker.helpers.arrayElements(['users.read','users.manage','roles.read','roles.manage','settings.manage','audit.read','aiUsage.read','documents.read','documents.upload','orders.read','orders.create','orders.edit','tracker.read','exceptions.read','insights.read','approvals.decide','payments.confirm','payments.post','workflows.read','spr.read','workflows.inboxes.any','tasks.complete','masking.customerNote','spr.route'] as const), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', demo: faker.datatype.boolean()}, ...overrideResponse})
 
@@ -36,6 +42,18 @@ export const getAuthRefreshResponseMock = (overrideResponse: Partial<Extract<Aut
 export const getAuthLogoutResponseMock = (overrideResponse: Partial<Extract<AuthLogout200, object>> = {}): AuthLogout200 => ({data: {ok: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
 export const getAuthMeResponseMock = (overrideResponse: Partial<Extract<AuthMe200, object>> = {}): AuthMe200 => ({data: {user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 1, max: 20}}), email: faker.internet.email(), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const)}, permissions: faker.helpers.arrayElements(['users.read','users.manage','roles.read','roles.manage','settings.manage','audit.read','aiUsage.read','documents.read','documents.upload','orders.read','orders.create','orders.edit','tracker.read','exceptions.read','insights.read','approvals.decide','payments.confirm','payments.post','workflows.read','spr.read','workflows.inboxes.any','tasks.complete','masking.customerNote','spr.route'] as const), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', demo: faker.datatype.boolean()}, ...overrideResponse})
+
+export const getTwoStepStatusResponseMock = (overrideResponse: Partial<Extract<TwoStepStatus200, object>> = {}): TwoStepStatus200 => ({data: {state: faker.helpers.arrayElement(['off','on'] as const), hasPassword: faker.datatype.boolean(), demoSignInSkips: faker.datatype.boolean(), demoAdminBlocked: faker.datatype.boolean(), enabledAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), recoveryCodesLeft: faker.helpers.arrayElement([faker.number.int({min: 0, max: 9007199254740991}), null]), lastLockedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null])}, ...overrideResponse})
+
+export const getTwoStepSetupResponseMock = (overrideResponse: Partial<Extract<TwoStepSetup200, object>> = {}): TwoStepSetup200 => ({data: {setupKey: faker.string.alpha({length: {min: 32, max: 32}}), otpauthUri: faker.helpers.fromRegExp("^otpauth:\\/\\/totp\\/.*"), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z'}, ...overrideResponse})
+
+export const getTwoStepEnableResponseMock = (overrideResponse: Partial<Extract<TwoStepEnable200, object>> = {}): TwoStepEnable200 => ({data: {recoveryCodes: Array.from({ length: faker.number.int({min: 10, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), status: {state: faker.helpers.arrayElement(['off','on'] as const), hasPassword: faker.datatype.boolean(), demoSignInSkips: faker.datatype.boolean(), demoAdminBlocked: faker.datatype.boolean(), enabledAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), recoveryCodesLeft: faker.helpers.arrayElement([faker.number.int({min: 0, max: 9007199254740991}), null]), lastLockedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null])}}, ...overrideResponse})
+
+export const getTwoStepDisableResponseMock = (overrideResponse: Partial<Extract<TwoStepDisable200, object>> = {}): TwoStepDisable200 => ({data: {state: faker.helpers.arrayElement(['off','on'] as const), hasPassword: faker.datatype.boolean(), demoSignInSkips: faker.datatype.boolean(), demoAdminBlocked: faker.datatype.boolean(), enabledAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), recoveryCodesLeft: faker.helpers.arrayElement([faker.number.int({min: 0, max: 9007199254740991}), null]), lastLockedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null])}, ...overrideResponse})
+
+export const getTwoStepNewCodesResponseMock = (overrideResponse: Partial<Extract<TwoStepNewCodes200, object>> = {}): TwoStepNewCodes200 => ({data: {recoveryCodes: Array.from({ length: faker.number.int({min: 10, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), status: {state: faker.helpers.arrayElement(['off','on'] as const), hasPassword: faker.datatype.boolean(), demoSignInSkips: faker.datatype.boolean(), demoAdminBlocked: faker.datatype.boolean(), enabledAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), recoveryCodesLeft: faker.helpers.arrayElement([faker.number.int({min: 0, max: 9007199254740991}), null]), lastLockedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null])}}, ...overrideResponse})
+
+export const getTwoStepVerifyResponseMock = (overrideResponse: Partial<Extract<TwoStepVerify200, object>> = {}): TwoStepVerify200 => ({data: {user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 1, max: 20}}), email: faker.internet.email(), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const)}, permissions: faker.helpers.arrayElements(['users.read','users.manage','roles.read','roles.manage','settings.manage','audit.read','aiUsage.read','documents.read','documents.upload','orders.read','orders.create','orders.edit','tracker.read','exceptions.read','insights.read','approvals.decide','payments.confirm','payments.post','workflows.read','spr.read','workflows.inboxes.any','tasks.complete','masking.customerNote','spr.route'] as const), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', demo: faker.datatype.boolean()}, meta: {method: faker.helpers.arrayElement(['code','recovery-code'] as const), recoveryCodesLeft: faker.number.int({min: 0, max: 9007199254740991}), lockedRecently: faker.datatype.boolean()}, ...overrideResponse})
 
 export const getDemoAuthDemoLoginResponseMock = (overrideResponse: Partial<Extract<DemoAuthDemoLogin200, object>> = {}): DemoAuthDemoLogin200 => ({data: {user: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 1, max: 20}}), email: faker.internet.email(), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const)}, permissions: faker.helpers.arrayElements(['users.read','users.manage','roles.read','roles.manage','settings.manage','audit.read','aiUsage.read','documents.read','documents.upload','orders.read','orders.create','orders.edit','tracker.read','exceptions.read','insights.read','approvals.decide','payments.confirm','payments.post','workflows.read','spr.read','workflows.inboxes.any','tasks.complete','masking.customerNote','spr.route'] as const), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', demo: faker.datatype.boolean()}, ...overrideResponse})
 
@@ -100,6 +118,78 @@ export const getAuthMeMockHandler = (overrideResponse?: AuthMe200 | ((info: Para
   }, options)
 }
 
+export const getTwoStepStatusMockHandler = (overrideResponse?: TwoStepStatus200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TwoStepStatus200> | TwoStepStatus200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/auth/two-step', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getTwoStepStatusResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getTwoStepSetupMockHandler = (overrideResponse?: TwoStepSetup200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TwoStepSetup200> | TwoStepSetup200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/auth/two-step/setup', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getTwoStepSetupResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getTwoStepEnableMockHandler = (overrideResponse?: TwoStepEnable200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TwoStepEnable200> | TwoStepEnable200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/auth/two-step/enable', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getTwoStepEnableResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getTwoStepDisableMockHandler = (overrideResponse?: TwoStepDisable200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TwoStepDisable200> | TwoStepDisable200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/auth/two-step/disable', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getTwoStepDisableResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getTwoStepNewCodesMockHandler = (overrideResponse?: TwoStepNewCodes200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TwoStepNewCodes200> | TwoStepNewCodes200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/auth/two-step/recovery-codes', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getTwoStepNewCodesResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getTwoStepVerifyMockHandler = (overrideResponse?: TwoStepVerify200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TwoStepVerify200> | TwoStepVerify200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/auth/two-step/verify', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getTwoStepVerifyResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getDemoAuthDemoLoginMockHandler = (overrideResponse?: DemoAuthDemoLogin200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DemoAuthDemoLogin200> | DemoAuthDemoLogin200), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/auth/demo-login', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
@@ -117,5 +207,11 @@ export const getAuthMock = () => [
   getAuthRefreshMockHandler(),
   getAuthLogoutMockHandler(),
   getAuthMeMockHandler(),
+  getTwoStepStatusMockHandler(),
+  getTwoStepSetupMockHandler(),
+  getTwoStepEnableMockHandler(),
+  getTwoStepDisableMockHandler(),
+  getTwoStepNewCodesMockHandler(),
+  getTwoStepVerifyMockHandler(),
   getDemoAuthDemoLoginMockHandler()
 ]

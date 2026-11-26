@@ -1,0 +1,66 @@
+### Area 1: profile pictures a person approves (ADR 0069).
+### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
+### Any signed-in person may use the routes about their own picture. The upload is
+### a raw JPEG body, Content-Type image/jpeg, at most 256 KB, square, 128 to 512
+### pixels a side. The server removes EXIF, GPS and every comment, and cuts
+### whatever follows the end marker. A refusal carries its code in
+### details[0].message (not_jpeg, damaged, not_square, wrong_size, ...).
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+@pictureId = paste a picture id from the answer to GET mine
+
+### What you have: the approved picture, the one waiting for review, the last
+### decision against you, and how many uploads you have left in 24 hours.
+GET {{baseUrl}}/api/v1/profile-pictures/mine
+
+### Send a picture for review. The body is the file itself, a checked-in flat
+### colour square made in code. A new upload replaces your pending picture.
+### The AI check does not run under today's data rule: pending.ai.status says so.
+PUT {{baseUrl}}/api/v1/profile-pictures/mine
+Content-Type: image/jpeg
+X-CSRF-Token: {{csrf}}
+
+< ../test/fixtures/profile-picture-flat-256.jpg
+
+### Take back your own picture, waiting or approved. Taking back a picture that is
+### already gone answers the same way and changes nothing.
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/withdraw
+X-CSRF-Token: {{csrf}}
+
+### The bytes of one picture. Any signed-in person may ask for an approved one. A
+### pending one is shown only to its owner (in a demo session, the sign-in that
+### sent it) and to whoever holds users.manage; anyone else, and a rejected,
+### removed or taken-down picture, gets 404. The answer is private and revalidated
+### every time: the ETag is the picture's SHA-256, so a repeat with
+### If-None-Match answers 304 only while the picture is still visible.
+GET {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/image
+If-None-Match: "paste the ETag of the last answer"
+
+### Review (users.manage: the System admin today). Reviewing a picture is user
+### administration, as disabling a user is: it is not an approval of any SPR,
+### payment or bank detail. The lists never hold your own pictures.
+### Pending pictures first (status=PENDING, the default), or the approved ones.
+GET {{baseUrl}}/api/v1/profile-pictures?status=PENDING&page=1&pageSize=25
+
+### Approve one. An earlier approved picture of that person steps aside. Your own
+### picture is refused with 403 (details[0].message own_picture) and audited. A
+### picture the owner replaced or withdrew answers 409 (replaced, removed_by_owner).
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/approve
+X-CSRF-Token: {{csrf}}
+
+### Reject one with a reason from the list: not_suitable, offensive, not_clear,
+### not_you, personal_information or other. "other" needs a note (140 characters).
+### The owner reads both, and the picture is deleted.
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/reject
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "reasonCode": "not_clear", "note": "Too dark to see who is in it." }
+
+### Take down an approved picture later. The same reasons, and "reported".
+### Only an approved picture can be taken down (409 not_approved otherwise).
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/take-down
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "reasonCode": "reported", "note": "Reported by a colleague." }

@@ -2,7 +2,7 @@ import { request } from "@playwright/test";
 import { HEADERS, type Role } from "@orderpilot/shared";
 import { apiUrl, ORIGIN } from "./env.js";
 import type { Method } from "./refusals.js";
-import { csrfToken, sessionFor } from "./session.js";
+import { csrfToken, sessionFor, type StoredSession } from "./session.js";
 
 /**
  * Calls the API as `role`, with that role's session cookies and its CSRF
@@ -10,14 +10,19 @@ import { csrfToken, sessionFor } from "./session.js";
  * Returns the status and the body; the spec parses the body with the shared
  * schema, as the app does. A body that is not JSON (a proxy's error page, an
  * empty 204) comes back as its text, so the status is never lost.
+ *
+ * A spec whose records belong to one sign-in (a demo picture is shown only to
+ * the session that sent it) passes the session it holds, so a renewed stored
+ * session cannot change who it is.
  */
 export async function callAs(
   role: Role,
   method: Method,
   route: string,
   body?: unknown,
+  held?: StoredSession,
 ): Promise<{ status: number; body: unknown }> {
-  const session = await sessionFor(role);
+  const session = held ?? (await sessionFor(role));
   const api = await request.newContext({ storageState: session });
   try {
     const res = await api.fetch(apiUrl(route), {

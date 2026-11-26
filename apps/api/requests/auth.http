@@ -7,6 +7,8 @@
 @demoPassword = orderpilot-demo-password
 
 ### What the sign-in page offers. Public. With DEMO_MODE=false, demoRoles is empty.
+### In demo mode each entry also carries the account's userId (ADR 0070), which
+### GET /availability?ids= takes; outside demo mode there is no id.
 GET {{baseUrl}}/api/v1/auth/options
 
 ### Demo sign-in as one of the nine roles. Only with DEMO_MODE=true: otherwise this
@@ -44,6 +46,68 @@ X-CSRF-Token: {{csrf}}
 POST {{baseUrl}}/api/v1/auth/logout
 X-CSRF-Token: {{csrf}}
 
+### Two-step sign-in. A person who turned on two-step verification gets no session
+### from the login request above: it answers 401 TWO_STEP_REQUIRED and sets a short
+### cookie (op_two_step, five minutes, sent by the client to the verify URL only).
+### Finish with a six-digit code from the authenticator app, or one recovery code.
+### The client sends the challenge cookie for you. Exactly one of code and
+### recoveryCode. Errors: 422 TWO_STEP_CODE_INVALID (the first four wrong codes),
+### 401 TWO_STEP_CHALLENGE_ENDED (no challenge, expired, or the fifth wrong code:
+### sign in again), 429 TWO_STEP_LOCKED (wait the Retry-After seconds, or use a
+### recovery code). No CSRF header: like login it has no CSRF cookie yet, so it
+### takes only JSON from our own origin.
+POST {{baseUrl}}/api/v1/auth/two-step/verify
+Content-Type: application/json
+
+{ "code": "123456" }
+
+### The same step with a recovery code. Each one works once.
+POST {{baseUrl}}/api/v1/auth/two-step/verify
+Content-Type: application/json
+
+{ "recoveryCode": "ABCDE-FGHJK-LMNPQ" }
+
+### Two-step settings. Signed in, with the CSRF header. A secret (the setup key, the
+### recovery codes) is only ever in the body of an answer, with Cache-Control: no-store.
+### Is two-step on? hasPassword false means there is no password sign-in to guard.
+GET {{baseUrl}}/api/v1/auth/two-step
+
+### Step 1 of turning it on: a new secret and its setup key (also as an otpauth
+### address for a QR code). A password session sends its password; a demo session
+### sends none. Errors: 400 no password, 422 PASSWORD_INCORRECT, 409 CONFLICT (already
+### on, the account has no password, or a demo session on an account that can reset
+### other people's two-step).
+POST {{baseUrl}}/api/v1/auth/two-step/setup
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "password": "{{demoPassword}}" }
+
+### Step 2: the first six-digit code from the app switches it on and shows ten
+### recovery codes, once. Errors: 422 TWO_STEP_CODE_INVALID, 409 TWO_STEP_SETUP_ENDED
+### (nothing pending, or ten minutes passed), 429 TWO_STEP_LOCKED (see Retry-After).
+POST {{baseUrl}}/api/v1/auth/two-step/enable
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "code": "123456" }
+
+### Turn it off: the password (password session) and a current code or a recovery
+### code, exactly one of the two. A session cookie alone cannot do this.
+POST {{baseUrl}}/api/v1/auth/two-step/disable
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "password": "{{demoPassword}}", "recoveryCode": "ABCDE-FGHJK-LMNPQ" }
+
+### Ten new recovery codes. Needs a current code (a recovery code is not accepted
+### here). The old codes stop working.
+POST {{baseUrl}}/api/v1/auth/two-step/recovery-codes
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "code": "123456" }
+
 ### Users. Reading needs users.read, changing needs users.manage (SYSTEM_ADMIN
 ### holds both). Another role gets 403 FORBIDDEN, and the refusal is audited.
 GET {{baseUrl}}/api/v1/users?page=1&pageSize=25
@@ -63,4 +127,15 @@ X-CSRF-Token: {{csrf}}
 
 ### Enable them again.
 POST {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000/enable
+X-CSRF-Token: {{csrf}}
+
+### Reset another person's two-step verification (users.manage, SYSTEM_ADMIN holds it),
+### for someone who lost the phone and the recovery codes. It removes the second
+### step, ends ALL of that person's sessions (demo ones too) and is audited as
+### user.two-step-reset. Answers wasOn and sessionsEnded. A setup nobody confirmed is
+### removed and audited too (wasOn false, pendingRemoved true), and ends no session.
+### A person with no row at all is a harmless no-op with no audit row. Never your
+### own: 409 CONFLICT, and the refusal is audited.
+### Refused in production (409 CONFLICT, audited with reason "production") until a person is told of a reset.
+POST {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000/two-step/reset
 X-CSRF-Token: {{csrf}}

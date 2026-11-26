@@ -417,6 +417,8 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #364  | Visual hierarchy and breathing room                   | `feat/area1-visual-hierarchy`    | This pull request. One rhythm in four tokens, one page stack, card padding of 24 px |
 | #384  | Scroll areas show which side has more                 | `feat/area1-scroll-edge-hint`    | This pull request. A quiet mark on each side of a scroll area that has more         |
 | #416  | The orders list test counts its days from today       | `test/web-date-range-days`       | This pull request. The date-range test holds a sample order on any day              |
+| #381  | Profile pictures a person approves                    | `feat/area1-profile-pictures`    | This pull request. Upload, review and show a picture; the AI check waits for area 4 |
+| #385  | Availability on the avatar                            | `feat/area1-availability`        | This pull request. Set it on your avatar; the Demo role menu shows it               |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
@@ -464,6 +466,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-78  | Room in the entry bundle                              | `perf/entry-bundle-room`         | Merged, [#183](https://github.com/xiu2809xiu-rgb/orderpilot/pull/183)               |
 | #32   | The AI gateway, with a person in the loop             | `feat/area1-ai-gateway`          | This pull request. One gateway, the mock by default, and a destination check        |
 | #349  | The settings page: sections, rows a user needs        | `feat/area1-settings-page`       | This pull request. A list of sections, one at a time, each a card of plain rows     |
+| #380  | Two-step sign-in with an authenticator app            | `feat/area1-two-step-sign-in`    | This pull request. A second step at sign-in, a recovery path, an admin reset        |
 
 ## Prompt 003: the product pass
 

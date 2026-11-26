@@ -14,10 +14,18 @@ export const COOKIES = {
   refresh: "op_refresh",
   /** Readable by script, so the web app can copy it into the header. */
   csrf: "op_csrf",
+  /** httpOnly, five minutes, sent only to the two-step verify path. */
+  twoStep: "op_two_step",
 } as const;
 
 /** The refresh cookie's Path attribute. */
 export const REFRESH_COOKIE_PATH = `${API_BASE_PATH}/auth`;
+
+/** The sign-in challenge cookie's Path: exactly the verify route, so no other route sees it. */
+export const TWO_STEP_COOKIE_PATH = `${API_BASE_PATH}/auth/two-step/verify`;
+
+/** The verify route's path, relative to API_BASE_PATH, as a plain string for the web client. */
+export const TWO_STEP_VERIFY_PATH = "/auth/two-step/verify";
 
 export const HEADERS = {
   csrf: "X-CSRF-Token",
@@ -41,7 +49,14 @@ export const authOptionsSchema = z.object({
   demoMode: z.boolean(),
   // Empty when demoMode is false.
   demoRoles: z.array(
-    z.object({ role: roleSchema, displayName: z.string().min(1) }),
+    z.object({
+      role: roleSchema,
+      displayName: z.string().min(1),
+      // Only in demo mode, and only for an account that is seeded: it lets the
+      // Demo role menu ask for that account's availability (ADR 0070). Optional
+      // so a page's fixtures and an unseeded account stay valid.
+      userId: z.uuid().optional(),
+    }),
   ),
 });
 export type AuthOptions = z.infer<typeof authOptionsSchema>;

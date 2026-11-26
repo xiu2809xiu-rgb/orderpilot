@@ -176,6 +176,49 @@ describe("the side panel", () => {
     expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
   });
 
+  describe("Settings, for a reviewer of profile pictures", () => {
+    /** Answers the waiting-pictures list with a fixed total and counts the asks. */
+    function servePictures(total: number) {
+      const calls = { pictures: 0 };
+      server.use(
+        http.get("*/api/v1/profile-pictures", () => {
+          calls.pictures += 1;
+          return list(total);
+        }),
+      );
+      return calls;
+    }
+
+    it("carries the number of pictures that wait, in its name", async () => {
+      serve({ tasks: 0, exceptions: 0 });
+      servePictures(3);
+      renderIn("SYSTEM_ADMIN");
+      expect(
+        await screen.findByRole("link", { name: /^Settings\s*3\s*waiting$/ }),
+      ).toHaveAttribute("href", "/settings");
+    });
+
+    it("shows no number when nothing waits", async () => {
+      serve({ tasks: 0, exceptions: 0 });
+      const calls = servePictures(0);
+      renderIn("SYSTEM_ADMIN");
+      await waitFor(() => {
+        expect(calls.pictures).toBe(1);
+      });
+      expect(screen.getByRole("link", { name: "Settings" })).toBeVisible();
+    });
+
+    it("asks nothing of a role that may not review", async () => {
+      serve({ tasks: 0, exceptions: 0 });
+      const calls = servePictures(5);
+      renderIn("SUPPORT");
+      expect(screen.getByRole("link", { name: "Settings" })).toBeVisible();
+      // Give a wrong request the time it would need to arrive.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(calls.pictures).toBe(0);
+    });
+  });
+
   it("shows no number for an empty list", async () => {
     const calls = serve({ tasks: 0, exceptions: 0 });
     renderIn("SUPPORT");

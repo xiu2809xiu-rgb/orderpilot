@@ -42,6 +42,9 @@ Who decides what, and how the decisions stay visible.
 | A tamper-evident audit trail, append-only and hash-chained              | Silent changes to the record             | P-9, F-2       |
 | Every refusal audited                                                   | Probing that nobody sees                 | P-10, F-1      |
 | Synthetic data only, labelled                                           | Real data leaking through demos or tests | Every story    |
+| Two-step sign-in: a code from an authenticator app, used once           | A stolen password signing in alone       | #380           |
+| A person approves every profile picture before it is shown              | An unsuitable picture shown to staff     | In review      |
+| Availability is information only: no rule or reminder reads it          | Staff routed or judged by a set label    | #385           |
 
 ### GRS in the UI
 
@@ -64,6 +67,7 @@ Likelihood and impact are rated low, medium or high for Spectra if OrderPilot we
 | R-09 | **Keys or client samples in Git:** private since 5 Nov 2026, but a clone made while it was public keeps the history                                                                        | Medium     | High   | Ignore rules (today); licence-key, samples and secret guards in the hooks (P-5); gitleaks in CI (P-6); push protection until the repository went private                                                                                                    | 1     | Low      |
 | R-10 | **Over-trust in AI:** staff confirm everything without reading                                                                                                                             | Medium     | Medium | Low-confidence fields marked "Requires approval"; some fields always need a person; the error rate measured after confirmation ([success metrics](../design-thinking/success-metrics.md))                                                                   | 1     | Medium   |
 | R-11 | **AI cost overrun:** model calls cost more than the time they save                                                                                                                         | Low        | Low    | AI only where it helps; the cost per document tracked and shown, with budgets and alerts (P-17, G-1)                                                                                                                                                        | 4     | Low      |
+| R-12 | **An unsuitable or private picture:** a profile picture shows something offensive or personal to people it should not reach                                                                | Medium     | Medium | Fixed rules refuse a bad file, metadata is removed twice, a person approves every picture, the AI only describes it and only if the data rule allows, a take-down with a reason, every decision audited, upload limits (ADR 0069)                           | 1, 4  | Medium   |
 
 The owners review their rows at each sprint review, and add a row when a story brings a new risk.
 

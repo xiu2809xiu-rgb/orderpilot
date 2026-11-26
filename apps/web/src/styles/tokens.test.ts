@@ -211,6 +211,8 @@ describe("the values of the design", () => {
     expect(light["motion-base"]).toBe("220ms");
     expect(light["spring-stiffness"]).toBe("260");
     expect(light["spring-damping"]).toBe("28");
+    expect(light["spring-pop-stiffness"]).toBe("400");
+    expect(light["spring-pop-damping"]).toBe("28");
   });
 
   it("has a dark value for every colour", () => {

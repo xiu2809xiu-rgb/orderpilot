@@ -487,6 +487,42 @@ describe("the gateway: the destination check", () => {
     ).rejects.toBeInstanceOf(AiDestinationRefusedError);
     expect(provider.requests).toHaveLength(0);
   });
+
+  it("mayReceive returns the policy's verdict and rule, and writes no audit row and no usage record", async () => {
+    const provider = new ScriptedProvider([answer("never")]);
+    const h = harness({ provider, decision: refused });
+    const verdict = await h.gateway.mayReceive({ ...context, origin: "real" });
+    expect(verdict).toEqual({ allowed: false, rule: "synthetic-data-only" });
+    // The reason names the provider: a caller is not told it.
+    expect(Object.keys(verdict)).toEqual(["allowed", "rule"]);
+    expect(h.decisions).toEqual([
+      {
+        provider: "openai-compatible",
+        classification: context.classification,
+        origin: "real",
+      },
+    ]);
+    expect(h.destinationRefusals).toHaveLength(0);
+    expect(h.rows).toHaveLength(0);
+    expect(provider.requests).toHaveLength(0);
+
+    const allowed = harness();
+    await expect(allowed.gateway.mayReceive(context)).resolves.toEqual({
+      allowed: true,
+      rule: "provider-rule",
+    });
+    expect(allowed.rows).toHaveLength(0);
+  });
+
+  it("mayReceive treats a policy that throws as not allowed, with the rule policy-unavailable", async () => {
+    const h = harness({ policyThrows: true });
+    await expect(h.gateway.mayReceive(context)).resolves.toEqual({
+      allowed: false,
+      rule: "policy-unavailable",
+    });
+    expect(h.destinationRefusals).toHaveLength(0);
+    expect(h.rows).toHaveLength(0);
+  });
 });
 
 describe("the gateway: inside a database transaction", () => {

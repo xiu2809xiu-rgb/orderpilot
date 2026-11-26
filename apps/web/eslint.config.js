@@ -18,7 +18,7 @@ const entryFiles = [
   "src/zod-setup.ts",
   "src/app/{App,RootLayout,router,guards,Splash,Logo}.tsx",
   "src/app/pages/{CrashPage,ForbiddenPage}.tsx",
-  "src/app/shell/{AppShell,Sidebar,Topbar,Breadcrumbs,Notifications,RoleSwitcher,ThemeSwitch,UserMenu}.tsx",
+  "src/app/shell/{AppShell,Sidebar,Topbar,Breadcrumbs,Notifications,RoleSwitcher,RoleItem,ThemeSwitch,UserMenu}.tsx",
   "src/app/shell/shortcuts.ts",
   "src/stores/*.ts",
   "src/features/{registry,nav,define}.ts",
@@ -26,6 +26,16 @@ const entryFiles = [
   "src/features/*/routes.tsx",
   "src/lib/api/{auth,client,instance,cookies}.ts",
   "src/lib/{query,theme,utils,deferred}.ts",
+  // Availability: the dot and the data hooks are in the shell (ADR 0070).
+  "src/components/kit/availability-picker/{tones.ts,openingPress.ts,AvailabilityDot.tsx,AvailabilityTrigger.tsx,AvailabilityControl.tsx}",
+  "src/lib/{useAvailability,useAvailabilityOf,useExpiryTimer}.ts",
+];
+const lazyPickerFiles = [
+  "AvailabilityPicker",
+  "PickerPill",
+  "PickerOrb",
+  "CaptionWords",
+  "useChipSpring",
 ];
 const lazyUi = [
   "alert-dialog",
@@ -64,12 +74,29 @@ export default defineConfig(
                 "This overlay opens on a click, so keep it out of the entry chunk: use the facade in @/app/shell/overlays, or lazy-load the component that needs it.",
               allowTypeImports: true,
             })),
+            {
+              name: "motion/react",
+              message:
+                "The spring library is fetched on hover or focus of the trigger, or when the first pill opens (useChipSpring). A static import puts it in the entry chunk.",
+              allowTypeImports: true,
+            },
           ],
           patterns: [
             {
               group: ["@/lib/api/generated/**"],
               message:
                 "The generated client brings a whole area's endpoints. Call apiClient from the entry, or lazy-load the component that needs the hook.",
+              allowTypeImports: true,
+            },
+            {
+              // The availability picker's lazy files, by the name an entry
+              // file in the same folder would import them by, and by its path.
+              group: lazyPickerFiles.flatMap((file) => [
+                `./${file}`,
+                `@/components/kit/availability-picker/${file}`,
+              ]),
+              message:
+                "The pill, its choices, its caption and its spring load when the menu opens or on idle (pickerModule). A static import puts them in the entry chunk.",
               allowTypeImports: true,
             },
           ],

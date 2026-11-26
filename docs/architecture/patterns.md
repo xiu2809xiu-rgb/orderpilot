@@ -327,3 +327,44 @@ The decision is recorded in [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-
 | ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Parallel change (expand, migrate, contract) | `packages/shared/src/roles.ts`, and the seven steps of ADR 0058 | The retired values get a wider stored type first, references move off them while they still work, and only then does the role list shrink, so `main` stays green at every step                        |
 | Read wide, write narrow                     | `packages/shared/src/audit.ts`, `apps/api/src/audit/`           | An event read back may name a retired role for ever, because its hash covers the role. A new event names a current one, so once the list shrinks the type checker refuses a write with a retired role |
+
+## Two-step sign-in (#380)
+
+The decision is recorded in [ADR 0068](../adr/0068-two-step-sign-in-with-an-authenticator-app.md).
+
+| Pattern                                | Where                                                          | Why                                                                                                                                              |
+| -------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Clock as a port                        | `apps/api/src/common/clock.ts`                                 | Every rule takes the moment as an argument, and a test passes one fixed moment, so no test sleeps and none depends on the hour it runs           |
+| Sealed value with bound context        | `apps/api/src/two-step/domain/secret-box.ts`                   | The secret is sealed with the person's id as associated data, so a ciphertext copied to another person's row cannot be opened                    |
+| Outcome returned, thrown after save    | `apps/api/src/auth/two-step-sign-in.service.ts`                | A wrong code must be counted and audited even though the call fails, so the service returns the outcome, commits, and only then throws the error |
+| Row lock to serialise a counter        | `apps/api/src/two-step/two-step.repository.ts`                 | Two codes at once for one person queue on the person's own row, so a code cannot be used twice and the tries cannot be counted short             |
+| Challenge, then verify, with a channel | `apps/api/src/two-step/two-step-challenge.repository.ts`       | A sign-in that needs a second step is a stored challenge with a channel column, so another channel can join without changing the flow            |
+| Controlled field, parent owns timers   | `components/kit/code-field/`, `app/two-step/useCodeAttempt.ts` | The field draws the state it is given and times nothing. The hook holds the three waits, so they hold under reduced motion and in jsdom          |
+
+## Profile pictures (#381)
+
+The decision is recorded in [ADR 0069](../adr/0069-profile-pictures-a-person-approves.md). The API is under `apps/api/src/modules/profile-pictures/`.
+
+| Pattern                                                | Where                                                               | Why                                                                                                                               |
+| ------------------------------------------------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| A cleaner that rewrites from allowed parts             | `domain/jpeg-cleaner.ts`                                            | The stored file is built from the segments the walk checked, so metadata and trailing bytes cannot ride along. It repairs nothing |
+| A bounded body reader                                  | `apps/api/src/common/read-bounded-body.ts`, `discard-rest.ts`       | The size limit holds for chunked and lying bodies, and the reader runs after the guards, so a refused caller costs nothing        |
+| An owner-row lock for one person's state               | `profile-picture.repository.ts`                                     | Upload, withdraw and every decision take turns on one person, and two reviewers at once give one decision and one 409             |
+| An ask-first method on a gateway                       | `LlmGateway.mayReceive` in `apps/api/src/modules/ai/llm-gateway.ts` | A feature learns whether the data rule allows a call without writing an audit row, and nothing is sent when it does not           |
+| A deadline race around a call that cannot be cancelled | `domain/deadline.ts`                                                | A slow check never holds an upload for more than five seconds, and its late answer is thrown away                                 |
+| Delete after commit, with a sweep                      | `picture-store.ts`                                                  | A rollback never destroys a live picture, and a failed delete is retried and audited                                              |
+| A one-in-flight guard kept in Redis                    | `picture-upload-guard.ts`                                           | A second upload of one person is refused before any AI call or storage write, and a Redis outage lets the upload go on            |
+
+## Availability (#385)
+
+The decision is recorded in [ADR 0070](../adr/0070-availability-on-the-avatar.md). The API is under `apps/api/src/modules/availability/` and the part is `apps/web/src/components/kit/availability-picker/`.
+
+| Pattern                                                                       | Where                                                          | Why                                                                                                                                             |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| An absent row is the default                                                  | `UserAvailability`, `availability.repository.ts`               | Available leaves no row, so nothing is kept of when a person was not available, and there is no history to clean                                |
+| Expiry worked out on read, with an injected clock                             | `domain/availability-rules.ts`, `common/clock.ts`              | No job and no write on a read, and a test passes one fixed moment, so a service that reads the real time fails it                               |
+| A lookup that answers every id alike                                          | `availability.service.ts`                                      | An unknown, a disabled and an expired id give one body, so the route tells a caller nothing about which ids exist                               |
+| A source scan that keeps a feature from steering rules                        | `availability-isolation.test.ts` in the API and in the web app | "No code outside the feature reads it" is a promise about future code, so a test fails when the names, the route or the client appear elsewhere |
+| A menu of `menuitemradio` in a portal, with a stand-in trigger while it loads | `kit/availability-picker/`                                     | The pill cannot be clipped, a choice is one write and not one per arrow, and the first screen carries only a button                             |
+| A button laid over a corner beside another button                             | `UserMenu.tsx`, `shell.css`                                    | A button inside a button is invalid, so the second control is a sibling placed by CSS, and on a touch screen it leaves the first its avatar     |
+| A growth on a spring written as a CSS easing                                  | `pickerMotion.ts`, `availabilityPicker.css`                    | `scale` and `opacity` only, on a `linear()` curve a test checks against the tokens: the pop pair on a fine pointer, the calm pair on a finger   |

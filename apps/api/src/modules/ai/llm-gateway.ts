@@ -371,22 +371,42 @@ export class LlmGateway {
     };
   }
 
-  /** The destination check. A policy that cannot answer is a refusal: nothing is sent on a guess. */
-  private async checkDestination(context: AiCallContext): Promise<void> {
-    let decision: AiDestinationDecision;
+  /**
+   * Whether a call with this context would be allowed to go to the provider,
+   * asked first and nothing else: no audit row, no usage record, nothing sent.
+   * Only the verdict and the rule id come back. The reason names the provider,
+   * and a caller is told only that a call was refused (ADR 0059 point 5).
+   * The answer can change before the real call, which still checks again.
+   */
+  async mayReceive(
+    context: AiCallContext,
+  ): Promise<{ readonly allowed: boolean; readonly rule: string }> {
+    const { allowed, rule } = await this.decideDestination(context);
+    return { allowed, rule };
+  }
+
+  /** The policy's answer. A policy that cannot answer is a refusal: nothing is sent on a guess. */
+  private async decideDestination(
+    context: AiCallContext,
+  ): Promise<AiDestinationDecision> {
     try {
-      decision = await this.destination.decide({
+      return await this.destination.decide({
         provider: this.provider.kind,
         classification: context.classification,
         origin: context.origin,
       });
     } catch {
-      decision = {
+      return {
         allowed: false,
         rule: "policy-unavailable",
         reason: "The destination policy could not be asked.",
       };
     }
+  }
+
+  /** The destination check before a call: a refusal is audited and thrown. */
+  private async checkDestination(context: AiCallContext): Promise<void> {
+    const decision = await this.decideDestination(context);
     if (decision.allowed) return;
     try {
       await this.auditor.destinationRefused({

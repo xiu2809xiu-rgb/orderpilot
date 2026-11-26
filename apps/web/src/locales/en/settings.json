@@ -12,10 +12,116 @@
       "privacy": "Privacy",
       "ai": "AI assistant",
       "controls": "Controls",
-      "health": "System health"
+      "health": "System health",
+      "pictures": "Profile pictures"
     },
     "showing": "Showing {{section}}",
     "deniedDescription": "Your role does not include this section. A system admin can change what a role may open."
+  },
+  "pictures": {
+    "reasons": {
+      "not_suitable": "It is not suitable for a workplace.",
+      "offensive": "It contains something offensive or threatening.",
+      "not_clear": "It is too dark, blurred or small to see who is in it.",
+      "not_you": "It does not show the person whose account it is.",
+      "personal_information": "It shows personal or confidential information, such as a document or a screen.",
+      "other": "Another reason: see the note.",
+      "reported": "It was reported to a reviewer."
+    },
+    "title": "Profile pictures",
+    "intro": "Approve or reject each picture before it replaces its owner's initials. You do not see your own here, and you cannot review it.",
+    "tabs": {
+      "label": "Show",
+      "PENDING": "Waiting for review",
+      "APPROVED": "Approved"
+    },
+    "showing": "Showing {{tab}}",
+    "empty": {
+      "PENDING": {
+        "title": "Nothing is waiting for review",
+        "description": "New pictures appear here when someone sends one."
+      },
+      "APPROVED": {
+        "title": "No approved pictures",
+        "description": "Approved pictures appear here, so you can take one down later."
+      }
+    },
+    "row": {
+      "alt": "Profile picture sent by {{name}}",
+      "asAvatar": "As an avatar",
+      "sent": "Sent {{when}}",
+      "failed": "This picture could not be loaded."
+    },
+    "ai": {
+      "CHECKED": {
+        "LOOKS_FINE": "AI check: looks fine. The AI decided nothing.",
+        "NEEDS_A_CLOSER_LOOK": "AI check: needs a closer look. The AI decided nothing."
+      },
+      "concerns": "Concerns: {{list}}",
+      "NOT_ALLOWED": {
+        "synthetic-data-only": "Not checked by AI: only synthetic data may go to an AI tool.",
+        "classification-not-allowed": "Not checked by AI: this kind of data may not go to an AI tool.",
+        "no-rule-for-provider": "Not checked by AI: no data rule covers the AI tool in use.",
+        "policy-unavailable": "Not checked by AI: the data rule could not be read.",
+        "other": "Not checked by AI: the data rules do not allow it."
+      },
+      "NOT_RUN": {
+        "timeout": "Not checked by AI: the AI did not answer in time.",
+        "failed": "Not checked by AI: the check failed.",
+        "mock": "Not checked by AI: only a scripted test answer came back, so nothing was examined.",
+        "other": "Not checked by AI: the check did not run."
+      },
+      "note": "What the AI said: {{note}}",
+      "concern": {
+        "nudity_or_sexual_content": "nudity or sexual content",
+        "violence_or_gore": "violence or gore",
+        "hateful_symbol_or_text": "a hateful symbol or text",
+        "offensive_gesture": "an offensive gesture",
+        "weapon": "a weapon",
+        "drugs_or_alcohol": "drugs or alcohol",
+        "personal_documents_visible": "a personal document is visible",
+        "unusable_image": "the image is blank, dark or blurred",
+        "other": "something else"
+      }
+    },
+    "approve": "Approve",
+    "approveFor": "Approve picture from {{name}}",
+    "reject": "Reject",
+    "rejectFor": "Reject picture from {{name}}",
+    "takeDown": "Take down",
+    "takeDownFor": "Take down picture from {{name}}",
+    "done": {
+      "approved": "Approved the picture from {{name}}",
+      "rejected": "Rejected the picture from {{name}}",
+      "takenDown": "Took down the picture from {{name}}"
+    },
+    "dialog": {
+      "reject": {
+        "title": "Reject this picture?",
+        "body": "{{name}} will read the reason you choose. The picture is deleted."
+      },
+      "takeDown": {
+        "title": "Take this picture down?",
+        "body": "{{name}} will read the reason you choose. Their initials show again and the picture is deleted."
+      },
+      "reason": "Reason",
+      "note": "Note (optional)",
+      "noteRequired": "Note (needed for this reason)",
+      "noteHint": "Up to 140 characters. {{name}} will read it.",
+      "chooseReason": "Choose a reason.",
+      "needNote": "Add a short note for this reason.",
+      "cancel": "Cancel",
+      "confirmReject": "Reject picture",
+      "confirmTakeDown": "Take picture down"
+    },
+    "refusals": {
+      "own_picture": "You cannot review your own picture. Another administrator has to.",
+      "already_approved": "This picture was already approved.",
+      "already_rejected": "This picture was already rejected.",
+      "removed_by_owner": "The person removed this picture.",
+      "replaced": "The person sent a newer picture. The list has been refreshed.",
+      "not_approved": "This picture is no longer approved."
+    }
   },
   "account": {
     "profile": "Profile",
@@ -33,6 +139,82 @@
       "LOGISTICS": "Arranges forwarders and follows shipping dates, AWB or BL, and import permits.",
       "MANAGEMENT": "Reads the tracker, dashboards and reports.",
       "AUDITOR": "Reads the audit trail."
+    },
+    "availability": {
+      "label": "Availability",
+      "description": "It changes nothing else: reminders, approvals and deadlines still reach you. It goes back to Available after {{hours}} hours.",
+      "change": "Change availability",
+      "until": "{{value}}, until about {{time}}",
+      "saving": "Saving",
+      "loading": "Loading your availability",
+      "refusedTitle": "Your availability was not changed",
+      "fellBack": "It went back to Available after {{hours}} hours.",
+      "demoShared": "This is a shared demo account. Everyone who signs in as this role sees this availability and can change it.",
+      "demoSeen": "In this demo, the Demo role menu in the top bar shows it to the other accounts.",
+      "footnote": "Saved on the server, not on this device. It applies at once."
+    },
+    "picture": {
+      "title": "Profile picture",
+      "intro": "Add a picture of yourself. A reviewer approves every picture first.",
+      "loading": "Loading your profile picture",
+      "none": "You have no profile picture. Your initials show instead.",
+      "approved": "Approved on {{date}}. It replaces your initials in your menu and on this card. Other pages do not show it yet.",
+      "pendingTitle": "Waiting for review",
+      "pendingBody": "Only you and the reviewers can see this picture until a reviewer approves it.",
+      "pendingOwnReviewer": "You may review pictures, but not your own. Another administrator has to review this one.",
+      "ai": {
+        "CHECKED": "An AI tool looked at it and told the reviewer what it saw. It decided nothing.",
+        "NOT_ALLOWED": "No AI tool looked at it: the data rules do not allow that today.",
+        "NOT_RUN": "No AI tool looked at it: the check did not complete."
+      },
+      "demoNote": "This is a shared demo account. A picture you send waits for review and only you and the reviewers can see it. Once it is approved, everyone who signs in as this role sees it.",
+      "notice": {
+        "REJECTED": "Your last picture was not approved",
+        "TAKEN_DOWN": "A reviewer took your picture down",
+        "deleted": "The picture was deleted. Choose another one when you are ready.",
+        "note": "Note from the reviewer: {{note}}"
+      },
+      "choose": "Choose a picture",
+      "chooseAnother": "Choose another",
+      "preparing": "Preparing your picture",
+      "previewTitle": "This is what the reviewer will see",
+      "previewBody": "It was cropped to a square and shrunk on your device. Camera details such as where it was taken were left out.",
+      "previewAlt": "Preview of your cropped picture",
+      "send": "Send for review",
+      "sending": "Sending",
+      "sent": "Sent for review",
+      "remove": "Remove picture",
+      "removeTitle": "Remove your profile picture?",
+      "removeBody": "Your initials will show instead. You can send a new picture later.",
+      "removeBodyWaiting": "This picture will not be reviewed. You can send a new one later.",
+      "removeConfirm": "Remove",
+      "removeKeep": "Keep it",
+      "removed": "Picture removed",
+      "left_one": "You can send {{count}} more picture in the next 24 hours.",
+      "left_other": "You can send {{count}} more pictures in the next 24 hours.",
+      "limitReached": "You have used all {{limit}} uploads for now. Try again later.",
+      "footnote": "A reviewer is a person. An AI tool may describe the picture to the reviewer when the data rules allow it. It never approves or rejects.",
+      "loadFailed": "The picture could not be shown.",
+      "choiceErrors": {
+        "not_an_image": "Choose a PNG, JPEG or WebP picture.",
+        "too_small": "Choose a picture at least 128 pixels wide and high.",
+        "too_large_file": "Choose a picture smaller than 10 MB.",
+        "cannot_read": "This file could not be read as a picture."
+      },
+      "refusals": {
+        "wrong_type": "Send the picture as a JPEG.",
+        "empty": "No picture was sent.",
+        "not_jpeg": "This file is not a JPEG picture.",
+        "damaged": "This picture file is damaged or incomplete.",
+        "unsupported": "This kind of JPEG is not supported. Save it as a standard JPEG and try again.",
+        "not_square": "The picture must be square.",
+        "wrong_size": "The picture must be between 128 and 512 pixels wide.",
+        "cut_off": "The upload was cut off. Try again.",
+        "too_big": "This picture is larger than 256 KB. Choose a smaller one.",
+        "upload_limit": "You have sent {{limit}} pictures in the last 24 hours. Try again later.",
+        "upload_busy": "Another picture of yours is still being sent. Wait a moment and try again.",
+        "rejected_before": "A reviewer did not approve this picture before. Choose a different one."
+      }
     },
     "access": {
       "title": "What you can do",
@@ -121,6 +303,82 @@
       "label": "Sign out of OrderPilot",
       "description": "You are signed in as {{name}}. Signing out deletes any unsaved drafts on this device.",
       "button": "Sign out"
+    },
+    "twoStep": {
+      "title": "Two-step verification",
+      "row": {
+        "label": "Authenticator app",
+        "descriptionOff": "Ask for a 6-digit code from your phone when you sign in with your email and password.",
+        "descriptionOn": "A 6-digit code from your phone is asked for each time you sign in with your email and password."
+      },
+      "state": {
+        "off": "Off",
+        "on": "On"
+      },
+      "since": "On since {{date}}",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off",
+      "recovery": {
+        "label": "Recovery codes",
+        "left_one": "{{count}} code left",
+        "left_other": "{{count}} codes left",
+        "low": "Only {{count}} left. Make new codes soon.",
+        "make": "New recovery codes"
+      },
+      "footnote": "Saved on the server, not on this device. It applies at once.",
+      "demoSkips": "The demo role buttons skip this step, so a shared demo account is never locked.",
+      "noPassword": "This account has no password, so there is no email and password sign-in for two-step to protect.",
+      "demoAdmin": "A demo session cannot turn on two-step verification for this account, because only an administrator could undo it and an administrator cannot reset their own.",
+      "recentLock": "Too many wrong codes were entered for your account on {{date}}. If that was not you, someone may know your password.",
+      "loading": "Checking two-step verification",
+      "turnedOn": "Two-step verification is on",
+      "turnedOff": "Two-step verification is off",
+      "setup": {
+        "title": "Turn on two-step verification",
+        "demoWarning": "This is a shared demo account. Two-step will apply to the email and password sign-in of this account for everyone who uses it.",
+        "continue": "Continue",
+        "restart": "Start again",
+        "scanTitle": "Scan the code",
+        "scanBody": "In your authenticator app, add an account and scan this code.",
+        "qrTitle": "QR code for your authenticator app",
+        "keyLabel": "Or type this key",
+        "keyCopy": "setup key",
+        "expires": "This setup ends in {{minutes}} minutes.",
+        "codeLabel": "Then enter the 6-digit code it shows",
+        "cancel": "Cancel",
+        "preparing": "Preparing your key"
+      },
+      "password": {
+        "label": "Password",
+        "show": "Show password",
+        "help": "Enter your password to continue.",
+        "required": "Enter your password."
+      },
+      "recoveryView": {
+        "title": "Save your recovery codes",
+        "body": "If you lose your phone, each of these codes lets you sign in once. They are shown only now.",
+        "listLabel": "Recovery codes",
+        "copy": "Copy codes",
+        "copied": "Recovery codes copied",
+        "copyFailed": "The codes could not be copied. Select them and copy by hand.",
+        "download": "Download as text file",
+        "fileTitle": "OrderPilot recovery codes",
+        "fileNote": "Each code works once.",
+        "saved": "I have saved these codes",
+        "done": "Done"
+      },
+      "disable": {
+        "title": "Turn off two-step verification",
+        "body": "Enter a code from your app, or a recovery code, to confirm.",
+        "submit": "Turn off",
+        "cancel": "Cancel"
+      },
+      "regenerate": {
+        "title": "Make new recovery codes",
+        "body": "Enter a code from your app. The old recovery codes stop working.",
+        "submit": "Make new codes",
+        "cancel": "Cancel"
+      }
     }
   },
   "appearance": {

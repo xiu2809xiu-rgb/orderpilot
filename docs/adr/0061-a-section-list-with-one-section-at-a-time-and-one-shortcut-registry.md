@@ -28,3 +28,5 @@ The page also held two small copies of work the shell does: the sign-out flow li
 - The old `ServiceChecksCard` is gone. Its role as the worked example of a generated hook (ADR 0019) moves to `useServiceHealth`, and the three documents that named it are updated.
 - A new permission shows under "Other" with its governance label until someone gives it wording.
 - The order lines table has keys of its own (Enter, Esc, Delete, Alt with the arrows). They are not in the registry yet. Adding an "In order lines" group, shown to roles that edit orders, is a follow-up.
+
+Amended by ADR 0070: availability is a Settings choice kept on the server, with two-step (ADR 0068), because colleagues read it.

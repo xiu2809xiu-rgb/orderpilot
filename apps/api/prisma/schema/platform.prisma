@@ -33,7 +33,12 @@ model User {
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
 
-  refreshTokens RefreshToken[]
+  refreshTokens      RefreshToken[]
+  twoStep            TwoStepSecret?
+  profilePictures    ProfilePicture[]
+  /// Named so a search for it, and the isolation test, cannot mistake it for
+  /// stock cover (ITEM_AVAILABILITIES). No rule may read this relation.
+  personAvailability UserAvailability?
 
   @@index([role])
 }
@@ -53,7 +58,8 @@ model RefreshToken {
   replacedByTokenId String?   @unique @db.Uuid
   /// Set when the token, or its whole family, is no longer valid.
   revokedAt         DateTime? @db.Timestamptz(3)
-  /// Why: "logout", "reuse-detected", "user-disabled", "password-changed".
+  /// Why: "logout", "reuse-detected", "user-disabled", "password-changed",
+  /// "two-step-enabled", "two-step-reset".
   revokedReason     String?
   createdAt         DateTime  @default(now()) @db.Timestamptz(3)
   ip                String?
@@ -68,6 +74,199 @@ model RefreshToken {
   @@index([familyId])
   @@index([userId])
   @@index([expiresAt])
+}
+
+enum TwoStepStatus {
+  /// A secret was made and shown; no code has confirmed it. Guards nothing.
+  PENDING
+  ACTIVE
+}
+
+/// How a second step reaches the person. Only the authenticator app exists.
+/// A later channel is a new value and a new "send" route; the sign-in flow
+/// (challenge, then verify) does not change.
+enum TwoStepChannel {
+  AUTHENTICATOR
+}
+
+/// One person's two-step verification, pending or active. No row means off.
+/// Its own table so the ciphertext rides along on no User read (the auth guard
+/// reads the user on every request). Deleting the row (turn off, reset) deletes
+/// the person's challenges and recovery codes with it.
+model TwoStepSecret {
+  id               String        @id @default(uuid(7)) @db.Uuid
+  userId           String        @unique @db.Uuid
+  status           TwoStepStatus
+  /// "v1.<nonce>.<ciphertext>.<tag>" in base64url: AES-256-GCM under a key
+  /// derived from JWT_SECRET, with the user id as associated data. Never logged,
+  /// never in an audit row, never in an error.
+  secretCipher     String
+  /// The last TOTP step (Unix seconds / 30) a code was accepted for. Null until
+  /// one was. A code for this step or an earlier one is refused: it works once.
+  lastStep         Int?
+  /// While PENDING: when the setup lapses (10 minutes). Null once ACTIVE.
+  pendingExpiresAt DateTime?     @db.Timestamptz(3)
+  enabledAt        DateTime?     @db.Timestamptz(3)
+  /// The newest (at most) ten wrong-code times, oldest first. The tenth wrong
+  /// code inside 15 minutes locks the six-digit entry. Cleared by a success.
+  failedAt         DateTime[]    @db.Timestamptz(3)
+  /// While set and in the future, six-digit codes are refused (recovery codes
+  /// are not).
+  lockedUntil      DateTime?     @db.Timestamptz(3)
+  /// Locks since the last success. The third and later one lasts 24 hours.
+  locksInARow      Int           @default(0)
+  /// When a lock was last placed. Unlike the three fields above, a success and a
+  /// setup restart keep it, so the owner can be told about a lock they did not
+  /// see. The status route shows it for 7 days. Gone with the row.
+  lastLockedAt     DateTime?     @db.Timestamptz(3)
+  createdAt        DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @db.Timestamptz(3)
+
+  user          User               @relation(fields: [userId], references: [id])
+  challenges    TwoStepChallenge[]
+  recoveryCodes RecoveryCode[]
+}
+
+/// One password sign-in waiting for its second step. The browser holds an opaque
+/// token in the op_two_step cookie; only its SHA-256 is stored here, as for a
+/// refresh token. Several may be live for one person (two tabs).
+model TwoStepChallenge {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  userId     String         @db.Uuid
+  tokenHash  String         @unique
+  channel    TwoStepChannel @default(AUTHENTICATOR)
+  expiresAt  DateTime       @db.Timestamptz(3)
+  /// Wrong tries on this challenge. The fifth ends it.
+  wrongTries Int            @default(0)
+  createdAt  DateTime       @default(now()) @db.Timestamptz(3)
+
+  twoStep TwoStepSecret @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// One single-use recovery code. Only the SHA-256 of the normalised code is kept.
+model RecoveryCode {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @db.Uuid
+  codeHash  String
+  usedAt    DateTime? @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+
+  twoStep TwoStepSecret @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  /// The lookup is by person and hash; this also covers "how many are left".
+  @@unique([userId, codeHash])
+}
+
+/// The two states that differ from the default. No row means Available.
+enum UserAvailabilityState {
+  FOCUSING
+  DO_NOT_DISTURB
+}
+
+/// One person's availability, while it is not Available (ADR 0070). Information
+/// for colleagues and nothing else: no rule, reminder or approval reads it. A row
+/// is live for 12 hours after setAt; that is worked out when it is read, and an
+/// expired row is deleted by the next write by anyone. Setting Available deletes
+/// the row, so nothing is kept of when a person was not available.
+model UserAvailability {
+  /// The primary key is the one-row-per-person rule.
+  userId String                @id @db.Uuid
+  state  UserAvailabilityState
+  /// Set by the server's clock, never by the client.
+  setAt  DateTime              @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  /// The delete of expired rows in each write finds them by this.
+  @@index([setAt])
+}
+
+enum ProfilePictureStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REMOVED
+}
+
+/// Why a REMOVED picture ended. Null in every other status.
+enum ProfilePictureRemoval {
+  WITHDRAWN
+  REPLACED_BY_UPLOAD
+  REPLACED_BY_APPROVAL
+  TAKEN_DOWN
+}
+
+/// What became of the AI check. CHECKED: a real model answered. NOT_ALLOWED:
+/// the data rule refused, nothing was sent. NOT_RUN: allowed but no usable
+/// answer came (timeout, failure, or only the mock answered).
+enum ProfilePictureAiStatus {
+  CHECKED
+  NOT_ALLOWED
+  NOT_RUN
+}
+
+enum ProfilePictureAiVerdict {
+  LOOKS_FINE
+  NEEDS_A_CLOSER_LOOK
+}
+
+/// One profile picture a person sent. A row is kept for ever (who, when, why
+/// and the hash); the picture itself is kept only while it is PENDING or
+/// APPROVED. A person has at most one PENDING and one APPROVED row, held by two
+/// partial unique indexes in the migration.
+model ProfilePicture {
+  id              String                   @id @default(uuid(7)) @db.Uuid
+  userId          String                   @db.Uuid
+  status          ProfilePictureStatus     @default(PENDING)
+  /// Set when status is REMOVED, and only then.
+  removal         ProfilePictureRemoval?
+  /// Where the cleaned JPEG is stored: profile-pictures/<userId>/<random uuid>.jpg
+  objectKey       String                   @unique
+  /// Set when the stored object has been deleted. A REJECTED or REMOVED row
+  /// with this still null is waiting for the sweep.
+  objectDeletedAt DateTime?                @db.Timestamptz(3)
+  /// Size of the cleaned file, not of what was received.
+  byteSize        Int
+  /// SHA-256 of the cleaned file, 64 lower case hex characters. It is also the ETag.
+  sha256          String
+  /// Pixels on each side (the picture is square).
+  width           Int
+  progressive     Boolean
+  aiStatus        ProfilePictureAiStatus
+  /// The policy rule id when NOT_ALLOWED; "timeout", "failed" or "mock" when
+  /// NOT_RUN; else null.
+  aiWhy           String?
+  aiVerdict       ProfilePictureAiVerdict?
+  /// Codes from PICTURE_CONCERNS in @orderpilot/shared. Empty unless the AI named some.
+  aiConcerns      String[]
+  /// The model's note, at most 200 characters. Shown to reviewers as text only.
+  aiNote          String?
+  createdAt       DateTime                 @default(now()) @db.Timestamptz(3)
+  /// Set only when the upload came from a demo session: that sign-in's family
+  /// (AuthContext.sessionId). A PENDING row with it is shown only to that
+  /// session and to reviewers. Null for every normal account.
+  sessionFamilyId String?                  @db.Uuid
+  /// The reviewer who approved or rejected it. No relation: the audit trail
+  /// keeps the name, and a disabled reviewer must not block anything.
+  decidedById     String?                  @db.Uuid
+  decidedAt       DateTime?                @db.Timestamptz(3)
+  /// From PICTURE_REJECTION_REASONS (REJECTED) or PICTURE_TAKE_DOWN_REASONS (TAKEN_DOWN).
+  reasonCode      String?
+  /// The reviewer's note to the owner, at most 140 characters.
+  reasonNote      String?
+  removedAt       DateTime?                @db.Timestamptz(3)
+  /// Who ended it: the owner (WITHDRAWN), the actor of the upload or approval
+  /// that replaced it, or the reviewer who took it down.
+  removedById     String?                  @db.Uuid
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
 }
 
 /// Which role holds which permission. The names come from @orderpilot/shared;

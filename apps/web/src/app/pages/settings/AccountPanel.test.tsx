@@ -1,12 +1,17 @@
 import { act, screen } from "@testing-library/react";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { Session } from "@orderpilot/shared";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import { AccountPanel } from "./AccountPanel";
 import { loadSettingsWords, renderSettings } from "./settingsTestKit";
+import { OFF, serveStatus } from "./twoStepTestKit";
 
 beforeAll(loadSettingsWords);
+// The two-step card on this panel asks for its state.
+beforeEach(() => {
+  serveStatus(OFF);
+});
 
 /** The session changes while the section is on screen. */
 function become(session: Session) {
