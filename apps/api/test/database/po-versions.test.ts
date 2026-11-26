@@ -266,6 +266,24 @@ describe("the PO version tables", () => {
     ).toBe(0);
   });
 
+  // Only the copy table's own trigger can refuse this one: with no line
+  // inserted, the line table's trigger never fires.
+  it("refuses, at commit, a copy sealed at one line that holds none, with the head moved", async () => {
+    const orderId = await newOrder();
+    await client.query("BEGIN");
+    await client.query(COPY_SQL, [randomUUID(), orderId, 1, 1]);
+    await client.query(
+      `UPDATE "SalesOrder" SET "poVersionNo" = 2 WHERE "id" = $1`,
+      [orderId],
+    );
+    await expect(client.query("COMMIT")).rejects.toThrow(
+      /is sealed at 1 lines but holds 0/,
+    );
+    expect(
+      await db.client.salesOrderPoVersion.count({ where: { orderId } }),
+    ).toBe(0);
+  });
+
   it("refuses, at commit, a copy inserted with more lines than its count", async () => {
     const orderId = await newOrder();
     const versionId = randomUUID();
