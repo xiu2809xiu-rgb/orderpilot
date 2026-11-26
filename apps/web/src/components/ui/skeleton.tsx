@@ -1,10 +1,24 @@
 import { cn } from "@/lib/utils";
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+interface SkeletonProps extends React.ComponentProps<"div"> {
+  /**
+   * A table or a list: the block stays a still grey block. Page and card
+   * skeletons shimmer (the `dx-shimmer` band in styles/motion.css), but a work
+   * screen is never animated while it is in use. `animate-none` stays on the
+   * block so that the tests that hold tables still keep finding it.
+   */
+  still?: boolean;
+}
+
+function Skeleton({ className, still = false, ...props }: SkeletonProps) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("animate-pulse rounded-md bg-accent", className)}
+      className={cn(
+        "rounded-md bg-accent",
+        still ? "animate-none" : "dx-shimmer",
+        className,
+      )}
       {...props}
     />
   );
