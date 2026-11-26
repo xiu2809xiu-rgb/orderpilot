@@ -62,9 +62,10 @@ export interface PoVersionConfirmed {
  *
  * Each call runs inside area 1's transaction (`Database.transaction` joins an
  * open one). So a `DomainError` from the implementation rolls area 1's write
- * back, and the person sees the implementation's message as the refusal. A
- * call that is repeated with the same fact has the effect of one call. An
- * order with no workflow answers `none` and does not throw.
+ * back, and the person sees the implementation's message as the refusal,
+ * whatever their role may see: the message holds no price, total or bank
+ * detail. A call that is repeated with the same fact has the effect of one
+ * call. An order with no workflow answers `none` and does not throw.
  *
  * `order-handoff.contract.ts` holds the checks that any implementation can run.
  */
