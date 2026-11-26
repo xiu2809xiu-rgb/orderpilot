@@ -221,9 +221,11 @@ describe("Submit order on a draft's form", () => {
     expect(within(alert).getByText(words)).toBeVisible();
     expect(within(alert).getByText("It is still a draft.")).toBeVisible();
     expect(within(alert).getByText("Trace ID: trace-refused-4")).toBeVisible();
-    expect(alert).toHaveFocus();
-    // Trying again is allowed, and the button says what it answers to.
-    expect(confirmIn(dialog)).toHaveAttribute("aria-describedby", alert.id);
+    // Announced once, as the alert appears: focus goes to what can be done
+    // next, and the button does not read the failure again as its description.
+    expect(alert).not.toHaveFocus();
+    expect(confirmIn(dialog)).toHaveFocus();
+    expect(confirmIn(dialog)).not.toHaveAttribute("aria-describedby");
     expect(
       within(dialog).queryByRole("button", { name: "Reload the order" }),
     ).toBeNull();
@@ -257,10 +259,11 @@ describe("Submit order on a draft's form", () => {
       name: "Reload the order",
     });
     expect(reload).toHaveFocus();
+    expect(alert).not.toHaveFocus();
     expect(isPrimary(reload)).toBe(true);
   });
 
-  it("reads the order again and gives the form its values when Reload the order is pressed", async () => {
+  it("reads the order again when Reload the order is pressed, and shows the dialog's first view with the new edit token", async () => {
     const { user, dialog, requests, api } = await openDialog();
     answerWrite(
       "post",
@@ -281,10 +284,151 @@ describe("Submit order on a draft's form", () => {
       within(dialog).getByRole("button", { name: "Reload the order" }),
     );
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).toBeNull();
-    });
-    await waitFor(() => {
       expect(requests.orderReads).toBeGreaterThan(before);
+    });
+    // The page is drawn anew, and the dialog comes back at its first view.
+    expect(
+      await screen.findByRole("heading", {
+        name: `Submit order ${NEW_ORDER_NO}?`,
+      }),
+    ).toBeVisible();
+    const fresh = screen.getByRole("dialog");
+    expect(within(fresh).queryByRole("alert")).toBeNull();
+    expect(
+      within(fresh).queryByRole("button", { name: "Reload the order" }),
+    ).toBeNull();
+    await waitFor(() => {
+      expect(
+        within(screen.getByRole("dialog")).getByRole("button", {
+          name: "Keep editing",
+        }),
+      ).toHaveFocus();
+    });
+    answerWrite("post", SUBMIT, requests.submits, submittedAfter(api));
+    await user.click(confirmIn(screen.getByRole("dialog")));
+    await screen.findByText(
+      "This order is submitted. Only a draft can be changed.",
+    );
+    expect(requests.submits).toEqual([{ version: 3 }, { version: 5 }]);
+  });
+
+  describe("every 409 shows the server's own sentence and claims nothing about the order", () => {
+    const stale =
+      "This order was changed by someone else. Reload it to see it.";
+    const already = `Order ${NEW_ORDER_NO} is already submitted.`;
+    const nextTeam =
+      "The order cannot start: synthetic refusal of the next team.";
+
+    it.each([
+      ["a stale edit token", stale],
+      ["an order that someone else submitted meanwhile", already],
+      ["a refusal by the next team", nextTeam],
+    ])(
+      "for %s: the sentence, no claim, Reload the order first",
+      async (_name, words) => {
+        const { user, dialog, requests } = await openDialog();
+        answerWrite(
+          "post",
+          SUBMIT,
+          requests.submits,
+          refused(409, "CONFLICT", null, words),
+        );
+        await user.click(confirmIn(dialog));
+        const alert = await within(dialog).findByRole("alert");
+        expect(within(alert).getByText(words)).toBeVisible();
+        expect(within(alert).queryByText("It is still a draft.")).toBeNull();
+        expect(
+          within(dialog).queryByRole("button", { name: "Submit order" }),
+        ).toBeNull();
+        expect(
+          within(dialog).getByRole("button", { name: "Reload the order" }),
+        ).toHaveFocus();
+      },
+    );
+
+    it.each([
+      ["a stale edit token", stale],
+      ["a refusal by the next team", nextTeam],
+    ])(
+      "after %s, Reload the order brings the first view back, because the order is still a draft",
+      async (_name, words) => {
+        const { user, dialog, requests, api } = await openDialog();
+        answerWrite(
+          "post",
+          SUBMIT,
+          requests.submits,
+          refused(409, "CONFLICT", null, words),
+        );
+        await user.click(confirmIn(dialog));
+        await within(dialog).findByRole("alert");
+        api.detail = () => draftDetail({ version: 6 });
+        await user.click(
+          within(dialog).getByRole("button", { name: "Reload the order" }),
+        );
+        expect(
+          await screen.findByRole("heading", {
+            name: `Submit order ${NEW_ORDER_NO}?`,
+          }),
+        ).toBeVisible();
+        const fresh = screen.getByRole("dialog");
+        expect(within(fresh).getByText(/You cannot undo this/)).toBeVisible();
+        expect(confirmIn(fresh)).toBeVisible();
+        expect(within(fresh).queryByRole("alert")).toBeNull();
+        answerWrite("post", SUBMIT, requests.submits, submittedAfter(api));
+        await user.click(confirmIn(screen.getByRole("dialog")));
+        await screen.findByText(
+          "This order is submitted. Only a draft can be changed.",
+        );
+        expect(requests.submits.at(-1)).toEqual({ version: 6 });
+      },
+    );
+
+    it("after an order someone else submitted, Reload the order leaves no dialog and no Submit order", async () => {
+      const { user, dialog, requests, api } = await openDialog();
+      answerWrite(
+        "post",
+        SUBMIT,
+        requests.submits,
+        refused(409, "CONFLICT", null, already),
+      );
+      await user.click(confirmIn(dialog));
+      await within(dialog).findByRole("alert");
+      api.detail = () => draftDetail({ captureState: "submitted", version: 4 });
+      await user.click(
+        within(dialog).getByRole("button", { name: "Reload the order" }),
+      );
+      await screen.findByText(
+        "This order is submitted. Only a draft can be changed.",
+      );
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(screen.queryByRole("button", { name: "Submit order" })).toBeNull();
+    });
+
+    it("for an order that is not there (404): the sentence, and after Reload the page says so, with no dialog", async () => {
+      const { user, dialog, requests } = await openDialog();
+      answerWrite(
+        "post",
+        SUBMIT,
+        requests.submits,
+        refused(404, "NOT_FOUND", null, "Order not found."),
+      );
+      await user.click(confirmIn(dialog));
+      const alert = await within(dialog).findByRole("alert");
+      expect(within(alert).getByText("Order not found.")).toBeVisible();
+      expect(within(alert).queryByText("It is still a draft.")).toBeNull();
+      server.use(
+        http.get(
+          "*/api/v1/orders/:orderNo",
+          refused(404, "NOT_FOUND", null, "Order not found."),
+        ),
+      );
+      await user.click(
+        within(dialog).getByRole("button", { name: "Reload the order" }),
+      );
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+      expect(screen.queryByRole("button", { name: "Submit order" })).toBeNull();
     });
   });
 
@@ -493,6 +637,91 @@ describe("Submit order on a draft's form", () => {
       "This order is submitted. Only a draft can be changed.",
     );
     expect(requests.submits).toHaveLength(1);
+  });
+
+  it("draws no close X: Keep editing is the way out", async () => {
+    const { dialog } = await openDialog();
+    expect(within(dialog).queryByRole("button", { name: "Close" })).toBeNull();
+    expect(within(dialog).getAllByRole("button")).toHaveLength(2);
+  });
+
+  it("left-aligns the header, and lets a long PO number or part number wrap inside the dialog", async () => {
+    const po = `PO-${"A".repeat(60)}`;
+    const part = "B".repeat(60);
+    const { dialog } = await openDialog({
+      externalDocumentNo: po,
+      shortage: SHORT,
+      shortageCount: 1,
+      lines: draftDetail().lines.map((line) => ({
+        ...line,
+        description: part,
+      })),
+    });
+    // jsdom has no layout: the classes are what makes a long word wrap.
+    const header = dialog.querySelector("[data-slot='dialog-header']");
+    expect(header?.className.split(" ")).toContain("text-left");
+    expect(header?.className.split(" ")).not.toContain("text-center");
+    const summary = within(dialog).getByText(new RegExp(po));
+    expect(summary.className.split(" ")).toEqual(
+      expect.arrayContaining(["min-w-0", "break-words"]),
+    );
+    const warning = within(dialog).getByText(new RegExp(`short on ${part}`));
+    expect(warning.className.split(" ")).toEqual(
+      expect.arrayContaining(["min-w-0", "break-words"]),
+    );
+    expect(summary.parentElement?.className.split(" ")).toContain("min-w-0");
+  });
+
+  it("moves focus to Submit order, not to the alert, after a refusal", async () => {
+    const refusal = await openDialog();
+    answerWrite(
+      "post",
+      SUBMIT,
+      refusal.requests.submits,
+      refused(400, "VALIDATION_FAILED", null, "Not now."),
+    );
+    await refusal.user.click(confirmIn(refusal.dialog));
+    const alert = await within(refusal.dialog).findByRole("alert");
+    expect(alert).not.toHaveFocus();
+    expect(alert).not.toHaveAttribute("tabindex");
+    expect(confirmIn(refusal.dialog)).toHaveFocus();
+  });
+
+  it("shows no failure to someone who signed in while the request was in flight", async () => {
+    const { user, dialog, requests } = await openDialog();
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    server.use(
+      http.post(SUBMIT, async ({ request }) => {
+        requests.submits.push(await request.json());
+        await gate;
+        return refused(
+          400,
+          "VALIDATION_FAILED",
+          null,
+          "Words for the first person.",
+        )();
+      }),
+    );
+    await user.click(confirmIn(dialog));
+    expect(requests.submits).toHaveLength(1);
+    const session = useSessionStore.getState().session;
+    if (!session) throw new Error("no session");
+    // The id changes with no render in between, as a sign-in in another tab
+    // does: only a check when the request settles can catch it.
+    const first = session.user;
+    session.user = { ...first, id: "00000000-0000-4000-8000-0000000000bb" };
+    try {
+      release();
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+    } finally {
+      session.user = first;
+    }
+    expect(screen.queryByText("Words for the first person.")).toBeNull();
   });
 
   it("is clean for axe with the dialog open", async () => {

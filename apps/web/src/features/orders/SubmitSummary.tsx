@@ -1,7 +1,7 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
-import { CircleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatMoney, formatQuantity } from "@/lib/format";
+import { SubmitWarning } from "./SubmitWarning";
 
 /** What the line says: its words, or the item's number when the line has none. */
 function itemOf(record: SalesOrderDetail, itemNo: string): string {
@@ -29,8 +29,8 @@ export function SubmitSummary({ record }: { record: SalesOrderDetail }) {
       }
     : null;
   return (
-    <div className="space-y-s1 text-sm">
-      <p>
+    <div className="min-w-0 space-y-s1 text-sm">
+      <p className="min-w-0 break-words">
         {t("form.submit.summary", {
           count: record.lines.length,
           customerNo: record.customerNo,
@@ -46,30 +46,18 @@ export function SubmitSummary({ record }: { record: SalesOrderDetail }) {
         </p>
       ) : null}
       {total !== null && Number(total) === 0 ? (
-        <Warning>{t("form.submit.zeroTotal")}</Warning>
+        <SubmitWarning>{t("form.submit.zeroTotal")}</SubmitWarning>
       ) : null}
       {gap ? (
-        <Warning>
+        <SubmitWarning>
           {record.shortageCount > 1
             ? t("form.submit.shortMore", {
                 ...gap,
                 count: record.shortageCount - 1,
               })
             : t("form.submit.short", gap)}
-        </Warning>
+        </SubmitWarning>
       ) : null}
     </div>
-  );
-}
-
-function Warning({ children }: { children: string }) {
-  return (
-    <p className="flex items-start gap-s1">
-      <CircleAlert
-        className="mt-0.5 size-4 shrink-0 text-warning"
-        aria-hidden="true"
-      />
-      <span>{children}</span>
-    </p>
   );
 }

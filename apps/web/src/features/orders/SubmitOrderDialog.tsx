@@ -1,6 +1,6 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
 import { CircleAlert } from "lucide-react";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +34,8 @@ const PRESSABLE = "aria-disabled:cursor-not-allowed aria-disabled:opacity-50";
  * submitted. Focus starts on "Keep editing", so Enter never submits by habit,
  * and no shortcut confirms. While the request is in flight both buttons are
  * `aria-disabled` and ignore presses (not `disabled`, which drops focus), and
- * Escape and an outside click do nothing. After a failure it says only what
+ * Escape and an outside click do nothing. The same holds while the order is
+ * read again after a refusal (`submitting` is true then too). After a failure it says only what
  * the failure proves (see `SubmitFailure`) and focus moves to what to do next.
  */
 export function SubmitOrderDialog({
@@ -47,15 +48,16 @@ export function SubmitOrderDialog({
   returnFocusTo,
 }: SubmitOrderDialogProps) {
   const { t } = useTranslation("orders");
-  const alertId = useId();
   const keep = useRef<HTMLButtonElement>(null);
   const reload = useRef<HTMLButtonElement>(null);
-  const alert = useRef<HTMLDivElement>(null);
+  const confirm = useRef<HTMLButtonElement>(null);
   const kind = failure?.kind ?? null;
   const mustReload = kind === "reload" || kind === "unknown";
   useEffect(() => {
+    // The block is announced once, as it appears (role="alert"). Focus goes to
+    // what the person can do next, so the failure is not read a second time.
     if (failure === null) return;
-    (failure.kind === "refused" ? alert : reload).current?.focus();
+    (failure.kind === "refused" ? confirm : reload).current?.focus();
   }, [failure]);
   const hold = (event: Event) => {
     if (submitting) event.preventDefault();
@@ -70,6 +72,8 @@ export function SubmitOrderDialog({
       <DialogContent
         // A phone turned on its side is 390 px tall: the dialog scrolls inside itself.
         className="max-h-[calc(100dvh-1rem)] sm:max-w-md"
+        // Keep editing is the way out: a second one that does nothing during a submit is not drawn.
+        showCloseButton={false}
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           keep.current?.focus();
@@ -81,7 +85,7 @@ export function SubmitOrderDialog({
         onEscapeKeyDown={hold}
         onInteractOutside={hold}
       >
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle>
             {t("form.submit.title", { orderNo: record.orderNo })}
           </DialogTitle>
@@ -93,17 +97,14 @@ export function SubmitOrderDialog({
         <SubmitSummary record={record} />
         {failure ? (
           <div
-            ref={alert}
-            id={alertId}
             role="alert"
-            tabIndex={-1}
-            className="flex items-start gap-s1 rounded-md border border-destructive/30 bg-(--destructive-surface) p-s2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex items-start gap-s1 rounded-md border border-destructive/30 bg-(--destructive-surface) p-s2 text-sm"
           >
             <CircleAlert
               className="mt-0.5 size-4 shrink-0 text-destructive"
               aria-hidden="true"
             />
-            <div className="min-w-0 space-y-1">
+            <div className="min-w-0 space-y-1 break-words">
               <p className="font-medium">
                 {t(
                   failure.kind === "unknown"
@@ -140,21 +141,27 @@ export function SubmitOrderDialog({
           >
             {t("form.submit.keep")}
           </Button>
+          {/* Keyed, so React draws a new button and the focus effect, not a reused node, decides where focus is. */}
           {mustReload ? (
             <Button
+              key="reload"
               ref={reload}
               type="button"
-              className="pointer-coarse:h-11"
-              onClick={onReload}
+              aria-disabled={submitting || undefined}
+              className={`pointer-coarse:h-11 ${PRESSABLE}`}
+              onClick={() => {
+                if (!submitting) onReload();
+              }}
             >
               {t("form.submit.reload")}
             </Button>
           ) : (
             <Button
+              key="confirm"
+              ref={confirm}
               type="button"
               aria-disabled={submitting || undefined}
               aria-busy={submitting || undefined}
-              aria-describedby={failure ? alertId : undefined}
               className={`pointer-coarse:h-11 ${PRESSABLE}`}
               onClick={() => {
                 if (!submitting) onConfirm();

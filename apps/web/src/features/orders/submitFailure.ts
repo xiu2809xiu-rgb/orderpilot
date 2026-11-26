@@ -3,8 +3,10 @@ import { formMessage } from "@/components/form";
 
 /**
  * What a failed submit proves, and so what the dialog may say:
- * - `reload`: the order is not what the person read (another save, another
- *   submit, or gone). Submitting again would only meet the same answer.
+ * - `reload`: any 409 or 404, in the server's own words. It may be another
+ *   save, another submit, a refusal by the team that takes the order next, or
+ *   an order that is gone, and the answer does not say which: so nothing is
+ *   claimed about the order, and the person reads it again first.
  * - `refused`: the server said no in its own words and rolled everything back,
  *   so the order is still a draft, and the person may try again.
  * - `unknown`: there was no answer we can trust (a 5xx, a dead network, a page

@@ -72,6 +72,7 @@ export function OrderDocument({
     record,
     serverPaths: save.serverPaths,
     onReload,
+    canReopen: state === undefined,
   });
   const actions = useOrderActions({
     form,
