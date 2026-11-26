@@ -165,18 +165,21 @@ function LoadedDocument<T extends FieldValues, O, R>(
         aria-label={formLabel}
         className="df-form space-y-0"
       >
-        <div className="df-bar">
-          <DocumentActionBar
-            form={form}
-            actions={props.actions}
-            save={save}
-            saveNew={saveNew}
-            onPrint={onPrint}
-            target={{ formId, label: number }}
-            saveBlocked={props.saveBlocked}
-            allowClean={allowClean}
-          />
-        </div>
+        {/* A form that declares no action, as the order form does while a panel holds the decision, draws no bar: an empty one would show as a blank strip. */}
+        {props.actions.length > 0 ? (
+          <div className="df-bar">
+            <DocumentActionBar
+              form={form}
+              actions={props.actions}
+              save={save}
+              saveNew={saveNew}
+              onPrint={onPrint}
+              target={{ formId, label: number }}
+              saveBlocked={props.saveBlocked}
+              allowClean={allowClean}
+            />
+          </div>
+        ) : null}
         {props.notices}
         <Section
           title={props.sectionTitles?.header ?? t("sections.header")}

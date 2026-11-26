@@ -161,6 +161,17 @@ describe("the action bar", () => {
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
+  it("draws no bar at all when the form declares no action", () => {
+    signInAs("SUPPORT");
+    const { container } = renderDocument({ actions: [] });
+    expect(
+      screen.queryByRole("group", { name: "Document actions" }),
+    ).toBeNull();
+    expect(container.querySelector(".df-bar")).toBeNull();
+    // The rest of the form is still there.
+    expect(screen.getByRole("region", { name: "Header" })).toBeVisible();
+  });
+
   it("draws the screen's notices between the bar and the header", () => {
     signInAs("SUPPORT");
     renderDocument({ notices: <p>Payment on hold</p> });

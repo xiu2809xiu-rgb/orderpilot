@@ -60,7 +60,10 @@ export function OrderDocument({
   readOnly,
   onReload,
 }: OrderDocumentProps) {
-  const { t } = useTranslation("orders");
+  // The second namespace is the panel's: its words load with the page, because
+  // a namespace that loads when the panel opens suspends the whole page behind
+  // its skeleton, and the form's draft is read again when the page comes back.
+  const { t } = useTranslation(["orders", "directions-orders"]);
   const orderNo = record?.orderNo ?? null;
   const schema = useMemo(
     () => makeOrderFormSchema(t, priceMasked),

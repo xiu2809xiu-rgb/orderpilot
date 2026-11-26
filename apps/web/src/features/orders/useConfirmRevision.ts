@@ -18,7 +18,7 @@ import type { Run } from "./revisionRun";
 
 /**
  * Pressing Confirm: sends the body that was previewed with the number it was
- * compared with, and on success ends the form's life: a toast, the form reset
+ * compared with, and on success ends the form's life: a toast, the form made clean
  * (which drops the typed draft), the order written to the cache, and a move to
  * the order's Versions tab. A second press while one is in flight does nothing,
  * and neither does one after someone else has signed in over the page.
@@ -84,7 +84,10 @@ export function useConfirmRevision(options: {
     setRun((current) => (current ? { ...current, saved: true } : null));
     writing.current = true;
     try {
-      form.reset();
+      // The typed values become the clean state, as a saved form's do, which
+      // drops the draft. A blank reset would draw an empty form for the moment
+      // the next page takes to load, and the next New order is blank anyway.
+      form.reset(form.getValues());
     } finally {
       writing.current = false;
     }

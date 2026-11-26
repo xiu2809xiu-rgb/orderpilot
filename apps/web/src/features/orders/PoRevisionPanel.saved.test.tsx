@@ -86,4 +86,43 @@ describe("the panel after a saved confirmation, before the page changes", () => 
     expect(screen.queryByRole("button", { name: /^Save/ })).toBeNull();
     expect(requests.confirms).toHaveLength(1);
   });
+
+  it("keeps what was typed in the form, and drops the draft, until the page changes", async () => {
+    const user = userEvent.setup();
+    const { requests } = serveRevision();
+    renderOrders("/orders/new");
+    await saveRefused(user);
+    const typed = screen.getByRole<HTMLInputElement>("textbox", {
+      name: /Customer PO number/,
+    }).value;
+    expect(typed).not.toBe("");
+    await openPanel(user);
+    answerConfirm(requests, () =>
+      Response.json(
+        {
+          data: {
+            poVersionNo: 2,
+            supersedesPoVersionNo: 1,
+            differences: differences(),
+            order: submittedOrder({ poVersionNo: 2, version: 5 }),
+          },
+        },
+        { status: 201 },
+      ),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Confirm PO version 2" }),
+    );
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalled();
+    });
+    // A slow page leaves this one on screen: it must not show an emptied form.
+    expect(
+      screen.getByRole("textbox", { name: /Customer PO number/ }),
+    ).toHaveValue(typed);
+    // The draft is gone all the same, so the next New order starts blank.
+    expect(
+      Object.keys(localStorage).filter((key) => key.includes(".draft.")),
+    ).toEqual([]);
+  });
 });
