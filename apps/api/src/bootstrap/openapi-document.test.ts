@@ -137,4 +137,17 @@ describe("the OpenAPI document (what orval reads)", () => {
       '"required":["data","meta"]',
     );
   });
+
+  it("keeps the largest value of the PO version path parameter", async () => {
+    const { paths } = await documentOf();
+    const one =
+      paths["/api/v1/orders/{orderNo}/po-versions/{poVersionNo}"]?.get;
+    const parameter = one?.parameters?.find(
+      (p) => "name" in p && p.name === "poVersionNo",
+    );
+    expect(parameter).toMatchObject({
+      in: "path",
+      schema: { type: "integer", minimum: 1, maximum: 2147483647 },
+    });
+  });
 });

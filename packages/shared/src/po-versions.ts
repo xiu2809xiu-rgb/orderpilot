@@ -98,6 +98,12 @@ export const headerDifferenceSchema = z.object({
   changed: z.boolean(),
 });
 
+/**
+ * One line of a differences view. Read `status` to know what happened to the
+ * line: `quantity.changed` and the price's `changed` are false for an added or
+ * a removed line (there is nothing to compare), even though `from` or `to`
+ * holds a value, so a reader of `changed` alone would draw it as unchanged.
+ */
 export const lineDifferenceSchema = z.object({
   status: z.enum(["added", "removed", "changed", "unchanged"]),
   itemNo: z.string().min(1),

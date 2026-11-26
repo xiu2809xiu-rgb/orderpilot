@@ -103,7 +103,9 @@ export class PoVersionsController {
   @ApiParam({ name: "orderNo", schema: { type: "string" } })
   @ApiParam({
     name: "poVersionNo",
-    schema: { type: "integer", minimum: 1 },
+    // The server refuses anything above the largest INTEGER; say so here, since
+    // this hand-written parameter is the only place the limit would be lost.
+    schema: { type: "integer", minimum: 1, maximum: 2147483647 },
   })
   @ApiOperation({ summary: "One PO version with its lines" })
   @ApiOkResponse({ schema: openApiSchema(poVersionDetailResponseSchema) })
