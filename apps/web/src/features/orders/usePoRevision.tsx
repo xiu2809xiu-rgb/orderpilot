@@ -1,4 +1,5 @@
 import type { CreateSalesOrderBody } from "@orderpilot/shared";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useCallback,
   useEffect,
@@ -8,6 +9,7 @@ import {
   type RefObject,
 } from "react";
 import { useViewerChanged } from "@/components/form";
+import { getOrdersOneQueryKey } from "@/lib/api/generated/endpoints/orders/orders";
 import { hasPermission, useSessionStore } from "@/stores/session";
 import { PoRevisionPanel } from "./PoRevisionPanel";
 import { previewRevision } from "./revisionCalls";
@@ -56,6 +58,7 @@ export function usePoRevision(options: {
 } {
   const { form, notice } = options;
   const otherViewer = useViewerChanged();
+  const queryClient = useQueryClient();
   const mayEdit = useSessionStore((state) =>
     hasPermission(state.session, "orders.edit"),
   );
@@ -76,12 +79,15 @@ export function usePoRevision(options: {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const returnFocus = useRef(false);
 
+  // A saved confirmation keeps the panel open while the route changes: the form
+  // is reset by then, and the notice that owned the panel goes with it.
   const open =
-    duplicate !== null &&
-    fromCreate &&
-    run?.of === duplicate &&
-    !moved &&
-    !otherViewer;
+    run?.saved === true ||
+    (duplicate !== null &&
+      fromCreate &&
+      run?.of === duplicate &&
+      !moved &&
+      !otherViewer);
 
   const wasOpen = useRef(false);
   useEffect(() => {
@@ -115,7 +121,13 @@ export function usePoRevision(options: {
       keptBody.current?.of === duplicate
         ? keptBody.current.body
         : duplicate.body;
-    setRun({ of: duplicate, body, phase: { kind: "loading" }, kept: false });
+    setRun({
+      of: duplicate,
+      body,
+      phase: { kind: "loading" },
+      kept: false,
+      saved: false,
+    });
     void preview(duplicate, body);
   }, [duplicate, preview]);
 
@@ -171,6 +183,11 @@ export function usePoRevision(options: {
       onClose={close}
       onConfirm={confirm}
       onCompareAgain={() => {
+        // The order may have moved on, which is why the person is comparing
+        // again: its facts are read again beside the new preview.
+        void queryClient.invalidateQueries({
+          queryKey: getOrdersOneQueryKey(run.of.orderNo),
+        });
         void preview(run.of, run.body);
       }}
       onKeepHeader={keepHeader}

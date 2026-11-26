@@ -8,9 +8,11 @@ import type {
   PoVersionDifferences,
   SalesOrderDetail,
 } from "@orderpilot/shared";
-import { differences } from "@/features/directions/screens/order/versions/versionsTestKit";
 import {
-  answerWrite,
+  differences,
+  maskedDifferences,
+} from "@/features/directions/screens/order/versions/versionsTestKit";
+import {
   draftDetail,
   fakeServer,
   http,
@@ -70,6 +72,15 @@ export function previewOf(
   };
 }
 
+/** `previewOf` for a role that may not see prices: no price anywhere, a mask in its place. */
+export function maskedPreviewOf(
+  body: CreateSalesOrderBody,
+  stored = submittedOrder(),
+): PoVersionDifferences {
+  const { pricesCompared, total, lines } = maskedDifferences();
+  return { ...previewOf(body, stored), pricesCompared, total, lines };
+}
+
 export interface RevisionRequests {
   previews: CreateSalesOrderBody[];
   confirms: unknown[];
@@ -80,6 +91,13 @@ export interface RevisionApi {
   stored: SalesOrderDetail;
   /** The status the preview answers with, when it is not 200. */
   previewStatus: number;
+  /** What the preview answers instead, when a test needs a particular refusal. */
+  previewReply: (() => Response) | null;
+  /** The preview and the create wait for these before they answer. */
+  previewGate: Promise<void> | null;
+  createGate: Promise<void> | null;
+  /** A role that sees no prices: the form draws no price column. */
+  masked: boolean;
   differences: (body: CreateSalesOrderBody) => PoVersionDifferences;
 }
 
@@ -92,37 +110,43 @@ export function serveRevision(over: Partial<RevisionApi> = {}) {
   const api: RevisionApi = {
     stored: submittedOrder(),
     previewStatus: 200,
+    previewReply: null,
+    previewGate: null,
+    createGate: null,
+    masked: false,
     differences: (body) => previewOf(body, api.stored),
     ...over,
   };
-  const kit = fakeServer({ detail: () => api.stored });
+  const kit = fakeServer({ detail: () => api.stored, masked: api.masked });
   const requests: RevisionRequests = {
     previews: [],
     confirms: [],
     creates: [],
   };
-  answerWrite(
-    "post",
-    CREATE,
-    requests.creates,
-    refused(
-      409,
-      "CONFLICT",
-      [
-        {
-          path: "externalDocumentNo",
-          message: "This customer already has an order with this PO.",
-        },
-        { path: "existingOrderNo", message: EXISTING },
-      ],
-      "That PO number is already an order.",
-      "trace-dup-1",
-    ),
+  const duplicate = refused(
+    409,
+    "CONFLICT",
+    [
+      {
+        path: "externalDocumentNo",
+        message: "This customer already has an order with this PO.",
+      },
+      { path: "existingOrderNo", message: EXISTING },
+    ],
+    "That PO number is already an order.",
+    "trace-dup-1",
   );
   server.use(
+    http.post(CREATE, async ({ request }) => {
+      requests.creates.push(await request.json());
+      await api.createGate;
+      return duplicate();
+    }),
     http.post(PREVIEW, async ({ request }) => {
       const body = (await request.json()) as CreateSalesOrderBody;
       requests.previews.push(body);
+      await api.previewGate;
+      if (api.previewReply) return api.previewReply();
       if (api.previewStatus !== 200) {
         return refused(
           api.previewStatus,
@@ -154,7 +178,13 @@ export function answerConfirm(
 type User = ReturnType<typeof userEvent.setup>;
 
 /** Types the order the way a person does, with the PO number given. */
-export async function fillNewOrder(user: User, po: string, quantity = "2") {
+export async function fillNewOrder(
+  user: User,
+  po: string,
+  quantity = "2",
+  /** Null for a role that sees no price: the column is not there to type in. */
+  price: string | null = "18.40",
+) {
   await user.type(
     await screen.findByRole("combobox", { name: /^Customer$/ }),
     "C-0001",
@@ -170,15 +200,20 @@ export async function fillNewOrder(user: User, po: string, quantity = "2") {
     expect(field).toHaveFocus();
   });
   await user.keyboard(quantity);
+  if (price === null) return;
   await user.type(
     screen.getByRole("textbox", { name: /Unit price, line 1/ }),
-    "18.40",
+    price,
   );
 }
 
 /** Fills and saves: the create is refused as a repeated PO number. */
-export async function saveRefused(user: User, po = "PO-7731") {
-  await fillNewOrder(user, po);
+export async function saveRefused(
+  user: User,
+  po = "PO-7731",
+  price: string | null = "18.40",
+) {
+  await fillNewOrder(user, po, "2", price);
   await user.click(screen.getByRole("button", { name: /^Save$/ }));
 }
 

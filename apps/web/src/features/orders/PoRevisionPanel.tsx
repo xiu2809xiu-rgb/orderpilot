@@ -2,10 +2,10 @@ import { useEffect, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { countsText } from "@/features/directions/screens/order/versions/differenceText";
 import { PoDifferences } from "@/features/directions/screens/order/versions/PoDifferences";
-import { Button } from "@/components/ui/button";
 import { formatDay } from "@/lib/format";
 import type { ExistingOrder } from "./useExistingOrder";
 import { FailureAlert } from "./FailureAlert";
+import { KeepHeader } from "./KeepHeader";
 import { RevisionButtons } from "./RevisionButtons";
 import { headerDiffers, type RevisionPhase } from "./revisionRun";
 
@@ -43,6 +43,12 @@ export function PoRevisionPanel({
   useEffect(() => {
     heading.current?.focus();
   }, []);
+  // Compare again, Try again and Keep leave the screen while the new preview
+  // loads, so focus moves to the heading first and is not lost with the button.
+  const holdFocus = (action: () => void) => () => {
+    heading.current?.focus();
+    action();
+  };
   const data = "data" in phase ? phase.data : null;
   const next = data?.toPoVersionNo ?? null;
   const current = data?.fromPoVersionNo ?? null;
@@ -107,23 +113,10 @@ export function PoRevisionPanel({
             {t("form.revision.intro", { current })}
           </p>
           {headerDiffers(data) ? (
-            <div className="flex flex-wrap items-center gap-s2">
-              <p className="max-w-[70ch] flex-1 basis-64 text-sm text-muted-foreground">
-                {t("form.revision.headerHint")}
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="pointer-coarse:min-h-11"
-                aria-disabled={phase.kind === "confirming"}
-                onClick={() => {
-                  if (phase.kind !== "confirming") onKeepHeader();
-                }}
-              >
-                {t("form.revision.keepHeader")}
-              </Button>
-            </div>
+            <KeepHeader
+              busy={phase.kind === "confirming"}
+              onKeep={holdFocus(onKeepHeader)}
+            />
           ) : null}
           <PoDifferences
             differences={data}
@@ -167,7 +160,7 @@ export function PoRevisionPanel({
         next={next}
         onClose={onClose}
         onConfirm={onConfirm}
-        onCompareAgain={onCompareAgain}
+        onCompareAgain={holdFocus(onCompareAgain)}
       />
       <p role="status" className="sr-only">
         {phase.kind === "ready" && phase.failure === null && data

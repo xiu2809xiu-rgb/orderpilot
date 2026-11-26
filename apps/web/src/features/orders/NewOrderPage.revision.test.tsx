@@ -52,7 +52,7 @@ describe("the offer in the notice of a repeated PO number", () => {
     expect(offer).toHaveAttribute("aria-expanded", "false");
     expect(
       await screen.findByText(
-        `${EXISTING} is submitted: order date 8 Nov 2026, 1 lines, PO version 1. If this is the customer's revised PO, you can confirm it as PO version 2. If it is a different PO that uses the same number, change the PO number here and save it as a new order.`,
+        `${EXISTING} is submitted: order date 8 Nov 2026, 1 line, PO version 1. If this is the customer's revised PO, you can confirm it as PO version 2. If it is a different PO that uses the same number, change the PO number here and save it as a new order.`,
       ),
     ).toBeVisible();
     // The link to the order is still there beside it.

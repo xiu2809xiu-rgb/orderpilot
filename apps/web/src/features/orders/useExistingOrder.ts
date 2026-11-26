@@ -1,4 +1,5 @@
 import { useOrdersOne } from "@/lib/api/generated/endpoints/orders/orders";
+import { hasPermission, useSessionStore } from "@/stores/session";
 
 /** What the order that a repeated PO number belongs to is, as far as the page can tell. */
 export interface ExistingOrder {
@@ -28,18 +29,24 @@ const NOTHING = {
  * and what can be done: edit it if it is a draft, add a PO version if it is
  * submitted. Asked only for a repeated PO number from a create; the read is made
  * once and never repeated on a refocus or a reconnect, so the notice does not
- * change its words under a person's eyes.
+ * change its words under a person's eyes. A session without `orders.read` does
+ * not ask: the read would be a refused, audited request, so the order is
+ * `unknown` to it.
  */
 export function useExistingOrder(orderNo: string | null): ExistingOrder | null {
+  const mayRead = useSessionStore((state) =>
+    hasPermission(state.session, "orders.read"),
+  );
   const query = useOrdersOne(orderNo ?? "", {
     query: {
-      enabled: orderNo !== null,
+      enabled: orderNo !== null && mayRead,
       retry: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
     },
   });
   if (orderNo === null) return null;
+  if (!mayRead) return { kind: "unknown", ...NOTHING };
   if (query.isPending) return { kind: "reading", ...NOTHING };
   const detail = query.data?.data;
   if (!detail) return { kind: "unknown", ...NOTHING };

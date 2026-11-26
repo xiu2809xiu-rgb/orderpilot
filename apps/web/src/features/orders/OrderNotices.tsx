@@ -49,7 +49,8 @@ export function OrderNotices({
   revision,
 }: OrderNoticesProps): ReactNode {
   const { t } = useTranslation("orders");
-  if (!notice && !readOnly) return null;
+  // The panel of a saved confirmation outlives the notice that opened it.
+  if (!notice && !readOnly && !revision.node) return null;
   return (
     <div className="space-y-s1">
       {notice?.kind === "duplicate" ? (

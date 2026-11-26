@@ -64,8 +64,9 @@ export function useConfirmRevision(options: {
           ? { ...current, phase: { kind: "ready", data, failure } }
           : null,
       );
-      // The PO version may be saved after all: the order is read again.
-      if (failure.kind === "unknown") {
+      // The PO version may be saved after all, or the order has moved on: the
+      // order is read again, so the facts the panel states are the new ones.
+      if (failure.kind === "unknown" || failure.kind === "stale") {
         void queryClient.invalidateQueries({
           queryKey: getOrdersOneQueryKey(orderNo),
         });
@@ -77,8 +78,16 @@ export function useConfirmRevision(options: {
     toast.done(
       t("form.revision.done", { n: result.answer.poVersionNo, orderNo }),
     );
+    // The panel stays in its confirming state, with its form locked, until the
+    // route has changed: the reset below would otherwise take the notice and the
+    // panel away and bring the Save bar back on a blank form.
+    setRun((current) => (current ? { ...current, saved: true } : null));
     writing.current = true;
-    form.reset();
+    try {
+      form.reset();
+    } finally {
+      writing.current = false;
+    }
     queryClient.setQueryData(getOrdersOneQueryKey(orderNo), {
       data: result.answer.order,
     });

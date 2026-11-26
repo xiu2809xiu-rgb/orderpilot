@@ -72,4 +72,6 @@ export interface Run {
   body: CreateSalesOrderBody;
   phase: RevisionPhase;
   kept: boolean;
+  /** The confirmation was saved: the panel stays as it is until the page changes. */
+  saved: boolean;
 }

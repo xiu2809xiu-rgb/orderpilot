@@ -15,7 +15,10 @@ type Duplicate = Extract<OrderNotice, { kind: "duplicate" }>;
  *
  * The subscription lives only while there is something to lose, and compares a
  * key of the typed fields, not the whole form, so a poll that writes the stock
- * beside a line never counts.
+ * beside a line never counts. The key is also compared once when the
+ * subscription starts: a field edited while the create was still in flight
+ * leaves no later event, so without that look the offer would stay on a body
+ * that no longer matches the form.
  */
 export function useRevisionWatch(
   form: OrderForm,
@@ -33,6 +36,11 @@ export function useRevisionWatch(
   useEffect(() => {
     if (!duplicate || !watched) return;
     baseline.current = duplicate.formKey;
+    if (formKey(form.getValues()) !== baseline.current) {
+      // An edit made while the create was in flight: the notice arrived late.
+      setMovedFor(duplicate);
+      return;
+    }
     const watching = form.watch(() => {
       if (writing.current) return;
       if (formKey(form.getValues()) !== baseline.current) {
