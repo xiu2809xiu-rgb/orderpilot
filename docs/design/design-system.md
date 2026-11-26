@@ -74,12 +74,12 @@ One set of levels and one rhythm, set in the tokens and the shared parts, so tha
 
 The faint tier is for text on a card or a panel only. On the bare ground it measures 2.6:1 in light and 3.5:1 in dark, below 4.5:1, so a page head, the date line and a hint that sits on the ground stay in the body colour. `tokens.test.ts` measures every faint pair on `--card`, `--panel-strong`, `--popover` and `--secondary`, and the body colour on the ground.
 
-The class is `text-faint-foreground` (Tailwind reads `--faint-foreground` through `--color-faint-foreground` in `styles/index.css`), for a label above a value, a setting's description, a timer and an empty line. Three rules:
+The class is `text-faint-foreground` (Tailwind reads `--faint-foreground` through `--color-faint-foreground` in `styles/index.css`), for a label above a value, a setting's description, a timer and an empty line. Four rules:
 
 - **Cards, panels and popovers only.** Never on the bare ground: a page intro, a date line or a count beside a title stays in the body colour.
 - **Not under the pointer light or a hover fill, except on the work panel.** A spotlight tile (a KPI tile, a count tile) is lit with the ring colour, and a count tile takes the hover fill over its card. On a card both take the faint tier under 4.5:1 (dark: 3.81 and 3.92), so a tile's label stays in the body colour. `tokens.test.ts` measures the body colour on each, and the faint tier on the work panel under the 8% light of a home section.
 - **Never the only sign of a status.** A late order, a failure or a hold also has its words, its icon or its chip.
-- **Label quiet, value loud.** On a card the label is faint and the value is ink (or the 600 numeral), so a blurred card still shows where the answer is.
+- **Label quiet, value loud.** On a card the value is ink (or the 600 numeral) and the label is quieter than it: faint where the card allows it, the body colour on a lit or hovered tile. A blurred card then still shows where the answer is.
 
 The rhythm is four tokens, all multiples of 8 px, declared in `tokens.css`. A fifth, `--dx-measure` (72 characters, class `.dx-measure`), is the longest line of prose or small print.
 
