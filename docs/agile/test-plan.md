@@ -74,7 +74,7 @@ Each row is a case some test must cover. The story is the one that brings the te
 | A13 | A code works once, one step either side of the clock                                       | A second use is refused, in any tab; two steps away is refused            | API               | Today               |
 | A14 | Five wrong codes end a sign-in; ten in 15 minutes lock the code entry                      | A recovery code still works; the third lock in a row lasts 24 hours       | API               | Today               |
 | A15 | Turning two-step off needs a password and a proof                                          | A session cookie alone is refused                                         | API               | Today               |
-| A16 | An administrator resets another person's two-step                                          | Never one's own; every session of that person ends                        | API               | Today               |
+| A16 | An administrator resets another person's two-step                                          | Never one's own; every session of that person ends; refused in production | API               | Today               |
 
 ### Order workflows and approvals (area 2)
 
