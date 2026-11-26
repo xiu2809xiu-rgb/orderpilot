@@ -101,7 +101,7 @@ export class UsersController {
   @idDoc
   @ApiOperation({
     summary:
-      "Reset another person's two-step verification and end all their sessions. Never your own",
+      "Reset another person's two-step verification and end all their sessions. Never your own. Refused in production",
   })
   @ApiOkResponse({ schema: openApiSchema(twoStepResetResponseSchema) })
   async resetTwoStep(

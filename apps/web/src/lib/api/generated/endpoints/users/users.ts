@@ -420,7 +420,7 @@ export function useUsersEnable<TData = Awaited<ReturnType<typeof usersEnable>>, 
 
 
 /**
- * @summary Reset another person's two-step verification and end all their sessions. Never your own
+ * @summary Reset another person's two-step verification and end all their sessions. Never your own. Refused in production
  */
 export const usersResetTwoStep = (
     id: string,
@@ -491,7 +491,7 @@ export function useUsersResetTwoStep<TData = Awaited<ReturnType<typeof usersRese
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Reset another person's two-step verification and end all their sessions. Never your own
+ * @summary Reset another person's two-step verification and end all their sessions. Never your own. Refused in production
  */
 
 export function useUsersResetTwoStep<TData = Awaited<ReturnType<typeof usersResetTwoStep>>, TError = ErrorType<unknown>>(

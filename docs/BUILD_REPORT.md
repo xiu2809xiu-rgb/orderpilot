@@ -363,6 +363,8 @@ The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 
 | P-111 | Grid polish                                                      | P    | could    | 5      | 13      | `feat/platform-grid-polish`           | Not started                                                   |
 | P-112 | Small delights                                                   | P    | could    | 3      | 13      | `feat/platform-small-delights`        | Not started                                                   |
 
+_Note, 26 Nov 2026 ([#227](https://github.com/xiu2809xiu-rgb/orderpilot/issues/227)):_ the table above is the cut as it was made. Since then P-89 has been re-based: it named P-51 and P-55, which none of its criteria needs, while nothing yet submits an order made on the form and no such order reaches the workflow. Two stories now come before it, P-113 (the PO version contract, 2 points, [#404](https://github.com/xiu2809xiu-rgb/orderpilot/issues/404)) and P-114 (Submit an order, 3 points, the first half of P-50), and P-89 is 8 points over Sprints 06 and 07. P-50 keeps cancel and copy at 3 points. P-50 and P-51 leave Sprint 02, where they were never started, for Sprint 07: a placeholder until Richie plans them.
+
 ## Prompt 004: an ERP-grade workspace
 
 [Prompt 004](ai/prompts/004-erp-grade-workspace.md) is Richie's brief of 1 Nov, after comparing OrderPilot with a real ERP. Records can be created, edited and voided, navigation follows the business, and two templates carry every screen. It finishes prompt 003's open items on those templates, so nothing is built twice. The prompt that writes each area's stories is now prompt 005.
@@ -414,6 +416,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #356  | A day-night switch replaces the theme menu            | `feat/area1-pixel-theme-switch`  | This pull request. The pixel toggle in the bar, menu and sign-in corner             |
 | #364  | Visual hierarchy and breathing room                   | `feat/area1-visual-hierarchy`    | This pull request. One rhythm in four tokens, one page stack, card padding of 24 px |
 | #384  | Scroll areas show which side has more                 | `feat/area1-scroll-edge-hint`    | This pull request. A quiet mark on each side of a scroll area that has more         |
+| #416  | The orders list test counts its days from today       | `test/web-date-range-days`       | This pull request. The date-range test holds a sample order on any day              |
 | #381  | Profile pictures a person approves                    | `feat/area1-profile-pictures`    | This pull request. Upload, review and show a picture; the AI check waits for area 4 |
 | #385  | Availability on the avatar                            | `feat/area1-availability`        | This pull request. Set it on your avatar; the Demo role menu shows it               |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |

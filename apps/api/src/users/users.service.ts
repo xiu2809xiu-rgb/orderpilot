@@ -3,12 +3,14 @@ import type { UserListQuery } from "@orderpilot/shared";
 import { AuditService } from "../audit/audit.service.js";
 import type { AuthContext } from "../auth/auth-context.js";
 import type { Page } from "../common/repository.js";
+import { AppConfig } from "../config/app-config.js";
 import { Database } from "../database/database.js";
 import { RefreshTokenRepository } from "../sessions/refresh-token.repository.js";
 import { TwoStepRepository } from "../two-step/two-step.repository.js";
 import {
   assertNotSelf,
   assertNotSelfForReset,
+  assertResetAllowedHere,
   isSelf,
 } from "./domain/user-rules.js";
 import { UserRepository, type UserRecord } from "./user.repository.js";
@@ -40,6 +42,7 @@ export class UsersService {
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(Database) private readonly database: Database,
     @Inject(TwoStepRepository) private readonly twoStep: TwoStepRepository,
+    @Inject(AppConfig) private readonly config: AppConfig,
   ) {}
 
   async list(query: UserListQuery): Promise<Page<UserView>> {
@@ -119,16 +122,27 @@ export class UsersService {
    * This is user administration, like disabling: it gives the administrator no
    * permission to approve, pay or post. It does let an administrator who knows
    * a person's password sign in as them with no second step, so every reset is
-   * audited and shows in the person's own history (ADR 0068).
+   * audited and shows in the person's own history (ADR 0068). That is why it is
+   * off in production, before anything is read or changed, until the person is
+   * told (issue 390).
    */
   async resetTwoStep(
     id: string,
     actor: AuthContext,
     info: RequestInfo,
   ): Promise<TwoStepReset> {
-    // The refusal is recorded outside the transaction, so it stays although the
-    // refusal rolls the change back (as for a self-disable).
-    if (isSelf(actor.user.id, id)) await this.recordSelfReset(actor, info);
+    // A refusal is recorded outside the transaction, so it stays although the
+    // refusal rolls the change back (as for a self-disable). In production one
+    // row says "production", also for one's own account: the environment is
+    // the first reason, and it is checked before the person is looked at.
+    const { isProduction } = this.config;
+    if (isProduction) {
+      await this.recordRefusedReset(actor, id, info, "production");
+    }
+    assertResetAllowedHere(isProduction);
+    if (isSelf(actor.user.id, id)) {
+      await this.recordRefusedReset(actor, id, info, "self");
+    }
     return this.database.transaction(async () => {
       assertNotSelfForReset(actor.user.id, id);
       // An unknown person is a 404, not a no-op.
@@ -176,17 +190,19 @@ export class UsersService {
     });
   }
 
-  private async recordSelfReset(
+  private async recordRefusedReset(
     actor: AuthContext,
+    id: string,
     info: RequestInfo,
+    reason: "self" | "production",
   ): Promise<void> {
     await this.audit.record({
       actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
       action: "user.two-step-reset.refused",
       entityType: "User",
-      entityId: actor.user.id,
+      entityId: id,
       summary: "A two-step reset was refused",
-      changes: { reason: "self" },
+      changes: { reason },
       ip: info.ip,
       traceId: info.traceId,
     });
