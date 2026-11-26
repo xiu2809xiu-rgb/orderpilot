@@ -56,7 +56,9 @@ const reader = {
   statusOfMany: () => Promise.resolve(new Map()),
 };
 
-const PRICES_SEEN = ["31.97", "33.41", "7321.13", "7650.89"];
+// The last is the masked writer's revised total: 230 at 31.97.
+const PRICES_SEEN = ["31.97", "33.41", "7321.13", "7650.89", "7353.10"];
+const MASKED_KEYS = ["classification", "field", "masked", "reason"];
 
 describe("PO versions over HTTP", () => {
   let t: TestApp;
@@ -989,6 +991,8 @@ describe("PO versions over HTTP", () => {
           asked.body,
         ).data;
         expect(previewed.pricesCompared).toBe(false);
+        // A masked total has exactly the masked keys: no value, no from, no to.
+        expect(Object.keys(previewed.total).sort()).toEqual(MASKED_KEYS);
         expect(previewed.lines[0]?.status).toBe("changed");
         const done = await send("WAREHOUSE", P(mine.orderNo), {
           ...bodyOf(mine.externalDocumentNo, revised),
@@ -1002,6 +1006,9 @@ describe("PO versions over HTTP", () => {
           done.body,
         ).data;
         expect(confirmed.order.amount.masked).toBe(true);
+        expect(Object.keys(confirmed.differences.total).sort()).toEqual(
+          MASKED_KEYS,
+        );
         expect(JSON.stringify(confirmed.differences)).toBe(
           JSON.stringify(previewed),
         );
