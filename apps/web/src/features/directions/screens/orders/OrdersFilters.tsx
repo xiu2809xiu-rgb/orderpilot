@@ -22,6 +22,7 @@ import {
   stageStatusValue,
   type OrdersQuery,
 } from "./ordersQuery";
+import { StatusFilter } from "./StatusFilter";
 import { ToggleChip } from "./ToggleChip";
 
 type Patch = (patch: Partial<OrdersQuery>) => void;
@@ -108,7 +109,7 @@ export function OrdersFilters({
             }}
           >
             <SelectTrigger id={stageId} className="od-control w-60">
-              <SelectValue />
+              <SelectValue placeholder={t("filters.severalStatuses")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">
@@ -161,6 +162,7 @@ export function OrdersFilters({
           >
             {t("filters.exceptions")}
           </ToggleChip>
+          <StatusFilter query={query} onChange={onChange} />
           <MoreFilters query={query} onChange={onChange} />
         </div>
       </FilterPanel>

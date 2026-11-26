@@ -247,12 +247,49 @@ export function statusesOfStage(stage: LifecycleStageTab): readonly string[] {
     : LIFECYCLE_STAGES.flatMap((candidate) => candidate.statuses);
 }
 
-/** The one value the Stage and status list shows: a whole stage, one status, or everything. */
+/** The statuses the address names, in the order the lifecycle lists them. */
+export function statusCodes(status: string | null): string[] {
+  return status ? status.split(",").filter(Boolean) : [];
+}
+
+/**
+ * The one value the Stage and status list shows: a whole stage, one status, or
+ * everything. Several statuses chosen one by one are none of those, so the list
+ * shows its placeholder rather than a stage the address does not name.
+ */
 export function stageStatusValue(query: OrdersQuery): string {
   if (query.status && !query.status.includes(",")) {
     return `status:${query.status}`;
   }
+  if (query.status) {
+    const whole = LIFECYCLE_STAGES.find(
+      (stage) => stage.statuses.join(",") === query.status,
+    );
+    return whole ? `stage:${whole.id}` : "";
+  }
   return query.stage === "all" ? "all" : `stage:${query.stage}`;
+}
+
+/**
+ * What pressing one status chip sets: that status added to or taken off those
+ * already in force. The address keeps them in the lifecycle's order, so the
+ * same choice is always the same link, and an empty choice is no filter.
+ */
+export function toggleStatus(
+  status: string | null,
+  code: string,
+): Partial<OrdersQuery> {
+  const chosen = new Set(statusCodes(status));
+  if (chosen.has(code)) chosen.delete(code);
+  else chosen.add(code);
+  const known = statusesOfStage("all");
+  const next = [
+    ...known.filter((candidate) => chosen.has(candidate)),
+    ...[...chosen].filter((candidate) => !known.includes(candidate)),
+  ];
+  if (next.length === 0) return { status: null, stage: "all" };
+  const joined = next.join(",");
+  return { status: joined, stage: stageTabOf(joined) };
 }
 
 /** What choosing a value of that list sets: a stage (and no status), a status, or neither. */

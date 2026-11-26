@@ -238,10 +238,11 @@
   gap: 0.5rem;
 }
 
-.od-toggle[data-pressed="true"] {
-  border-color: var(--ring);
-  background: var(--accent);
-  color: var(--foreground);
+/* The status chips in their popover: they wrap, and each keeps its own width. */
+.od-status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .od-count {
