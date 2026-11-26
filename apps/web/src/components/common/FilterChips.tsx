@@ -15,7 +15,8 @@ export interface FilterChip {
 /**
  * The filters a link opened a list with, each with its own Clear button. A
  * cleared pill fades out where it stood and then leaves; the filter changes at
- * once, and focus moves to the next pill or to Clear all.
+ * once, and focus moves to the next pill or to Clear all, and from the last
+ * one up to the filters above (or to the page heading when none take focus).
  */
 export function FilterChips({
   chips,
@@ -79,6 +80,7 @@ export function FilterChips({
         ),
       )}
       {clearAll ? (
+        // No ghost of its own: with the last pill gone the whole row ends at once.
         <li>
           <button
             type="button"
