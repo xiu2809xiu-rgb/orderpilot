@@ -417,7 +417,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #364  | Visual hierarchy and breathing room                   | `feat/area1-visual-hierarchy`    | This pull request. One rhythm in four tokens, one page stack, card padding of 24 px |
 | #384  | Scroll areas show which side has more                 | `feat/area1-scroll-edge-hint`    | This pull request. A quiet mark on each side of a scroll area that has more         |
 | #416  | The orders list test counts its days from today       | `test/web-date-range-days`       | This pull request. The date-range test holds a sample order on any day              |
-| #426  | Shimmer skeletons and a shared progress bar           | `feat/area1-loading-shimmer`     | Built, not merged. Page skeletons shimmer, tables stay still, one real progress bar |
+| #426  | Shimmer skeletons and a shared progress bar           | `feat/area1-loading-shimmer`     | Built, not merged. Cards and tiles shimmer, table rows stay still, one real bar     |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
