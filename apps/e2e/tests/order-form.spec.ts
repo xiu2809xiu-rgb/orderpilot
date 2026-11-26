@@ -972,7 +972,7 @@ test.describe("PO versions", () => {
     const wide = page.viewportSize();
 
     await test.step("the open panel", async () => {
-      // The first line sent again with quantity 3, the others as they are.
+      // The form sends one line again, with quantity 3, so the order's other lines come out removed.
       await page.goto("/orders/new");
       await fillNewOrder(page, po);
       await page.getByRole("textbox", { name: "Quantity, line 1" }).fill("3");
