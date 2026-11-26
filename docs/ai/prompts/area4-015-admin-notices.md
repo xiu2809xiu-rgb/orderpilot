@@ -34,3 +34,21 @@ What the four additions became:
 2. A migration cannot write rows through the audit writer, so the seed does the clean-up instead, with one audit row per repair. On the demo data there is nothing to repair.
 3. No route changes an account's role, so there was nothing to refuse. A test pins that.
 4. `approvals.decide` is locked on for the approver role. A notice for that change would go to the people who had just lost the right to read it, and no SPR could be decided until someone gave it back.
+
+## 3. After the pull request
+
+```text
+Thanks, good work.
+1. Yes, delete fix/area4-admin-self-grant.
+2. Fix the silent "Mark as read" failure in this PR: show a toast with
+   the server's reason and trace ID, as #276 does. Leave the loading
+   line as it is, since it matches the reminders, and note it in the PR
+   for Richie's bell.
+3. Check whether #379 is merged. If #386 contains #379's commits, say
+   in the PR that it must merge after #379.
+4. Tell me when the checks are green.
+```
+
+#379 had merged on 24 Nov, before the branch was cut, so #386 holds none of its commits. Rerunning the end-to-end tests against a stack that had unread notices found that the bell's name left out the number on its badge, which axe refuses (label in name), and that was fixed too.
+
+#386 had already been merged, so the toast and the bell's name could not go into it. Asked how they should reach main, she chose a new issue and pull request: [#400](https://github.com/xiu2809xiu-rgb/orderpilot/issues/400).

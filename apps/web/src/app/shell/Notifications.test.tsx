@@ -102,9 +102,12 @@ describe("the bell", () => {
       ),
     );
     open("APPROVER");
+    // The name holds the number the badge shows, so a person who says what
+    // they see can still reach the button (WCAG 2.5.3, label in name).
     const bell = await screen.findByRole("button", {
-      name: "Notifications: 2 reminders, 1 notice",
+      name: "Notifications: 3 (2 reminders, 1 notice)",
     });
+    expect(bell).toHaveTextContent("3");
     fireEvent.click(bell);
     expect(
       await screen.findByText(
