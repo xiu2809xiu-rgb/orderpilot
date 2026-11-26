@@ -2,8 +2,13 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
-import { REPEAT_REACH_PX, REPEAT_WINDOW_MS } from "./openingPress";
-import { OPENING_CLICK_MS, OPEN_GUARD_MS } from "./PickerOrb";
+import {
+  OPENING_CLICK_MS,
+  OPEN_GUARD_MS,
+  REPEAT_REACH_PX,
+  REPEAT_WINDOW_MS,
+  repeatsOpeningPress,
+} from "./openingPress";
 
 loadPicker();
 
@@ -154,6 +159,30 @@ describe("picking with the pointer", () => {
     expect(onPick).toHaveBeenCalledTimes(2);
     expect(onPick).toHaveBeenLastCalledWith("DO_NOT_DISTURB");
   });
+
+  it.each([
+    ["Enter", "Enter"],
+    ["Space", " "],
+  ])(
+    "picks nothing for the repeat of a held %s on the focused choice, and a first one picks",
+    async (_name, key) => {
+      const onPick = vi.fn();
+      renderPicker({ onPick });
+      await open();
+      const checked = item("Available");
+      await waitFor(() => {
+        expect(checked).toHaveFocus();
+      });
+      // The key's own repeat, as the system sends it while the key stays down.
+      fireEvent.keyDown(checked, { key, repeat: true });
+      fireEvent.keyDown(checked, { key, repeat: true });
+      expect(onPick).not.toHaveBeenCalled();
+      expect(screen.getByRole("menu")).toBeVisible();
+      fireEvent.keyDown(checked, { key });
+      expect(onPick).toHaveBeenCalledTimes(1);
+      expect(onPick).toHaveBeenCalledWith("AVAILABLE");
+    },
+  );
 });
 
 // The opening press said again (openingPress.ts). The clock is held, so that
@@ -335,6 +364,119 @@ describe("a press that repeats the opening press", () => {
     await open();
     goTo(400);
     tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("records no opening press while a save is in flight", () => {
+    renderPicker({ busy: true });
+    clock();
+    openByPress(100, 100);
+    expect(repeatsOpeningPress({ clientX: 100, clientY: 100 })).toBe(false);
+  });
+
+  it("records no opening press for the right button", () => {
+    renderPicker();
+    clock();
+    fireEvent.pointerDown(trigger(), {
+      button: 2,
+      clientX: 100,
+      clientY: 100,
+    });
+    expect(screen.queryByRole("menu")).toBeNull();
+    expect(repeatsOpeningPress({ clientX: 100, clientY: 100 })).toBe(false);
+  });
+
+  it("records the press that opens the menu, which the other clauses must not hide", () => {
+    renderPicker();
+    clock();
+    openByPress(100, 100);
+    expect(repeatsOpeningPress({ clientX: 100, clientY: 100 })).toBe(true);
+  });
+
+  it("picks nothing for a press that was refused at 200 ms and held for 1.5 s, but a later press picks", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    const choice = item("Do not disturb");
+    const at = { clientX: 300, clientY: 300, pointerType: "mouse" };
+    goTo(200);
+    fireEvent.pointerDown(choice, at);
+    goTo(1700);
+    fireEvent.pointerUp(choice, at);
+    fireEvent.click(choice, { ...at, detail: 1 });
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+    tap(press(choice, 300, 300));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("picks nothing for the third click of a triple click, 300 ms after the second, at the opening place", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    goTo(300);
+    tap(press(item("Available"), 100, 100));
+    goTo(600);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+    // Said again after a pause of more than the half second, it is a choice.
+    goTo(600 + REPEAT_WINDOW_MS + 50);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("counts the quarter second from each opening, also when the pill stayed mounted through the fold", async () => {
+    // Radix keeps a closing pill in the page until its fold ends. jsdom has no
+    // animations, so the closed pill is given one, as the sheet does.
+    const real = window.getComputedStyle.bind(window);
+    vi.spyOn(window, "getComputedStyle").mockImplementation(
+      (node, pseudo) =>
+        new Proxy(real(node, pseudo), {
+          get(style, name) {
+            if (name === "animationName") {
+              return node.getAttribute("data-state") === "closed"
+                ? "ap-fold"
+                : "ap-grow";
+            }
+            const value: unknown = Reflect.get(style, name);
+            if (typeof value !== "function") return value;
+            return (...args: unknown[]): unknown =>
+              Reflect.apply(value, style, args);
+          },
+        }),
+    );
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    await open();
+    const first = item("Available");
+    // The menu's own trigger is hidden from the tree while it is open.
+    const opener = () =>
+      screen.getByRole("button", { name: /^Your availability/, hidden: true });
+    goTo(1000);
+    fireEvent.keyDown(first, { key: "Escape" });
+    await waitFor(() => {
+      expect(opener()).toHaveAttribute("aria-expanded", "false");
+    });
+    // The same pill, folding.
+    expect(first.isConnected).toBe(true);
+    goTo(1100);
+    opener().focus();
+    fireEvent.keyDown(opener(), { key: "Enter" });
+    await waitFor(() => {
+      expect(opener()).toHaveAttribute("aria-expanded", "true");
+    });
+    expect(first.isConnected).toBe(true);
+    goTo(1200);
+    tap(press(first, 0, 0));
+    expect(onPick).not.toHaveBeenCalled();
+    goTo(1100 + OPEN_GUARD_MS + 50);
+    tap(press(first, 0, 0));
     expect(onPick).toHaveBeenCalledTimes(1);
   });
 });

@@ -9,6 +9,7 @@ import {
   useEffectEvent,
   useId,
   useState,
+  type KeyboardEvent,
   type PointerEvent,
   type SyntheticEvent,
 } from "react";
@@ -25,7 +26,11 @@ import {
   whenIdle,
 } from "@/lib/deferred";
 import { AvailabilityTrigger } from "./AvailabilityTrigger";
-import { forgetOpeningPress, recordOpeningPress } from "./openingPress";
+import {
+  forgetOpeningPress,
+  markOpened,
+  recordOpeningPress,
+} from "./openingPress";
 import type { AvailabilityPickerProps } from "./types";
 
 // The pill, its orbs and its caption load after the first paint, on idle, and
@@ -74,13 +79,22 @@ export function AvailabilityControl({
   const giveUp = useEffectEvent(() => {
     change(false);
   });
-  // Asking again also retries a chunk that failed: the module forgets a failure.
-  // Nothing is said, as with the shell's other deferred menus: a failed chunk
-  // closes the menu and the next press tries again.
+  // Each opening starts the clock that the pill's choices count their windows
+  // from (openingPress.ts), whoever opened the menu. Radix keeps the pill
+  // mounted when a menu closes and opens again within the fold, so the choices
+  // cannot keep that clock themselves.
+  useEffect(() => {
+    if (isOpen) markOpened();
+  }, [isOpen]);
+  // Both chunks are asked for: the picker's and the shell's menu code. Asking
+  // again also retries one that failed: the module forgets a failure. Nothing
+  // is said, as with the shell's other deferred menus: a failed chunk closes
+  // the menu, so it cannot open by itself when the chunk arrives later, and
+  // the next press tries again.
   useEffect(() => {
     if (!isOpen) return;
     let live = true;
-    pickerModule.load().catch(() => {
+    Promise.all([pickerModule.load(), dropdownMenuModule.load()]).catch(() => {
       if (live) giveUp();
     });
     return () => {
@@ -114,16 +128,22 @@ export function AvailabilityControl({
     if (busy || isOpen || event.button !== 0 || event.ctrlKey) return;
     recordOpeningPress(event);
   };
-  const holdKey = (event: SyntheticEvent & { key?: string }) => {
-    if (busy && event.key && OPENING_KEYS.includes(event.key)) {
-      event.preventDefault();
-    }
+  // A held Enter or Space is no second opening: a choice that took the first
+  // one gives the focus back to this trigger, and the key's next repeat would
+  // open the menu again (Radix toggles on every keydown, repeat or not).
+  const holdKey = (event: KeyboardEvent<HTMLElement>) => {
+    if (!OPENING_KEYS.includes(event.key)) return;
+    const held = event.repeat && (event.key === "Enter" || event.key === " ");
+    if (busy || held) event.preventDefault();
   };
   // On hover and focus the spring library is fetched too, so the first
-  // opening does not stall on loading it.
+  // opening does not stall on loading it. Offline it fails quietly: the
+  // pill's own effect asks again.
   const warm = () => {
     prefetch(pickerModule);
-    void import("./useChipSpring").then((spring) => spring.loadSpring());
+    import("./useChipSpring")
+      .then((spring) => spring.loadSpring())
+      .catch(() => undefined);
   };
 
   return (

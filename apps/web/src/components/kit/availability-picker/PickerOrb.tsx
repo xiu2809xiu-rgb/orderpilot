@@ -9,29 +9,30 @@ import { DropdownMenu as MenuPrimitive } from "radix-ui";
 import {
   useRef,
   type CSSProperties,
+  type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
 } from "react";
-import { repeatsOpeningPress } from "./openingPress";
+import {
+  OPENING_CLICK_MS,
+  OPEN_GUARD_MS,
+  msSinceOpened,
+  repeatsOpeningPress,
+} from "./openingPress";
 import { availabilityLook } from "./tones";
 
-/**
- * A press on a choice within this long of the pill's appearing is not a pick.
- * The pill opens over its trigger, so a second click of a double click lands
- * on the first choice; a person has not yet seen the choices by then.
- */
-export const OPEN_GUARD_MS = 250;
+/** What this choice last saw of a press: none, one that may pick, or one that a rule refused. */
+type Press = "none" | "taken" | "refused";
 
 /**
- * A click made by a pointer on a choice that was not pressed is refused only
- * this long after the pill appears: it is the click of the tap that opened the
- * pill. A finger held longer is a long press, which sends no click, so after
- * this an input that sends a click with no press of its own (a mobile screen
- * reader, a browser not tried yet) picks.
+ * One choice: a round orb with its mark, and its words. On a fine pointer the
+ * words are for assistive technology and the caption shows them; on a touch
+ * screen they sit under the orb. When a press picks is stated once, in
+ * openingPress.ts; this part applies it to Radix's item (react-menu 2.2.1):
+ * Radix clicks the item itself on a release that had no press (only on an item
+ * never pressed since it mounted), and on Enter or Space with no look at
+ * `repeat`, and it composes our handlers so that `preventDefault` skips its own.
  */
-export const OPENING_CLICK_MS = 1000;
-
-/** One choice: a round orb with its mark, and its words. On a fine pointer the words are for assistive technology and the caption shows them; on a touch screen they sit under the orb. */
 export function PickerOrb({
   value,
   index,
@@ -44,28 +45,9 @@ export function PickerOrb({
   onPick: (next: PersonAvailability) => void;
 }) {
   const Mark = availabilityLook[value].mark;
-  // Radix opens the menu on pointerdown, and the pill grows out of the
-  // trigger, so the pointer is soon over a choice that it never pressed.
-  // Radix's item answers a pointerup it has no pointerdown for by clicking
-  // itself (react-menu 2.2.1), which would pick the first choice on a plain
-  // click of the trigger. A choice is picked by a press and a release on it,
-  // or by the keyboard, never by a release alone.
-  const pressed = useRef(false);
-  const shownAt = useRef(performance.now());
-  // A finger is the same, one step later: it opens the menu on the press, the
-  // browser sends a click to whatever lies under the finger after the release,
-  // and by then the pill has grown there. A click that a pointer made (detail
-  // 1 or more) is a pick only if this choice was pressed; the keyboard's
-  // click, and one made by assistive technology, have detail 0 and pass, and
-  // so does any click after the first second (OPENING_CLICK_MS). The mark
-  // outlives the release (a touch screen's pointerleave comes before its
-  // click), and goes with a pick or a cancelled gesture.
-  const armed = useRef(false);
-  const release = (event: PointerEvent<HTMLElement>) => {
-    // preventDefault makes Radix's composed handler skip its own click().
-    if (!pressed.current) event.preventDefault();
-    pressed.current = false;
-  };
+  // The mark outlives the release, and a touch screen's pointerleave comes
+  // before its click, so no leave clears it. It goes with a pick or a cancel.
+  const press = useRef<Press>("none");
   return (
     <MenuPrimitive.RadioItem
       value={value}
@@ -73,30 +55,37 @@ export function PickerOrb({
       className="ap-item"
       style={{ "--ap-i": index } as CSSProperties}
       onPointerDown={(event: PointerEvent<HTMLElement>) => {
-        if (performance.now() - shownAt.current < OPEN_GUARD_MS) return;
-        // The opening press said again, at its place, is no choice either.
-        if (repeatsOpeningPress(event)) return;
-        pressed.current = true;
-        armed.current = true;
+        // Both are asked, so that every repeat restarts the half second.
+        const repeat = repeatsOpeningPress(event);
+        const early = msSinceOpened() < OPEN_GUARD_MS;
+        press.current = repeat || early ? "refused" : "taken";
+      }}
+      // A release is never a pick: stopping it makes Radix skip its own click.
+      onPointerUp={(event: PointerEvent<HTMLElement>) => {
+        event.preventDefault();
       }}
       onClick={(event: MouseEvent<HTMLElement>) => {
-        const opening = performance.now() - shownAt.current < OPENING_CLICK_MS;
-        if (event.detail > 0 && !armed.current && opening) {
+        if (event.detail === 0) return;
+        const unpressed =
+          press.current === "none" && msSinceOpened() < OPENING_CLICK_MS;
+        if (press.current === "refused" || unpressed) {
+          press.current = "none";
           event.preventDefault();
         }
       }}
-      onPointerUp={release}
-      onPointerLeave={() => {
-        pressed.current = false;
-      }}
       onPointerCancel={() => {
-        pressed.current = false;
-        armed.current = false;
+        press.current = "none";
+      }}
+      // The key's own repeat is not a second pick: it would pick, close the
+      // menu and give the focus back to the trigger, which the next repeat opens.
+      onKeyDown={(event: KeyboardEvent<HTMLElement>) => {
+        if (event.repeat && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+        }
       }}
       // A repeat of the current value is a pick too: it renews the 12 hours.
       onSelect={() => {
-        pressed.current = false;
-        armed.current = false;
+        press.current = "none";
         onPick(value);
       }}
     >

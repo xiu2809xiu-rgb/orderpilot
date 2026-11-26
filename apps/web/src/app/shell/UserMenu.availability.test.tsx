@@ -165,8 +165,7 @@ describe("the availability button in the side panel", () => {
     );
     await screen.findByRole("menu");
     // jsdom puts every click on one point, so this pick is a press at the
-    // opening press's place, which counts once REPEAT_WINDOW_MS has passed. In
-    // a browser a choice lies somewhere else and the quarter second is enough.
+    // opening press's place, which counts once REPEAT_WINDOW_MS has passed.
     await new Promise((resolve) => setTimeout(resolve, REPEAT_WINDOW_MS + 20));
     await user.click(
       within(screen.getByRole("menu")).getByRole("menuitemradio", {

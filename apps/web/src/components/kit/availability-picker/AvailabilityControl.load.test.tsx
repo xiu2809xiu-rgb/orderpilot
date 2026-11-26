@@ -15,7 +15,15 @@ const faceOpacity = () =>
 
 const real = pickerModule.load.bind(pickerModule);
 let failing = true;
+// A failure that comes when the test says so, as a slow network's does.
+const failLater: ((reason: Error) => void)[] = [];
+let slow = false;
 const load = vi.spyOn(pickerModule, "load").mockImplementation(() => {
+  if (slow) {
+    return new Promise<never>((_resolve, reject) => {
+      failLater.push(reject);
+    });
+  }
   if (failing) return Promise.reject(new Error("the chunk did not arrive"));
   return real();
 });
@@ -26,6 +34,8 @@ beforeAll(async () => {
 
 afterEach(() => {
   failing = true;
+  slow = false;
+  failLater.length = 0;
   load.mockClear();
 });
 
@@ -43,6 +53,27 @@ describe("a picker whose code fails to load", () => {
     expect(screen.queryByRole("menu")).toBeNull();
     // The parent kept `open` true here, so the control did not clear it itself.
     expect(trigger()).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("does not close a menu that the person has already closed when the failure arrives late", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    slow = true;
+    renderPicker({ onOpenChange });
+    await press(user);
+    await waitFor(() => {
+      expect(failLater.length).toBeGreaterThan(0);
+    });
+    // The person gives up waiting and closes it themselves.
+    await press(user);
+    await waitFor(() => {
+      expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    });
+    const calls = onOpenChange.mock.calls.length;
+    // Every ask fails, the control's own and the prefetch's.
+    for (const fail of failLater) fail(new Error("the chunk did not arrive"));
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(onOpenChange).toHaveBeenCalledTimes(calls);
   });
 
   it("closes again, leaves the face drawn, and the next press tries again", async () => {

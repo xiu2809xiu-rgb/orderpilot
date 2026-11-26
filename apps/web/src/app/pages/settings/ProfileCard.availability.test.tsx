@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadPicker } from "@/components/kit/availability-picker/availabilityTestKit";
-import { OPEN_GUARD_MS } from "@/components/kit/availability-picker/PickerOrb";
+import { OPEN_GUARD_MS } from "@/components/kit/availability-picker/openingPress";
 import { apiClient } from "@/lib/api/instance";
 import { must } from "@/test/must";
 import { server } from "@/test/server";

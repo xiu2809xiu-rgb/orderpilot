@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderPicker } from "./availabilityTestKit";
-import { repeatsOpeningPress } from "./openingPress";
+import { msSinceOpened, repeatsOpeningPress } from "./openingPress";
 
 describe("the opening press and the control that took it", () => {
   afterEach(() => {
@@ -17,5 +17,12 @@ describe("the opening press and the control that took it", () => {
     expect(repeatsOpeningPress(at), "while the control is there").toBe(true);
     first.unmount();
     expect(repeatsOpeningPress(at), "after it has gone").toBe(false);
+  });
+
+  it("forgets when its menu opened as well, so a neighbour's choices do not count from it", () => {
+    const view = renderPicker({ defaultOpen: true });
+    expect(msSinceOpened(), "while the control is there").toBeLessThan(10_000);
+    view.unmount();
+    expect(msSinceOpened(), "after it has gone").toBe(Infinity);
   });
 });

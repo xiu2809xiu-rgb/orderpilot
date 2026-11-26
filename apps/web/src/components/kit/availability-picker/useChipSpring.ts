@@ -17,10 +17,17 @@ type Animate = typeof motionAnimate;
 // a placement at once, which is what reduced motion does anyway.
 let animate: Animate | undefined;
 let loading: Promise<void> | undefined;
+/** A failed fetch is forgotten, as `deferredModule` forgets one, so the next ask tries again. */
 export function loadSpring(): Promise<void> {
-  loading ??= import("motion/react").then((library) => {
-    animate = library.animate;
-  });
+  loading ??= import("motion/react").then(
+    (library) => {
+      animate = library.animate;
+    },
+    (error: unknown) => {
+      loading = undefined;
+      throw error;
+    },
+  );
   return loading;
 }
 
@@ -39,7 +46,8 @@ export function useChipSpring(place: { x: number; w: number }, stop: number) {
   const still = useStill();
 
   useEffect(() => {
-    if (!still) void loadSpring();
+    // Quietly: with no spring the caption is placed at once.
+    if (!still) loadSpring().catch(() => undefined);
   }, [still]);
 
   useLayoutEffect(() => {

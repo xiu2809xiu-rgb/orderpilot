@@ -1,7 +1,7 @@
 import type { PersonAvailability } from "@orderpilot/shared";
 import { render } from "@testing-library/react";
 import { useState } from "react";
-import { beforeAll } from "vitest";
+import { beforeAll, vi } from "vitest";
 import { loadShellOverlays } from "@/app/shell/overlays/preload";
 import { AvailabilityControl, pickerModule } from "./AvailabilityControl";
 import type {
@@ -56,4 +56,30 @@ function Harness({ start = "AVAILABLE", onPick, ...rest }: HarnessProps) {
 
 export function renderPicker(props: HarnessProps = {}) {
   return render(<Harness {...props} />);
+}
+
+/**
+ * Radix keeps a closing pill in the page until its fold ends, and jsdom has no
+ * animations: this gives a closed pill one, as the sheet does, so that a test
+ * can see the same pill through a close and an opening within the fold. The
+ * caller restores the mocks.
+ */
+export function holdFoldingPills(): void {
+  const real = window.getComputedStyle.bind(window);
+  vi.spyOn(window, "getComputedStyle").mockImplementation(
+    (node, pseudo) =>
+      new Proxy(real(node, pseudo), {
+        get(style, name) {
+          if (name === "animationName") {
+            return node.getAttribute("data-state") === "closed"
+              ? "ap-fold"
+              : "ap-grow";
+          }
+          const value: unknown = Reflect.get(style, name);
+          if (typeof value !== "function") return value;
+          return (...args: unknown[]): unknown =>
+            Reflect.apply(value, style, args);
+        },
+      }),
+  );
 }
