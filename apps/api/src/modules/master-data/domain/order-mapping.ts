@@ -3,8 +3,9 @@ import type { MasterDataSalesOrder } from "./master-data-reader.js";
 
 /**
  * Master data's view of an order. A sample maps to exactly what the mock of
- * Business Central reports for it; a stored order has no workflow status, so its
- * capture state is the nearest honest word.
+ * Business Central reports for it. A stored order carries no workflow status
+ * here (the orders service overlays it, master data does not), so its capture
+ * state is the nearest honest word.
  */
 export function toMasterDataSalesOrder(
   facts: OrderFacts,

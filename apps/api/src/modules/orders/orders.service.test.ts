@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain-error.js";
 import type { CustomerLookup } from "../master-data/customer-lookup.js";
 import type { StockLookup } from "../master-data/stock-lookup.js";
+import type { WorkflowOrderStatusReader } from "../workflows/workflow-order-status-reader.js";
 import type { OrderDirectory } from "./domain/order-directory.js";
 import type { OrderFacts } from "./domain/order-facts.js";
 import { OrderMasking } from "./domain/order-masking.js";
@@ -21,6 +22,7 @@ function service(
   orders: OrderFacts[],
   stock: Record<string, string>,
   names: Record<string, string> = {},
+  held: Record<string, string> = {},
 ) {
   const asked: string[][] = [];
   const listed: (string | undefined)[] = [];
@@ -44,11 +46,34 @@ function service(
       return Promise.resolve(new Map(Object.entries(names)));
     },
   } as unknown as CustomerLookup;
+  const workflowAsks: string[][] = [];
+  const workflow = {
+    statusOfMany: (nos: readonly string[]) => {
+      workflowAsks.push([...nos]);
+      return Promise.resolve(
+        new Map(
+          nos
+            .filter((no) => no in held)
+            .map((no) => [
+              no,
+              { status: { code: "Received", label: held[no] } },
+            ]),
+        ),
+      );
+    },
+  } as unknown as WorkflowOrderStatusReader;
   return {
-    svc: new OrdersService(directory, lookup, customers, new OrderMasking()),
+    svc: new OrdersService(
+      directory,
+      lookup,
+      customers,
+      new OrderMasking(),
+      workflow,
+    ),
     asked,
     listed,
     nameAsks,
+    workflowAsks,
   };
 }
 
@@ -205,5 +230,97 @@ describe("the orders service", () => {
     await expect(svc.one("SO-20990101-0001", "SUPPORT")).rejects.toBeInstanceOf(
       NotFoundError,
     );
+  });
+
+  describe("the workflow's label on a submitted stored order", () => {
+    const submitted = (no: string, patch: Partial<OrderFacts> = {}) =>
+      facts({ orderNo: no, captureState: "submitted", ...patch });
+
+    it("gives a submitted stored order the workflow's label, and null when the workflow does not hold it", async () => {
+      const { svc } = service(
+        [submitted("SO-20261108-0010"), submitted("SO-20261108-0011")],
+        {},
+        {},
+        { "SO-20261108-0010": "PO received" },
+      );
+      const page = await svc.list(query, "SUPPORT");
+      const labels = Object.fromEntries(
+        page.items.map((r) => [r.orderNo, r.workflowStatus]),
+      );
+      expect(labels).toEqual({
+        "SO-20261108-0010": "PO received",
+        "SO-20261108-0011": null,
+      });
+      const held = await svc.one("SO-20261108-0010", "SUPPORT");
+      expect(held.workflowStatus).toBe("PO received");
+      const free = await svc.one("SO-20261108-0011", "SUPPORT");
+      expect(free.workflowStatus).toBeNull();
+    });
+
+    it("asks the workflow once for the submitted stored orders of the page it shows, and not at all when there is none", async () => {
+      const { svc, workflowAsks } = service(
+        [
+          submitted("SO-20261108-0010"),
+          submitted("SO-20261108-0011"),
+          shortStored,
+        ],
+        {},
+      );
+      await svc.list(query, "SUPPORT");
+      expect(workflowAsks).toHaveLength(1);
+      expect([...(workflowAsks[0] ?? [])].sort()).toEqual([
+        "SO-20261108-0010",
+        "SO-20261108-0011",
+      ]);
+      const quiet = service([shortStored, waitingSample], {});
+      await quiet.svc.list(query, "SUPPORT");
+      expect(quiet.workflowAsks).toHaveLength(0);
+    });
+
+    it("does not ask for the orders outside the page", async () => {
+      const { svc, workflowAsks } = service(
+        [
+          submitted("SO-20261108-0010"),
+          submitted("SO-20261108-0011"),
+          submitted("SO-20261108-0012"),
+        ],
+        {},
+      );
+      const page = await svc.list({ page: 2, pageSize: 1 }, "SUPPORT");
+      expect(page.items).toHaveLength(1);
+      expect(workflowAsks).toEqual([[page.items[0]?.orderNo]]);
+    });
+
+    it("never asks for a draft, a void order or a sample", async () => {
+      const { svc, workflowAsks } = service(
+        [
+          shortStored,
+          facts({ orderNo: "SO-20261108-0020", captureState: "void" }),
+          waitingSample,
+        ],
+        {},
+      );
+      await svc.list(query, "SUPPORT");
+      await svc.one("SO-20261108-0020", "SUPPORT");
+      await svc.one("SO-0001", "SUPPORT");
+      expect(workflowAsks).toHaveLength(0);
+    });
+
+    it("a submitted stored order with a shortage still reports it after the label is filled", async () => {
+      const { svc } = service(
+        [submitted("SO-20261108-0010", { lines: [line("I-1", "8.000")] })],
+        { "I-1": "5.00" },
+        {},
+        { "SO-20261108-0010": "PO received" },
+      );
+      const page = await svc.list(query, "SUPPORT");
+      expect(page.items[0]).toMatchObject({
+        workflowStatus: "PO received",
+        shortageCount: 1,
+        shortage: { itemNo: "I-1", shortBy: "3.00" },
+      });
+      const detail = await svc.one("SO-20261108-0010", "SUPPORT");
+      expect(detail.shortageCount).toBe(1);
+    });
   });
 });
