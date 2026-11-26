@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,6 +10,7 @@ import {
   type TableQuery,
   type TableStatus,
 } from "@/components/common";
+import { ChipCheck } from "@/components/common/ChipCheck";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/errors";
 import { formatMoney } from "@/lib/format";
@@ -116,9 +116,7 @@ export function GalleryTable() {
               setScenario(name);
             }}
           >
-            {scenario === name ? (
-              <Check aria-hidden="true" className="size-4" />
-            ) : null}
+            <ChipCheck on={scenario === name} />
             {t(`demo.${name}`)}
           </button>
         ))}
