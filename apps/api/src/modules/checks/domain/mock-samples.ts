@@ -9,6 +9,7 @@ import {
 import type {
   Customer,
   Item,
+  OrderDocument,
   SampleException,
   SampleOrder,
   SampleScreenState,
@@ -153,6 +154,46 @@ export function mockOverdue(order: SampleOrder, asOf: string): OverdueFlag {
   };
 }
 
+/** True once the order has a document of this type on file, draft or final. */
+function hasDocument(order: SampleOrder, type: OrderDocument["type"]): boolean {
+  return order.documents.some((d) => d.type === type);
+}
+
+/** The document of this type on the order's file, if it has come. */
+function documentOf(
+  order: SampleOrder,
+  type: OrderDocument["type"],
+): OrderDocument | undefined {
+  return order.documents.find((d) => d.type === type);
+}
+
+/** Ordered and shipped, summed over the item lines. */
+function lineTotals(order: SampleOrder): {
+  ordered: string;
+  shipped: string;
+} {
+  let ordered = 0;
+  let shipped = 0;
+  for (const line of order.lines) {
+    if (line.type !== "Item") continue;
+    ordered += Number(line.quantity);
+    shipped += Number(line.quantityShipped);
+  }
+  return {
+    ordered: plainQuantity(String(ordered)),
+    shipped: plainQuantity(String(shipped)),
+  };
+}
+
+/**
+ * Area 3's four document cross-checks, each run only once both documents of
+ * its pair are on the order's file: the customer PO against the proforma
+ * invoice, the PO against the packing list, the proforma invoice against the
+ * sales invoice (on a prepaid order, once Business Central has posted one),
+ * and the packing list against the bill of lading or air waybill. A pair
+ * whose second document has not come, and is not yet overdue, runs no check:
+ * there is nothing yet to compare it against.
+ */
 export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
   const no = order.header.no;
   const index = SAMPLE_STEPS.findIndex(
@@ -160,9 +201,10 @@ export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
   );
   const checkedAt = stepTime(order, Math.max(index, 0), index + 1, asOf);
   const results: CheckResult[] = [];
+
   if (index >= 1) {
     results.push({
-      id: `mock-${no}-1`,
+      id: `mock-${no}-customer-no`,
       ruleId: "mock.sample-customer-no",
       ruleLabel: "Customer No. is in master data (sample result)",
       orderNo: no,
@@ -181,67 +223,236 @@ export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
       checkedAt,
     });
   }
-  if (order.scenario.kind === "packing-list-mismatch") {
-    const { itemNo } = order.scenario;
-    const ordered = plainQuantity(order.scenario.ordered);
-    const packed = plainQuantity(order.scenario.packed);
-    results.push({
-      id: `mock-${no}-2`,
-      ruleId: "mock.sample-quantity",
-      ruleLabel: "Packing list quantity against the PO (sample result)",
-      orderNo: no,
-      outcome: "fail",
-      expected: ordered,
-      actual: packed,
-      tolerance: MOCK_TOLERANCE,
-      evidence: [
-        {
-          documentId: `${no}-customer-po`,
-          documentType: "CUSTOMER_PO",
-          location: `item ${itemNo}: quantity`,
-          value: ordered,
+
+  // 1. Customer PO against Proforma Invoice.
+  if (hasDocument(order, "PROFORMA_INVOICE")) {
+    if (order.scenario.kind === "pi-price-mismatch") {
+      const { itemNo, poPrice, piPrice } = order.scenario;
+      results.push({
+        id: `mock-${no}-po-pi`,
+        ruleId: "mock.doc.po-pi",
+        ruleLabel: "Customer PO against Proforma Invoice (sample result)",
+        orderNo: no,
+        outcome: "fail",
+        expected: poPrice,
+        actual: piPrice,
+        tolerance: {
+          label: "Price difference in USD (sample value)",
+          value: "0.00",
         },
-        {
-          documentId: `${no}-packing-list`,
-          documentType: "PACKING_LIST",
-          location: `item ${itemNo}: quantity`,
-          value: packed,
+        evidence: [
+          {
+            documentId: `${no}-customer-po`,
+            documentType: "CUSTOMER_PO",
+            location: `item ${itemNo}: unit price`,
+            value: poPrice,
+          },
+          {
+            documentId: `${no}-proforma-invoice`,
+            documentType: "PROFORMA_INVOICE",
+            location: `item ${itemNo}: unit price`,
+            value: piPrice,
+          },
+        ],
+        checkedAt,
+      });
+    } else {
+      results.push({
+        id: `mock-${no}-po-pi`,
+        ruleId: "mock.doc.po-pi",
+        ruleLabel: "Customer PO against Proforma Invoice (sample result)",
+        orderNo: no,
+        outcome: "pass",
+        expected: order.total,
+        actual: order.total,
+        tolerance: {
+          label: "Price difference in USD (sample value)",
+          value: "0.00",
         },
-      ],
-      checkedAt,
-    });
+        evidence: [
+          {
+            documentId: `${no}-customer-po`,
+            documentType: "CUSTOMER_PO",
+            location: "header: total",
+            value: order.total,
+          },
+          {
+            documentId: `${no}-proforma-invoice`,
+            documentType: "PROFORMA_INVOICE",
+            location: "header: total",
+            value: order.total,
+          },
+        ],
+        checkedAt,
+      });
+    }
   }
-  if (order.scenario.kind === "pi-price-mismatch") {
-    const { itemNo, poPrice, piPrice } = order.scenario;
-    results.push({
-      id: `mock-${no}-3`,
-      ruleId: "mock.sample-price",
-      ruleLabel: "Unit price on the PI against the PO (sample result)",
-      orderNo: no,
-      outcome: "fail",
-      expected: poPrice,
-      actual: piPrice,
-      tolerance: {
-        label: "Price difference in USD (sample value)",
-        value: "0.00",
-      },
-      evidence: [
-        {
-          documentId: `${no}-customer-po`,
-          documentType: "CUSTOMER_PO",
-          location: `item ${itemNo}: unit price`,
-          value: poPrice,
-        },
-        {
-          documentId: `${no}-proforma-invoice`,
-          documentType: "PROFORMA_INVOICE",
-          location: `item ${itemNo}: unit price`,
-          value: piPrice,
-        },
-      ],
-      checkedAt,
-    });
+
+  // 2. Customer PO against Packing List.
+  if (hasDocument(order, "PACKING_LIST")) {
+    if (order.scenario.kind === "packing-list-mismatch") {
+      const { itemNo } = order.scenario;
+      const ordered = plainQuantity(order.scenario.ordered);
+      const packed = plainQuantity(order.scenario.packed);
+      results.push({
+        id: `mock-${no}-po-pl`,
+        ruleId: "mock.doc.po-pl",
+        ruleLabel: "Customer PO against Packing List (sample result)",
+        orderNo: no,
+        outcome: "fail",
+        expected: ordered,
+        actual: packed,
+        tolerance: MOCK_TOLERANCE,
+        evidence: [
+          {
+            documentId: `${no}-customer-po`,
+            documentType: "CUSTOMER_PO",
+            location: `item ${itemNo}: quantity`,
+            value: ordered,
+          },
+          {
+            documentId: `${no}-packing-list`,
+            documentType: "PACKING_LIST",
+            location: `item ${itemNo}: quantity`,
+            value: packed,
+          },
+        ],
+        checkedAt,
+      });
+    } else {
+      const { ordered, shipped } = lineTotals(order);
+      results.push({
+        id: `mock-${no}-po-pl`,
+        ruleId: "mock.doc.po-pl",
+        ruleLabel: "Customer PO against Packing List (sample result)",
+        orderNo: no,
+        outcome: "pass",
+        expected: ordered,
+        actual: shipped,
+        tolerance: MOCK_TOLERANCE,
+        evidence: [
+          {
+            documentId: `${no}-customer-po`,
+            documentType: "CUSTOMER_PO",
+            location: "lines: total quantity",
+            value: ordered,
+          },
+          {
+            documentId: `${no}-packing-list`,
+            documentType: "PACKING_LIST",
+            location: "lines: total quantity",
+            value: shipped,
+          },
+        ],
+        checkedAt,
+      });
+    }
   }
+
+  // 3. Proforma Invoice against Sales Invoice, on a prepaid order once
+  // Business Central has posted one. Nothing in the sample data mismatches
+  // this pair, so once the sales invoice is on file the check passes.
+  const prepaid = Number(order.header.prepaymentPercent) > 0;
+  if (prepaid && hasDocument(order, "PROFORMA_INVOICE")) {
+    const salesInvoice = documentOf(order, "SALES_INVOICE");
+    if (salesInvoice) {
+      results.push({
+        id: `mock-${no}-pi-si`,
+        ruleId: "mock.doc.pi-si",
+        ruleLabel: "Proforma Invoice against Sales Invoice (sample result)",
+        orderNo: no,
+        outcome: "pass",
+        expected: order.total,
+        actual: order.total,
+        tolerance: {
+          label: "Price difference in USD (sample value)",
+          value: "0.00",
+        },
+        evidence: [
+          {
+            documentId: `${no}-proforma-invoice`,
+            documentType: "PROFORMA_INVOICE",
+            location: "header: total",
+            value: order.total,
+          },
+          {
+            documentId: salesInvoice.id,
+            documentType: "SALES_INVOICE",
+            location: "header: total",
+            value: order.total,
+          },
+        ],
+        checkedAt,
+      });
+    }
+  }
+
+  // 4. Packing List against Bill of Lading / Air Waybill. A shipping
+  // document that is `expected` (overdue, never confirmed) fails the check:
+  // nothing confirms the packing list went out as it reads.
+  if (hasDocument(order, "PACKING_LIST")) {
+    const shipping =
+      documentOf(order, "AWB") ?? documentOf(order, "BILL_OF_LADING");
+    if (shipping?.status === "expected") {
+      results.push({
+        id: `mock-${no}-pl-awb`,
+        ruleId: "mock.doc.pl-awb",
+        ruleLabel:
+          "Packing List against Bill of Lading / Air Waybill (sample result)",
+        orderNo: no,
+        outcome: "fail",
+        expected: "Received",
+        actual: shipping.dueDate
+          ? `Missing, due ${shipping.dueDate}`
+          : "Missing",
+        tolerance: { label: "The document is on file", value: "0" },
+        evidence: [
+          {
+            documentId: `${no}-packing-list`,
+            documentType: "PACKING_LIST",
+            location: "header: shipment",
+            value: "Packed",
+          },
+          {
+            documentId: shipping.id,
+            documentType: shipping.type,
+            location: "header: status",
+            value: "Expected",
+          },
+        ],
+        checkedAt,
+      });
+    } else if (shipping) {
+      const { ordered, shipped } = lineTotals(order);
+      results.push({
+        id: `mock-${no}-pl-awb`,
+        ruleId: "mock.doc.pl-awb",
+        ruleLabel:
+          "Packing List against Bill of Lading / Air Waybill (sample result)",
+        orderNo: no,
+        outcome: "pass",
+        expected: ordered,
+        actual: shipped,
+        tolerance: MOCK_TOLERANCE,
+        evidence: [
+          {
+            documentId: `${no}-packing-list`,
+            documentType: "PACKING_LIST",
+            location: "lines: total quantity",
+            value: ordered,
+          },
+          {
+            documentId: shipping.id,
+            documentType: shipping.type,
+            location: "lines: total quantity",
+            value: shipped,
+          },
+        ],
+        checkedAt,
+      });
+    }
+  }
+
   return results;
 }
 
