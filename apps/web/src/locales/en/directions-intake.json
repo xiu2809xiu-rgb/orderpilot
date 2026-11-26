@@ -99,6 +99,7 @@
     "finishedBody": "Nothing was saved and no order was made. This sample belongs to order {{order}} in the sample data.",
     "openOrder": "Open order {{order}}",
     "loading": "Loading the demo document",
+    "waitLine": "PO-IN-4807, Vellamar Network Stores",
     "failed": "The demo document could not be loaded.",
     "retry": "Try again",
     "classifiedAs": "Classified as {{type}}",

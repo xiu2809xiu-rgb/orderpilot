@@ -59,20 +59,39 @@ describe("the wait for the demo document", () => {
     expect(region).toHaveTextContent("Loading the demo document");
   });
 
-  it("is a skeleton in the review's shape: two cards, the page and the field rows", async () => {
+  it("is a skeleton in the review's shape: two cards, the page and the list of fields", async () => {
     const { region } = await waitForDemo();
     expect(region.querySelectorAll(".dx-card")).toHaveLength(2);
-    const blocks = region.querySelectorAll('[data-slot="skeleton"]');
-    // Three lines, the ring, one line and a button, the page, eight rows.
-    expect(blocks).toHaveLength(15);
     expect(
-      [...blocks].some(
+      [...region.querySelectorAll('[data-slot="skeleton"]')].some(
         (block) => (block as HTMLElement).style.aspectRatio === "910 / 1287",
       ),
     ).toBe(true);
-    // The hidden blocks leave one announcement, not fifteen.
-    for (const block of blocks) {
+    // The two it was unsure of and the nineteen it was sure of, each a row.
+    expect(region.querySelectorAll("li")).toHaveLength(21);
+    expect(region.querySelectorAll("section")).toHaveLength(2);
+    // The hidden blocks leave one announcement, not a hundred.
+    for (const block of region.querySelectorAll('[data-slot="skeleton"]')) {
       expect(block.closest('[aria-hidden="true"]')).not.toBeNull();
+    }
+  });
+
+  it("shimmers its cards and the page, and keeps the rows of the list still", async () => {
+    const { region } = await waitForDemo();
+    const list = region.querySelector("section")?.parentElement;
+    if (!list) throw new Error("no list of fields");
+    const inList = [...list.querySelectorAll('[data-slot="skeleton"]')];
+    const outside = [
+      ...region.querySelectorAll('[data-slot="skeleton"]'),
+    ].filter((block) => !list.contains(block));
+    // Head card (6), progress card (4), the pager (2) and the page (1).
+    expect(outside).toHaveLength(13);
+    for (const block of outside) expect(block).toHaveClass("dx-shimmer");
+    // Two headings, then the rows: 6 blocks in each unsure row, 4 in each sure row.
+    expect(inList).toHaveLength(2 + 2 * 6 + 19 * 4);
+    for (const block of inList) {
+      expect(block).not.toHaveClass("dx-shimmer");
+      expect(block).toHaveClass("animate-none");
     }
   });
 
