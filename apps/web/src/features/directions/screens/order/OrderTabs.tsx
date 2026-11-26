@@ -1,4 +1,5 @@
 import type { OrderTimeline, SalesOrderDetail } from "@orderpilot/shared";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +8,7 @@ import { ChecksTab } from "./ChecksTab";
 import { DocumentsTab } from "./DocumentsTab";
 import { documentsOf, withFlow, withPending } from "./documentsModel";
 import { LinesTab } from "./LinesTab";
+import { showSelectedTab } from "./showSelectedTab";
 import { useOrderFlow } from "./useOrderFlow";
 import { VersionsTab } from "./versions/VersionsTab";
 
@@ -66,6 +68,10 @@ export function OrderTabs({
   const asked = params.get("tab");
   const tab: Tab = isTab(asked) ? asked : "lines";
   const failed = timeline.checks.filter((check) => check.outcome !== "pass");
+  const tabRow = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    showSelectedTab(tabRow.current);
+  }, [tab]);
   const counts: Record<Exclude<Tab, "versions">, number> = {
     lines: detail?.lines.length ?? 0,
     documents: documents.filter((row) => !row.pending).length,
@@ -81,7 +87,11 @@ export function OrderTabs({
         setParams(copy, { replace: true });
       }}
     >
-      <TabsList aria-label={t("order.tabs.label")} className="od-tabs">
+      <TabsList
+        ref={tabRow}
+        aria-label={t("order.tabs.label")}
+        className="od-tabs"
+      >
         {TABS.map((id) => (
           <TabsTrigger key={id} value={id} className="od-tab">
             <span className="fs-14">{t(`order.tabs.${id}`)}</span>

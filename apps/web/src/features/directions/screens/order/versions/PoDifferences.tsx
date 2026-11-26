@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import "@/features/directions/screens/orders/orders.css";
 import { countsText, onlyMoved } from "./differenceText";
 import { DifferenceRow } from "./DifferenceRow";
 import { HeaderDifferences } from "./HeaderDifferences";

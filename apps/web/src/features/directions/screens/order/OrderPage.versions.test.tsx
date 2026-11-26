@@ -70,6 +70,31 @@ describe("the order page of a revised order", () => {
     ).toBeVisible();
   });
 
+  it("slides the tab row to the selected tab when the order opens on it", async () => {
+    // A phone cannot hold five tabs: the row scrolls, and the tab named in the
+    // address must not be the one that is out of sight. jsdom lays nothing out.
+    const rect = (left: number, right: number) =>
+      ({ left, right, top: 0, bottom: 44, width: right - left }) as DOMRect;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        if (this.getAttribute("role") === "tablist") return rect(46, 352);
+        if (this.getAttribute("role") === "tab") {
+          return this.getAttribute("aria-selected") === "true"
+            ? rect(429, 509)
+            : rect(46, 128);
+        }
+        return rect(0, 0);
+      },
+    );
+    const spec = { ...SUBMITTED, poVersionNo: 2 };
+    stubApi({ specs: [spec] });
+    open(spec, "?tab=versions");
+    const row = await screen.findByRole("tablist", { name: "Order details" });
+    await vi.waitFor(() => {
+      expect(row.scrollLeft).toBe(509 - 352);
+    });
+  });
+
   it("opens the Versions tab from the chip", async () => {
     const user = userEvent.setup();
     const spec = { ...SUBMITTED, poVersionNo: 2 };
