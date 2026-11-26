@@ -179,6 +179,18 @@ describe("the notice of a submitted order", () => {
     expect(classes(/See who submitted/)).toContain("pointer-coarse:min-h-11");
   });
 
+  it("colours both links with the notice's info colour, since the teal link colour is under 4.5:1 on its tinted ground", async () => {
+    signIn("AUDITOR");
+    stubApi({ specs: [TYPED] });
+    open();
+    const region = await notice();
+    for (const name of [/See who submitted/, /audit trail/]) {
+      const link = within(region).getByRole("link", { name });
+      expect(link.className.split(" ")).toContain("text-(--info)");
+      expect(link.className.split(" ")).not.toContain("text-primary");
+    }
+  });
+
   it("takes focus once after a submit and not on a later visit or a reload (the mark expires)", async () => {
     stubApi({ specs: [TYPED] });
     markSubmittedFocus(NO);
