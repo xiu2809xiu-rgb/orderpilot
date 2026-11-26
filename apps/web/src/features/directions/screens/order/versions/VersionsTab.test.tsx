@@ -480,8 +480,12 @@ describe("the Versions tab", () => {
         });
       }),
     );
-    // A list read at PO version 1, left in the cache by an earlier visit.
+    // A list read at PO version 1, left in the cache by an earlier visit, and
+    // still fresh: the app's queries keep data 30 s before reading it again.
     renderVersions("SUPPORT", ORDER, (client) => {
+      client.setDefaultOptions({
+        queries: { retry: false, staleTime: 30_000 },
+      });
       client.setQueryData(getPoVersionsListQueryKey(ORDER), {
         data: {
           orderNo: ORDER,

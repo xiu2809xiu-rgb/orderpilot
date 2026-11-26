@@ -1,4 +1,5 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorPanel, PermissionDenied } from "@/components/common";
 import { isForbidden } from "@/lib/query-status";
@@ -18,6 +19,19 @@ export function SubmittedVersions({ detail }: { detail: SalesOrderDetail }) {
     hasPermission(state.session, "orders.edit"),
   );
   const { list, current, pair, choose, diff } = usePoVersions(orderNo);
+  const target = detail.poVersionNo ?? 1;
+  const behind =
+    list.data !== undefined && list.data.data.currentPoVersionNo < target;
+  const { refetch, isFetching } = list;
+  // A list read before another person's revision is still fresh for the
+  // query's stale time and would not be read again by itself: ask for it once
+  // for each number the order has reached.
+  const asked = useRef<number | null>(null);
+  useEffect(() => {
+    if (!behind || isFetching || asked.current === target) return;
+    asked.current = target;
+    void refetch();
+  }, [behind, isFetching, refetch, target]);
   if (list.isError) {
     return isForbidden(list.error) ? (
       <PermissionDenied />
@@ -33,10 +47,9 @@ export function SubmittedVersions({ detail }: { detail: SalesOrderDetail }) {
   // A list read before a confirmation can sit in the cache at the old number.
   // Until it has caught up with the order, it is not drawn: it would say that
   // the order has one PO version, or that nobody was told about the old one.
-  if (
-    list.isPending ||
-    list.data.data.currentPoVersionNo < (detail.poVersionNo ?? 1)
-  ) {
+  // If the one read it was asked for still comes back behind, it is drawn: the
+  // server's list is the truth.
+  if (list.isPending || (behind && (isFetching || asked.current !== target))) {
     return <VersionsLoading label={t("order.versions.loading")} />;
   }
   const versions = list.data.data.versions;
