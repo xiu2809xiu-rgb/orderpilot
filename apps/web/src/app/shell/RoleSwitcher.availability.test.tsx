@@ -86,8 +86,11 @@ function renderSwitcher() {
 }
 
 const trigger = () => screen.findByRole("button", { name: "Demo role" });
+// A matcher, not a RegExp built from the persona: Semgrep blocks the latter.
 const row = (role: Role) =>
-  screen.getByRole("menuitem", { name: new RegExp(DEMO_PERSONAS[role]) });
+  screen.getByRole("menuitem", {
+    name: (name) => name.includes(DEMO_PERSONAS[role]),
+  });
 
 describe("the Demo role menu and availability", () => {
   it("asks once for the accounts the server named by id, and draws a dot and words on a row that is Focusing or on Do not disturb", async () => {

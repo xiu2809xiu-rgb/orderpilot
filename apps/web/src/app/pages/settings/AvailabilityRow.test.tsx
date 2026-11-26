@@ -109,8 +109,14 @@ describe("the Availability row", () => {
     ["DO_NOT_DISTURB", "Do not disturb"],
   ] as const)("says %s with its end time", (value, words) => {
     row({ value, setAt: new Date(), expiresAt: ENDS });
+    // A matcher, not a RegExp built from the words: Semgrep blocks the latter.
+    const lead = `${words}, until about `;
     expect(
-      screen.getByText(new RegExp(`^${words}, until about \\d{1,2}:\\d{2}`)),
+      screen.getByText(
+        (text) =>
+          text.startsWith(lead) &&
+          /^\d{1,2}:\d{2}/.test(text.slice(lead.length)),
+      ),
     ).toBeInTheDocument();
   });
 
