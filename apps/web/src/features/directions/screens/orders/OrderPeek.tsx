@@ -22,7 +22,14 @@ import { useOrderJourney } from "../order/useOrderJourney";
 import { Amount } from "./Amount";
 import { EntryChip } from "./EntryChip";
 import { StockCell } from "./OrderFigures";
-import { ageInDays, ALL_DONE, isUntracked, type OrderRow } from "./orderRow";
+import {
+  ageInDays,
+  ALL_DONE,
+  isTypedHere,
+  isUntracked,
+  stageWordKey,
+  type OrderRow,
+} from "./orderRow";
 import { focusPeekOpener } from "./peekFocus";
 
 /**
@@ -47,8 +54,9 @@ export function OrderPeek({
   roleLabel: (role: NonNullable<OrderRow["ownerRole"]>) => string;
 }) {
   const { t } = useTranslation("directions-orders");
-  // A draft or a void order is not in the tracker: it is not asked.
-  const asks = row !== null && !isUntracked(row.captureState);
+  // A draft, a void order or a submitted one no team holds is not in the
+  // tracker: it is not asked.
+  const asks = row !== null && !isUntracked(row);
   const { timeline, journey } = useOrderJourney(asks ? row.orderNo : null);
   // The order that was showing when the peek closed: by then `row` is null.
   const lastShown = useRef<string | null>(null);
@@ -117,12 +125,14 @@ export function OrderPeek({
                   <Fact label={t("peek.status")}>
                     {row.status?.label ??
                       row.workflowStatus ??
-                      t("cells.notStarted")}
+                      t(stageWordKey(row))}
                   </Fact>
                   <Fact label={t("columns.heldAt")}>
                     {row.ownerRole && row.step !== ALL_DONE
                       ? roleLabel(row.ownerRole)
-                      : t("cells.done")}
+                      : isTypedHere(row)
+                        ? t("cells.heldNobody")
+                        : t("cells.done")}
                   </Fact>
                   <Fact label={t("columns.age")}>
                     {t("cells.days", {

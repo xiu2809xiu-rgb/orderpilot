@@ -30,6 +30,7 @@ export function DocumentsTab({
   externalDocumentNo,
   toConfirm,
   priceMask,
+  typedHere,
 }: {
   documents: readonly OrderDocumentRow[];
   orderNo: string;
@@ -37,6 +38,8 @@ export function DocumentsTab({
   toConfirm: boolean;
   /** Why the role's prices are masked, in words, or null when it may see them. */
   priceMask: string | null;
+  /** The order was typed in here, so no file of it is stored. */
+  typedHere: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
   const named = documents.some((row) => row.flow?.status === "to-confirm");
@@ -63,17 +66,23 @@ export function DocumentsTab({
           ) : null}
         </Alert>
       ) : null}
-      <ul className="od-docs">
-        {documents.map((document) => (
-          <DocumentItem
-            key={document.id}
-            document={document}
-            orderNo={orderNo}
-            externalDocumentNo={externalDocumentNo}
-            priceMask={priceMask}
-          />
-        ))}
-      </ul>
+      {typedHere ? (
+        <p className="fs-14 max-w-prose text-muted-foreground">
+          {t("documents.typedHere")}
+        </p>
+      ) : (
+        <ul className="od-docs">
+          {documents.map((document) => (
+            <DocumentItem
+              key={document.id}
+              document={document}
+              orderNo={orderNo}
+              externalDocumentNo={externalDocumentNo}
+              priceMask={priceMask}
+            />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

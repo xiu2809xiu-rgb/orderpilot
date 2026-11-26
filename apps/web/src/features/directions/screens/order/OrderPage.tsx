@@ -1,13 +1,11 @@
-import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import { ErrorPanel, PermissionDenied } from "@/components/common";
-import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/errors";
 import { useOrdersOne } from "@/lib/api/generated/endpoints/orders/orders";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { isForbidden } from "@/lib/query-status";
 import { OrderAction } from "./OrderAction";
+import { OrderBack } from "./OrderBack";
 import { OrderFacts } from "./OrderFacts";
 import { OrderHeader } from "./OrderHeader";
 import { OrderJourneySection } from "./OrderJourneySection";
@@ -17,7 +15,9 @@ import { statusSentence } from "./statusSentence";
 import { OrderSkeleton } from "./OrderSkeleton";
 import { OrderStatus } from "./OrderStatus";
 import { OrderTabs } from "./OrderTabs";
-import { ALL_DONE, isUntracked } from "../orders/orderRow";
+import { stageFactsOf } from "./stageFacts";
+import { SubmittedNotice } from "./SubmittedNotice";
+import { ALL_DONE, isTypedHere, isUntracked } from "../orders/orderRow";
 import { untracked } from "./untracked";
 import { useOrderAction } from "./useOrderAction";
 import { useOrderFlow } from "./useOrderFlow";
@@ -40,14 +40,14 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
   const { t: tc } = useTranslation("common");
   // The route has already asked for this order. An order that is not there
   // answered 404, and asking again on mount would put the query back to
-  // pending: the route would draw its skeleton, unmount this page, and
-  // mount it again for ever.
+  // pending: the route would draw its skeleton, unmount this page, and mount
+  // it again for ever.
   const detail = useOrdersOne(orderNo, { query: { retryOnMount: false } });
-  // A draft or a void order is not in the tracker or the workflow: neither is
-  // asked, and the order's own facts and lines are the page. Until the order
-  // has answered nothing is asked either.
-  const asksTracker =
-    !detail.isPending && !isUntracked(detail.data?.data.captureState ?? null);
+  // A draft, a void order, or a submitted one that no team holds is not in
+  // the tracker or the flow: neither is asked, and the order's own facts and
+  // lines are the page. Until the order has answered nothing is asked either.
+  const known = detail.data?.data;
+  const asksTracker = !detail.isPending && !(known && isUntracked(known));
   const { timeline, order, journey } = useOrderJourney(
     asksTracker ? orderNo : null,
   );
@@ -61,19 +61,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
   const toConfirm =
     waiting.data?.data.some((row) => row.orderNo === orderNo) ?? false;
 
-  const back = (
-    <Button
-      asChild
-      variant="ghost"
-      size="sm"
-      className="od-back pointer-coarse:h-11"
-    >
-      <Link to="/orders">
-        <ArrowLeft aria-hidden="true" />
-        {t("order.back")}
-      </Link>
-    </Button>
-  );
+  const back = <OrderBack />;
   // The tracker is where the journey, checks and events come from. An order it
   // does not know (a draft entered here) or a role it refuses still has its
   // facts and lines from the Orders API, so neither empties the page.
@@ -126,9 +114,8 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
   const events = order ?? (found ? untracked(found) : null);
   if (!events) return <OrderSkeleton />;
   const customer = found?.customerName ?? events.customerName;
-  const stageLabel =
-    order?.status.label ?? found?.workflowStatus ?? t("cells.notStarted");
-  const heldAt = order ? tc(`roles.${order.ownerRole}`) : t("cells.notSet");
+  const typedHere = found !== undefined && isTypedHere(found);
+  const { stageLabel, heldAt } = stageFactsOf({ t, tc, order, found });
   const late = events.overdue.overdue;
   const step = journey?.current ?? null;
   // A finished order has nothing left to hold it: a check that once failed,
@@ -137,7 +124,11 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
   const sentence =
     step === ALL_DONE
       ? ""
-      : statusSentence(t, { detail: found ?? null, checks: events.checks });
+      : statusSentence(t, {
+          detail: found ?? null,
+          checks: events.checks,
+          asStock: typedHere,
+        });
   const tone = orderTone(late, sentence !== "");
 
   return (
@@ -156,6 +147,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
           />
         }
       />
+      {found ? <SubmittedNotice detail={found} /> : null}
       <div className="od-top-row">
         <OrderStatus
           orderNo={orderNo}
@@ -185,6 +177,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
             timeline={events}
             toConfirm={toConfirm}
             inWorkflow={asksTracker}
+            typedHere={typedHere}
           />
         </section>
       </div>

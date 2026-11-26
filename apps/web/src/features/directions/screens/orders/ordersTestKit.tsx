@@ -76,6 +76,8 @@ export interface OrderSpec {
   shipInDays: number | null;
   /** An order entered here: the tracker does not know it, and it has an entry state. */
   entered?: "draft" | "submitted" | "void";
+  /** The label area 2 reports for an entered order, when a team holds it. */
+  workflowLabel?: string;
   /** How many items are short, when `shortBy` is set. The first is I-0190. */
   shortItems?: number;
 }
@@ -154,7 +156,9 @@ function ordersRow(spec: OrderSpec, masked: boolean) {
     externalDocumentNo: `PO-${spec.orderNo}`,
     orderDate: dateOnly(-spec.orderedDaysAgo),
     shipmentDate: spec.shipInDays === null ? null : dateOnly(spec.shipInDays),
-    workflowStatus: spec.entered ? null : spec.status.label,
+    workflowStatus: spec.entered
+      ? (spec.workflowLabel ?? null)
+      : spec.status.label,
     amount: amount(spec.value, masked),
     currencyCode: "USD",
     shortage: spec.shortBy

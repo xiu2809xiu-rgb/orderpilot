@@ -68,7 +68,7 @@ export function OrdersBoard({
         })}
         {columns.unknown.length > 0 ? (
           <Column
-            title={t("board.notStarted")}
+            title={t("board.notInFlow")}
             rows={columns.unknown}
             onPeek={onPeek}
             onMore={null}

@@ -92,6 +92,8 @@
     "done": "Done",
     "notSet": "Not set",
     "notStarted": "Not started",
+    "notInFlow": "Not in the order flow",
+    "heldNobody": "Nobody",
     "notEntered": "Not entered here",
     "hidden": "Hidden",
     "covered": "Covered",
@@ -141,7 +143,7 @@
   "board": {
     "region": "Orders by stage",
     "done": "Done",
-    "notStarted": "Not started",
+    "notInFlow": "Not in the order flow",
     "empty": "No orders",
     "more_one": "Show {{count}} more in the list",
     "more_other": "Show {{count}} more in the list",
@@ -208,7 +210,19 @@
         "short": "{{quantity}} short on {{item}}",
         "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",
         "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
+      },
+      "stock": {
+        "short": "Stock today: {{quantity}} short on {{item}}. No team has been asked to hold this order.",
+        "shortMore_one": "Stock today: {{quantity}} short on {{item}} and {{count}} more item. No team has been asked to hold this order.",
+        "shortMore_other": "Stock today: {{quantity}} short on {{item}} and {{count}} more items. No team has been asked to hold this order."
       }
+    },
+    "submitted": {
+      "title": "Submitted. No team has a task for it",
+      "body": "This order is entered and saved. It is not approved. Keep handling it as you do today: it does not appear in the Order tracker. It counts as an open order on the customer's page and on its items' pages.",
+      "mistake": "If it was submitted by mistake: OrderPilot cannot change or cancel it, and its PO number stays with it. Tell whoever looks after OrderPilot. A corrected order needs a different PO number.",
+      "who": "See who submitted it, and when",
+      "auditSubject": "order {{orderNo}}"
     },
     "latest": {
       "stepDone": "Latest: {{name}} marked {{step}} as done, {{when}}",
@@ -268,11 +282,13 @@
     "checks": {
       "emptyTitle": "No checks have run yet",
       "emptyBody": "Checks run once the documents of this order have been read.",
+      "typedHereTitle": "Not checked",
+      "typedHereBody": "Orders typed in here are not checked. Checks run on documents that have been read.",
       "matches": "Matched to Business Central"
     },
     "activity": {
-      "emptyTitle": "Nothing has happened yet",
-      "emptyBody": "Events appear here as the order moves through its steps.",
+      "emptyTitle": "No steps to show",
+      "emptyBody": "What people did to this order is listed below.",
       "note": "What happened on the order, newest first. Nothing is posted from this page. Business Central stays the system of record.",
       "current": "Current step",
       "by": "{{actor}}, {{when}}"
@@ -315,6 +331,7 @@
       "none": "No file in the demo set"
     },
     "noChecks": "No check has read this document yet.",
+    "typedHere": "No PO file is stored for an order typed in here.",
     "received": "Received {{date}}",
     "flow": {
       "confirmed": "Confirmed",

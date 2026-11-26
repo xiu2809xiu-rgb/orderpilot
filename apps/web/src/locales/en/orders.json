@@ -68,7 +68,7 @@
     },
     "notices": {
       "duplicateTitle": "This order already exists",
-      "duplicateBody": "This customer and PO number already have an order, {{orderNo}}. Open it to make changes.",
+      "duplicateBody": "This customer and PO number already have an order, {{orderNo}}. Open it to see it. A draft can be edited, and a submitted order cannot be changed here.",
       "duplicateOpen": "Open {{orderNo}}",
       "staleTitle": "This draft changed",
       "staleBody": "It was changed by someone else, or it is no longer a draft. Reload to see its current state before you save again.",

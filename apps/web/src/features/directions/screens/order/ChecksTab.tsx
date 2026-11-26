@@ -161,11 +161,14 @@ export function ChecksTab({
   checks,
   matches,
   priceMask,
+  typedHere,
 }: {
   checks: readonly CheckResult[];
   matches: readonly MasterMatch[];
   /** Why the order's amount is masked for this role, or null when it may see prices. */
   priceMask: string | null;
+  /** The order was typed in here: no document of it is read, so no check runs. */
+  typedHere: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
   return (
@@ -173,8 +176,12 @@ export function ChecksTab({
       {checks.length === 0 ? (
         <EmptyState
           icon={ShieldCheck}
-          title={t("order.checks.emptyTitle")}
-          description={t("order.checks.emptyBody")}
+          title={t(
+            `order.checks.${typedHere ? "typedHereTitle" : "emptyTitle"}`,
+          )}
+          description={t(
+            `order.checks.${typedHere ? "typedHereBody" : "emptyBody"}`,
+          )}
         />
       ) : (
         <ul className="od-check-list">
