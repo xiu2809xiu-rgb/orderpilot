@@ -1,7 +1,9 @@
 import { randomInt } from "node:crypto";
 import {
   errorEnvelopeSchema,
+  existingOrderOf,
   salesOrderResponseSchema,
+  type ConfirmPoVersionBody,
   type CreateSalesOrderBody,
   type PatchSalesOrderBody,
   type SubmitSalesOrderBody,
@@ -496,14 +498,29 @@ test.describe("Submit an order", () => {
       await fillNewOrder(page, po);
       await saveButton(page).click();
       await expect(page.getByText("This order already exists")).toBeVisible();
+      // The notice reads the order it names: submitted, so it may take the PO as
+      // its next PO version, and this role may say that it does.
       await expect(
         page.getByText(
-          "A draft can be edited, and a submitted order cannot be changed here.",
+          new RegExp(`${orderNo} is submitted: order date .*PO version 1`),
         ),
       ).toBeVisible();
       await expect(
         page.getByRole("link", { name: `Open ${orderNo}` }),
       ).toBeVisible();
+      await page
+        .getByRole("button", { name: `This PO revises ${orderNo}` })
+        .click();
+      // The same dates, quantities and prices as the order holds: nothing to confirm.
+      await expect(
+        page.getByRole("region", { name: "This PO matches PO version 1" }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(/so there is nothing to confirm/),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^Confirm PO version/ }),
+      ).toHaveCount(0);
     });
   });
 
@@ -581,5 +598,323 @@ test.describe("Submit an order", () => {
       page.getByRole("heading", { level: 1, name: orderNo }),
     ).toBeVisible();
     await checkPage(page);
+  });
+});
+
+// P-89: PO versions. These tests leave submitted orders with two PO versions
+// behind them, and nothing can cancel or void a submitted order until P-50, so
+// every run uses a PO number no earlier run used (freshPo). On a persistent stack
+// the customer C-0001 simply gains open orders, which no other spec counts.
+//
+// Like the P-114 tests, these were written without being run: the builders had no
+// browser or Docker. The first run, on a Docker build, is the first time they are
+// seen, and the first things to look at are the focus steps and the 390 px fit.
+
+/** A day this many days after today in Singapore, as a date field holds it. */
+function daysAhead(days: number): string {
+  const day = new Date(`${todayInSingapore()}T00:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + days);
+  return day.toISOString().slice(0, 10);
+}
+
+/** Creates and submits an order through the API, as Support, and returns its number. */
+async function submitThroughApi(create: CreateSalesOrderBody): Promise<string> {
+  const made = await callAs("SUPPORT", "POST", "/orders", create);
+  expect(made.status, "the draft is created").toBe(201);
+  const draft = salesOrderResponseSchema.parse(made.body).data;
+  const sent = await callAs(
+    "SUPPORT",
+    "POST",
+    `/orders/${draft.orderNo}/submit`,
+    { version: draft.version ?? 1 } satisfies SubmitSalesOrderBody,
+  );
+  expect(sent.status, "the draft is submitted").toBe(200);
+  return draft.orderNo;
+}
+
+/**
+ * A submitted order whose prepayment and shipment date differ from what the New
+ * order form starts with, so that a re-sent PO shows header differences.
+ */
+function submittedOrderWithTerms(po: string): Promise<string> {
+  return submitThroughApi({
+    customerNo: "C-0001",
+    externalDocumentNo: po,
+    orderDate: todayInSingapore(),
+    shipmentDate: daysAhead(30),
+    prepaymentPercent: "30",
+    lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+  });
+}
+
+/** Confirms a revised PO through the API, as Support, and returns the status. */
+async function reviseThroughApi(
+  orderNo: string,
+  body: CreateSalesOrderBody,
+  expectedPoVersionNo = 1,
+): Promise<number> {
+  const sent = await callAs(
+    "SUPPORT",
+    "POST",
+    `/orders/${orderNo}/po-versions`,
+    {
+      ...body,
+      confirmed: true,
+      expectedPoVersionNo,
+    } satisfies ConfirmPoVersionBody,
+  );
+  return sent.status;
+}
+
+const versionsTab = (page: Page) =>
+  page.getByRole("tabpanel", { name: "Versions" });
+
+test.describe("PO versions", () => {
+  test("Support re-sends a submitted order's PO, confirms it as PO version 2, and sees both versions with the difference", async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    const po = freshPo();
+    const orderNo = await submittedOrderWithTerms(po);
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders/new");
+    // The same customer and PO number, with quantity 3 where the order has 2.
+    await fillNewOrder(page, po);
+    await page.getByRole("textbox", { name: "Quantity, line 1" }).fill("3");
+    await saveButton(page).click();
+    await expect(page.getByText("This order already exists")).toBeVisible();
+    await page
+      .getByRole("button", { name: `This PO revises ${orderNo}` })
+      .click();
+
+    const panel = page.getByRole("region", {
+      name: `Add this PO as PO version 2 of ${orderNo}`,
+    });
+    await expect(panel).toBeVisible();
+    await expect(panel.getByRole("heading", { level: 2 })).toBeFocused();
+    // The header first: the form starts with 100% and no shipment date.
+    const header = panel.locator("dl").first();
+    await expect(header.getByText("Prepayment")).toBeVisible();
+    await expect(header.getByText("30.00% to 100.00%")).toBeVisible();
+    await expect(header.getByText(/to Not set/)).toBeVisible();
+    // The line: quantity 2 to 3.
+    await expect(panel.getByRole("cell", { name: /2 to 3/ })).toBeVisible();
+    // One primary button, and the form's own bar is not drawn.
+    await expect(saveButton(page)).toHaveCount(0);
+
+    await test.step("keeping the order's dates and prepayment puts them back in the form", async () => {
+      await panel
+        .getByRole("button", { name: "Keep the order's dates and prepayment" })
+        .click();
+      await expect(
+        panel.getByText("Now using the order's dates and prepayment."),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("textbox", { name: /Prepayment/ }),
+      ).toHaveValue("30.00");
+      await expect(header.getByText("Same")).toHaveCount(4);
+    });
+
+    await test.step("Confirm ends on the Versions tab with a toast, and focus on its heading", async () => {
+      await panel.getByRole("button", { name: "Confirm PO version 2" }).click();
+      await expect(
+        page.getByText(`PO version 2 saved on ${orderNo}`),
+      ).toBeVisible();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === `/orders/${orderNo}` &&
+          url.searchParams.get("tab") === "versions",
+      );
+      await expect(
+        versionsTab(page).getByRole("heading", { name: "PO versions" }),
+      ).toBeFocused();
+      const rows = versionsTab(page)
+        .getByRole("list", { name: "PO versions, newest first" })
+        .getByRole("listitem");
+      await expect(rows).toHaveCount(2);
+      await expect(rows.nth(0)).toContainText("PO version 2");
+      await expect(rows.nth(0)).toContainText("Current");
+      await expect(rows.nth(1)).toContainText("PO version 1");
+      await expect(rows.nth(1)).toContainText("Superseded");
+      await expect(rows.nth(1)).toContainText("Draft started");
+      // The comparison of 1 and 2 shows the quantity, and nobody holds the order.
+      await expect(
+        versionsTab(page).getByRole("cell", { name: /2 to 3/ }),
+      ).toBeVisible();
+      await expect(
+        versionsTab(page).getByText(/Nobody was told about PO version 2/),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", {
+          name: "PO version 2. Open the Versions tab.",
+        }),
+      ).toBeVisible();
+    });
+
+    await test.step("a reload keeps it and does not take focus again", async () => {
+      await page.reload();
+      const heading = versionsTab(page).getByRole("heading", {
+        name: "PO versions",
+      });
+      await expect(heading).toBeVisible();
+      await expect(heading).not.toBeFocused();
+      await expect(
+        versionsTab(page).getByRole("listitem").first(),
+      ).toContainText("PO version 2");
+    });
+
+    await test.step("a second confirmation with the old number is refused, naming the number the order is at", async () => {
+      const again = await callAs(
+        "SUPPORT",
+        "POST",
+        `/orders/${orderNo}/po-versions`,
+        {
+          customerNo: "C-0001",
+          externalDocumentNo: po,
+          orderDate: todayInSingapore(),
+          shipmentDate: null,
+          prepaymentPercent: "100",
+          lines: [{ itemNo: "I-0001", quantity: "4", unitPrice: "857.00" }],
+          confirmed: true,
+          expectedPoVersionNo: 1,
+        } satisfies ConfirmPoVersionBody,
+      );
+      expect(again.status).toBe(409);
+      const envelope = errorEnvelopeSchema.parse(again.body);
+      expect(envelope.error.details).toContainEqual({
+        path: "currentPoVersionNo",
+        message: "2",
+      });
+    });
+
+    await test.step("the same PO sent as a new order is still refused, naming the order", async () => {
+      const resent = await callAs("SUPPORT", "POST", "/orders", {
+        customerNo: "C-0001",
+        externalDocumentNo: po,
+        orderDate: todayInSingapore(),
+        shipmentDate: null,
+        prepaymentPercent: "100",
+        lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+      } satisfies CreateSalesOrderBody);
+      expect(resent.status).toBe(409);
+      const envelope = errorEnvelopeSchema.parse(resent.body);
+      expect(existingOrderOf(envelope.error.details)).toBe(orderNo);
+    });
+  });
+
+  test("Warehouse reads the versions with prices masked and has no way to add one", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const po = freshPo();
+    const orderNo = await submittedOrderFor(po);
+    const revised = {
+      customerNo: "C-0001",
+      externalDocumentNo: po,
+      orderDate: todayInSingapore(),
+      shipmentDate: null,
+      prepaymentPercent: "100",
+      lines: [{ itemNo: "I-0001", quantity: "3", unitPrice: "857.00" }],
+    } satisfies CreateSalesOrderBody;
+    expect(await reviseThroughApi(orderNo, revised)).toBe(201);
+    await signInAs(page, "WAREHOUSE");
+    await page.goto(`/orders/${orderNo}?tab=versions`);
+    await expect(
+      versionsTab(page).getByRole("heading", { name: "PO versions" }),
+    ).toBeVisible();
+    await expect(versionsTab(page).getByRole("listitem").first()).toContainText(
+      "PO version 2",
+    );
+    await expect(
+      versionsTab(page).getByText("Prices are not compared for your role."),
+    ).toBeVisible();
+    await expect(page.getByText(/USD\s?[\d,]+\.\d{2}/)).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "New order" })).toHaveCount(0);
+    await expectRefused("WAREHOUSE", "POST", `/orders/${orderNo}/po-versions`, {
+      ...revised,
+      confirmed: true,
+      expectedPoVersionNo: 2,
+    } satisfies ConfirmPoVersionBody);
+    await expectRefused(
+      "WAREHOUSE",
+      "POST",
+      `/orders/${orderNo}/po-versions/preview`,
+      revised,
+    );
+  });
+
+  test("a draft's Versions tab says it has no PO versions", async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, freshPo());
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    try {
+      const other = await context.newPage();
+      await signInAs(other, "WAREHOUSE");
+      await other.goto(`/orders/${orderNo}?tab=versions`);
+      await expect(
+        other.getByText(
+          "A draft has no PO versions yet. It becomes PO version 1 when you submit it.",
+        ),
+      ).toBeVisible();
+    } finally {
+      await context.close();
+    }
+    await voidDraft(page, orderNo);
+  });
+
+  test("the open panel and the Versions tab fit and pass the accessibility check", async ({
+    page,
+  }) => {
+    test.setTimeout(240_000);
+    // Twelve lines, so that the table of differences has to scroll at 390 px.
+    const lines = Array.from({ length: 12 }, (_, i) => ({
+      itemNo: `I-${String(i + 1).padStart(4, "0")}`,
+      quantity: "2",
+      unitPrice: "857.00",
+    }));
+    const po = freshPo();
+    const create = {
+      customerNo: "C-0001",
+      externalDocumentNo: po,
+      orderDate: todayInSingapore(),
+      shipmentDate: null,
+      prepaymentPercent: "100",
+      lines,
+    } satisfies CreateSalesOrderBody;
+    const orderNo = await submitThroughApi(create);
+    await signInAs(page, "SUPPORT");
+
+    await test.step("the open panel", async () => {
+      // The first line sent again with quantity 3, the others as they are.
+      await page.goto("/orders/new");
+      await fillNewOrder(page, po);
+      await page.getByRole("textbox", { name: "Quantity, line 1" }).fill("3");
+      await saveButton(page).click();
+      await page
+        .getByRole("button", { name: `This PO revises ${orderNo}` })
+        .click();
+      await expect(
+        page.getByRole("region", {
+          name: `Add this PO as PO version 2 of ${orderNo}`,
+        }),
+      ).toBeVisible();
+      await checkPage(page);
+    });
+
+    await test.step("the Versions tab of an order with twelve lines", async () => {
+      expect(
+        await reviseThroughApi(orderNo, {
+          ...create,
+          lines: lines.map((line) => ({ ...line, quantity: "3" })),
+        }),
+      ).toBe(201);
+      await page.goto(`/orders/${orderNo}?tab=versions`);
+      await expect(versionsTab(page).getByRole("table")).toBeVisible();
+      await checkPage(page);
+    });
   });
 });
