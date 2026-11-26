@@ -11,15 +11,18 @@ import {
 } from "@/components/ui/table";
 
 // Every block is the height of the text it stands for, so that nothing moves
-// when the data arrives. They are `still` Skeletons, with no shimmer band: work
-// screens, tables and lists stay still.
+// when the data arrives. The rule for which blocks move: a block that stands for
+// a page head, a card, a tile, a chart or a panel shimmers (the band of
+// styles/motion.css); the rows of a table or a list, and the cards of a board,
+// are `still` grey blocks. CLAUDE.md says never to animate tables or forms while
+// they are in use, and a wall of moving rows is not calm.
 
 /** Stands in for PageHeader: a title line and one line of context. */
 export function PageHeaderSkeleton() {
   return (
     <div className="space-y-2" aria-hidden="true">
-      <Skeleton still className="h-8 w-56" />
-      <Skeleton still className="h-5 w-96 max-w-full" />
+      <Skeleton className="h-8 w-56" />
+      <Skeleton className="h-5 w-96 max-w-full" />
     </div>
   );
 }
@@ -29,11 +32,11 @@ export function SectionCardSkeleton({ lines = 3 }: { lines?: number }) {
   return (
     <Card aria-hidden="true">
       <CardHeader>
-        <Skeleton still className="h-7 w-40" />
+        <Skeleton className="h-7 w-40" />
       </CardHeader>
       <CardContent className="space-y-3">
         {Array.from({ length: lines }, (_, index) => (
-          <Skeleton still key={index} className="h-5 w-full" />
+          <Skeleton key={index} className="h-5 w-full" />
         ))}
       </CardContent>
     </Card>
@@ -87,7 +90,7 @@ export function ListPageSkeleton() {
       <span className="sr-only">{t("states.loading")}</span>
       <PageHeaderSkeleton />
       <div className="space-y-s2" aria-hidden="true">
-        <Skeleton still className="h-9 w-full max-w-xs" />
+        <Skeleton className="h-9 w-full max-w-xs" />
         <TableSkeleton />
       </div>
     </div>

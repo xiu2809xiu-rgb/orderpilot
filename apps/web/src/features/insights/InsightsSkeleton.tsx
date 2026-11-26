@@ -13,7 +13,7 @@ export function InsightsSkeleton() {
         className="dx-grid-gap grid sm:grid-cols-2 xl:grid-cols-3"
       >
         {Array.from({ length: 5 }, (_, index) => (
-          <Skeleton still key={index} className="h-56 rounded-xl" />
+          <Skeleton key={index} className="h-56 rounded-xl" />
         ))}
       </div>
       <SectionCardSkeleton lines={4} />

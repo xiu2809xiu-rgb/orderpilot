@@ -5,8 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * What the board shows in place of its columns while the orders load, or when
- * they cannot: columns of blank cards in the board's own shape (they do not
- * pulse), the error with its trace id and Retry, or permission denied.
+ * they cannot: columns of blank cards in the board's own shape (they stay
+ * still, as a board is worked in), the error with its trace id and Retry, or
+ * permission denied.
  */
 export function BoardState({
   status,
