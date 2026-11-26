@@ -31,7 +31,15 @@ import type {
   OrdersUpdate200,
   OrdersUpdateBody,
   OrdersVoidDraft200,
-  OrdersVoidDraftBody
+  OrdersVoidDraftBody,
+  PoVersionsConfirm201,
+  PoVersionsConfirmBody,
+  PoVersionsDiff200,
+  PoVersionsDiffParams,
+  PoVersionsList200,
+  PoVersionsOne200,
+  PoVersionsPreview200,
+  PoVersionsPreviewBody
 } from '../../model';
 
 import { apiMutator } from '../../../mutator.ts';
@@ -537,7 +545,7 @@ export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidD
 
 
 /**
- * @summary Submit a draft order. Send the version you read. OrderPilot cannot change or cancel it afterwards
+ * @summary Submit a draft order. Send the version you read. OrderPilot cannot cancel it afterwards. A revised PO is added as a new PO version
  */
 export const ordersSubmitDraft = (
     orderNo: string,
@@ -616,7 +624,7 @@ export function useOrdersSubmitDraft<TData = Awaited<ReturnType<typeof ordersSub
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Submit a draft order. Send the version you read. OrderPilot cannot change or cancel it afterwards
+ * @summary Submit a draft order. Send the version you read. OrderPilot cannot cancel it afterwards. A revised PO is added as a new PO version
  */
 
 export function useOrdersSubmitDraft<TData = Awaited<ReturnType<typeof ordersSubmitDraft>>, TError = ErrorType<unknown>>(
@@ -626,6 +634,499 @@ export function useOrdersSubmitDraft<TData = Awaited<ReturnType<typeof ordersSub
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getOrdersSubmitDraftQueryOptions(orderNo,ordersSubmitDraftBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The PO versions of an order, newest first. Prices are masked by role
+ */
+export const poVersionsList = (
+    orderNo: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PoVersionsList200>(
+      {url: `/api/v1/orders/${orderNo}/po-versions`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getPoVersionsListQueryKey = (orderNo: string,) => {
+    return [
+    `/api/v1/orders/${orderNo}/po-versions`
+    ] as const;
+    }
+
+
+export const getPoVersionsListQueryOptions = <TData = Awaited<ReturnType<typeof poVersionsList>>, TError = ErrorType<unknown>>(orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsList>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPoVersionsListQueryKey(orderNo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof poVersionsList>>> = ({ signal }) => poVersionsList(orderNo, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof poVersionsList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PoVersionsListQueryResult = NonNullable<Awaited<ReturnType<typeof poVersionsList>>>
+export type PoVersionsListQueryError = ErrorType<unknown>
+
+
+export function usePoVersionsList<TData = Awaited<ReturnType<typeof poVersionsList>>, TError = ErrorType<unknown>>(
+ orderNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsList>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsList<TData = Awaited<ReturnType<typeof poVersionsList>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsList>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsList<TData = Awaited<ReturnType<typeof poVersionsList>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The PO versions of an order, newest first. Prices are masked by role
+ */
+
+export function usePoVersionsList<TData = Awaited<ReturnType<typeof poVersionsList>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPoVersionsListQueryOptions(orderNo,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Confirm that a PO revises a submitted order. It becomes the next PO version. OrderPilot cannot undo this
+ */
+export const poVersionsConfirm = (
+    orderNo: string,
+    poVersionsConfirmBody: PoVersionsConfirmBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PoVersionsConfirm201>(
+      {url: `/api/v1/orders/${orderNo}/po-versions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: poVersionsConfirmBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getPoVersionsConfirmQueryKey = (orderNo: string,
+    poVersionsConfirmBody?: PoVersionsConfirmBody,) => {
+    return [
+    'POST', `/api/v1/orders/${orderNo}/po-versions`, poVersionsConfirmBody
+    ] as const;
+    }
+
+
+export const getPoVersionsConfirmQueryOptions = <TData = Awaited<ReturnType<typeof poVersionsConfirm>>, TError = ErrorType<unknown>>(orderNo: string,
+    poVersionsConfirmBody: PoVersionsConfirmBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsConfirm>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPoVersionsConfirmQueryKey(orderNo,poVersionsConfirmBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof poVersionsConfirm>>> = ({ signal }) => poVersionsConfirm(orderNo,poVersionsConfirmBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof poVersionsConfirm>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PoVersionsConfirmQueryResult = NonNullable<Awaited<ReturnType<typeof poVersionsConfirm>>>
+export type PoVersionsConfirmQueryError = ErrorType<unknown>
+
+
+export function usePoVersionsConfirm<TData = Awaited<ReturnType<typeof poVersionsConfirm>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsConfirmBody: PoVersionsConfirmBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsConfirm>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsConfirm>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsConfirm>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsConfirm<TData = Awaited<ReturnType<typeof poVersionsConfirm>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsConfirmBody: PoVersionsConfirmBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsConfirm>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsConfirm>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsConfirm>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsConfirm<TData = Awaited<ReturnType<typeof poVersionsConfirm>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsConfirmBody: PoVersionsConfirmBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsConfirm>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Confirm that a PO revises a submitted order. It becomes the next PO version. OrderPilot cannot undo this
+ */
+
+export function usePoVersionsConfirm<TData = Awaited<ReturnType<typeof poVersionsConfirm>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsConfirmBody: PoVersionsConfirmBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsConfirm>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPoVersionsConfirmQueryOptions(orderNo,poVersionsConfirmBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The differences between two PO versions
+ */
+export const poVersionsDiff = (
+    orderNo: string,
+    params: PoVersionsDiffParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PoVersionsDiff200>(
+      {url: `/api/v1/orders/${orderNo}/po-versions/diff`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getPoVersionsDiffQueryKey = (orderNo: string,
+    params?: PoVersionsDiffParams,) => {
+    return [
+    `/api/v1/orders/${orderNo}/po-versions/diff`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getPoVersionsDiffQueryOptions = <TData = Awaited<ReturnType<typeof poVersionsDiff>>, TError = ErrorType<unknown>>(orderNo: string,
+    params: PoVersionsDiffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsDiff>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPoVersionsDiffQueryKey(orderNo,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof poVersionsDiff>>> = ({ signal }) => poVersionsDiff(orderNo,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof poVersionsDiff>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PoVersionsDiffQueryResult = NonNullable<Awaited<ReturnType<typeof poVersionsDiff>>>
+export type PoVersionsDiffQueryError = ErrorType<unknown>
+
+
+export function usePoVersionsDiff<TData = Awaited<ReturnType<typeof poVersionsDiff>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    params: PoVersionsDiffParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsDiff>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsDiff>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsDiff>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsDiff<TData = Awaited<ReturnType<typeof poVersionsDiff>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    params: PoVersionsDiffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsDiff>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsDiff>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsDiff>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsDiff<TData = Awaited<ReturnType<typeof poVersionsDiff>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    params: PoVersionsDiffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsDiff>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The differences between two PO versions
+ */
+
+export function usePoVersionsDiff<TData = Awaited<ReturnType<typeof poVersionsDiff>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    params: PoVersionsDiffParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsDiff>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPoVersionsDiffQueryOptions(orderNo,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary One PO version with its lines
+ */
+export const poVersionsOne = (
+    orderNo: string,
+    poVersionNo: number,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PoVersionsOne200>(
+      {url: `/api/v1/orders/${orderNo}/po-versions/${poVersionNo}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getPoVersionsOneQueryKey = (orderNo: string,
+    poVersionNo: number,) => {
+    return [
+    `/api/v1/orders/${orderNo}/po-versions/${poVersionNo}`
+    ] as const;
+    }
+
+
+export const getPoVersionsOneQueryOptions = <TData = Awaited<ReturnType<typeof poVersionsOne>>, TError = ErrorType<unknown>>(orderNo: string,
+    poVersionNo: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsOne>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPoVersionsOneQueryKey(orderNo,poVersionNo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof poVersionsOne>>> = ({ signal }) => poVersionsOne(orderNo,poVersionNo, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined && poVersionNo !== null && poVersionNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof poVersionsOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PoVersionsOneQueryResult = NonNullable<Awaited<ReturnType<typeof poVersionsOne>>>
+export type PoVersionsOneQueryError = ErrorType<unknown>
+
+
+export function usePoVersionsOne<TData = Awaited<ReturnType<typeof poVersionsOne>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionNo: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsOne>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsOne>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsOne<TData = Awaited<ReturnType<typeof poVersionsOne>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionNo: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsOne>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsOne>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsOne<TData = Awaited<ReturnType<typeof poVersionsOne>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionNo: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsOne>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary One PO version with its lines
+ */
+
+export function usePoVersionsOne<TData = Awaited<ReturnType<typeof poVersionsOne>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionNo: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsOne>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPoVersionsOneQueryOptions(orderNo,poVersionNo,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The differences a revised PO would make. Writes nothing and tells nobody
+ */
+export const poVersionsPreview = (
+    orderNo: string,
+    poVersionsPreviewBody: PoVersionsPreviewBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PoVersionsPreview200>(
+      {url: `/api/v1/orders/${orderNo}/po-versions/preview`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: poVersionsPreviewBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getPoVersionsPreviewQueryKey = (orderNo: string,
+    poVersionsPreviewBody?: PoVersionsPreviewBody,) => {
+    return [
+    'POST', `/api/v1/orders/${orderNo}/po-versions/preview`, poVersionsPreviewBody
+    ] as const;
+    }
+
+
+export const getPoVersionsPreviewQueryOptions = <TData = Awaited<ReturnType<typeof poVersionsPreview>>, TError = ErrorType<unknown>>(orderNo: string,
+    poVersionsPreviewBody: PoVersionsPreviewBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsPreview>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPoVersionsPreviewQueryKey(orderNo,poVersionsPreviewBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof poVersionsPreview>>> = ({ signal }) => poVersionsPreview(orderNo,poVersionsPreviewBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof poVersionsPreview>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PoVersionsPreviewQueryResult = NonNullable<Awaited<ReturnType<typeof poVersionsPreview>>>
+export type PoVersionsPreviewQueryError = ErrorType<unknown>
+
+
+export function usePoVersionsPreview<TData = Awaited<ReturnType<typeof poVersionsPreview>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsPreviewBody: PoVersionsPreviewBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsPreview>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsPreview>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsPreview>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsPreview<TData = Awaited<ReturnType<typeof poVersionsPreview>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsPreviewBody: PoVersionsPreviewBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsPreview>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof poVersionsPreview>>,
+          TError,
+          Awaited<ReturnType<typeof poVersionsPreview>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePoVersionsPreview<TData = Awaited<ReturnType<typeof poVersionsPreview>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsPreviewBody: PoVersionsPreviewBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsPreview>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The differences a revised PO would make. Writes nothing and tells nobody
+ */
+
+export function usePoVersionsPreview<TData = Awaited<ReturnType<typeof poVersionsPreview>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    poVersionsPreviewBody: PoVersionsPreviewBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof poVersionsPreview>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPoVersionsPreviewQueryOptions(orderNo,poVersionsPreviewBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

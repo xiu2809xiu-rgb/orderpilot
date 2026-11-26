@@ -3,7 +3,8 @@
 ### status, only a capture state (draft, submitted or void), which is not the
 ### order's status. Support and the Product Manager start, change and submit
 ### drafts. A submitted order is handed to the workflow, which today is a
-### stand-in that changes no status. A sample can be read but never written.
+### stand-in that changes no status. A submitted order takes a revised PO as its next
+### PO version, after a person confirms it. A sample can be read but never written.
 ### Sign in first (see auth.http): REST Client keeps the cookies. The writes also
 ### need the CSRF header: paste the op_csrf cookie's value into @csrf, as auth.http says.
 @baseUrl = http://localhost:3000
@@ -213,7 +214,8 @@ X-CSRF-Token: {{csrf}}
 
 ### Submit a saved draft. Send the version you read (here a fresh draft, version 1).
 ### 200: captureState submitted, the version up by one, workflowStatus null while the
-### stand-in is bound. OrderPilot cannot change or cancel the order afterwards.
+### stand-in is bound. OrderPilot cannot cancel the order afterwards, and a revised PO
+### is added to it as a new PO version (see the PO versions section below).
 # @name toSubmit
 POST {{baseUrl}}/api/v1/orders
 Content-Type: application/json
@@ -300,6 +302,222 @@ X-CSRF-Token: {{csrf}}
 
 { "version": 2 }
 
+### PO versions. A submitted order takes a revised PO as its next PO version, after a
+### person confirms it. Only a submitted order has PO versions: a draft or a void order
+### answers 409 and a sample 404. Preview writes nothing. Confirm sends the number you
+### compared with: a stale one is 409 with the current number in the details.
+### The order below is made, submitted, previewed and revised in this section.
+# @name toRevise
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
+###
+@reviseNo = {{toRevise.response.body.$.data.orderNo}}
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1 }
+
+### A draft has no PO versions: 409, detail captureState draft. Try it with a fresh
+### draft's number. A submitted order with one version lists it as current.
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions
+
+### Preview a revised PO: 200 with the differences. Writes nothing and tells nobody.
+### The same customer and PO number, a later order date and a quantity of 8.
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/preview
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "8", "unitPrice": "12.50" }]
+}
+
+### Confirm it: 201, PO version 2, PO version 1 kept and marked superseded.
+### expectedPoVersionNo is the number the person compared with.
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "8", "unitPrice": "12.50" }],
+  "confirmed": true,
+  "expectedPoVersionNo": 1
+}
+
+### The same confirm with the old number: 409, details currentPoVersionNo 2.
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "8", "unitPrice": "12.50" }],
+  "confirmed": true,
+  "expectedPoVersionNo": 1
+}
+
+### The versions, newest first: two, PO version 2 current.
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions
+
+### The differences between PO version 1 and PO version 2.
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/diff?from=1&to=2
+
+### from must be below to: 400 on to.
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/diff?from=2&to=1
+
+### One PO version with its lines. A superseded one stays readable: 200.
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/1
+
+### A PO version that does not exist: 404 "PO version was not found."
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/9
+
+### A malformed number: 400.
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/abc
+
+### A draft cannot be previewed as a revision: 409, "... is a draft, so edit it."
+### Use the number of a draft you made (see the draft sections above).
+POST {{baseUrl}}/api/v1/orders/{{orderNo}}/po-versions/preview
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-draft",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "8", "unitPrice": "12.50" }]
+}
+
+### A draft has no versions to list: 409, detail captureState draft.
+GET {{baseUrl}}/api/v1/orders/{{orderNo}}/po-versions
+
+### Another PO number is a new order, not a revision: 400 on externalDocumentNo.
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/preview
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-other",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "8", "unitPrice": "12.50" }]
+}
+
+### Another customer: 400 on customerNo.
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/preview
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0002",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "8", "unitPrice": "12.50" }]
+}
+
+### The same content as the current PO version: preview answers 200 with identical true,
+### and confirm answers 400 on revision. Send the current PO version 2 content again.
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/preview
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "8", "unitPrice": "12.50" }]
+}
+
+### A sample is not stored: 404.
+GET {{baseUrl}}/api/v1/orders/SO-0001/po-versions
+
+### A third PO version, then the differences from 1 to 3.
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "9", "unitPrice": "12.50" }],
+  "confirmed": true,
+  "expectedPoVersionNo": 2
+}
+
+###
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/diff?from=1&to=3
+
+### Warehouse reads the list and the differences with every price masked, and cannot
+### add a version: sign in as Warehouse, then the reads answer 200 with masked prices
+### and the confirm answers 403, audited. Sign in as Support again afterwards.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "WAREHOUSE" }
+
+###
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions
+
+###
+GET {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions/diff?from=1&to=3
+
+###
+POST {{baseUrl}}/api/v1/orders/{{reviseNo}}/po-versions
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-revise",
+  "orderDate": "2026-11-20",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "10" }],
+  "confirmed": true,
+  "expectedPoVersionNo": 3
+}
+
+###
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "SUPPORT" }
+
 ### No session: 401. Sign out first (see auth.http), then send the write.
 POST {{baseUrl}}/api/v1/auth/logout
 X-CSRF-Token: {{csrf}}
@@ -315,3 +533,12 @@ POST {{baseUrl}}/api/v1/orders/{{submitNo}}/submit
 Content-Type: application/json
 
 { "version": 2 }
+
+###
+GET {{baseUrl}}/api/v1/orders/{{submitNo}}/po-versions
+
+###
+POST {{baseUrl}}/api/v1/orders/{{submitNo}}/po-versions/preview
+Content-Type: application/json
+
+{ "customerNo": "C-0001" }

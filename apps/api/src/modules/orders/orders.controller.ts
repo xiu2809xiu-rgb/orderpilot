@@ -159,7 +159,7 @@ export class OrdersController {
   @ApiParam({ name: "orderNo", schema: { type: "string" } })
   @ApiOperation({
     summary:
-      "Submit a draft order. Send the version you read. OrderPilot cannot change or cancel it afterwards",
+      "Submit a draft order. Send the version you read. OrderPilot cannot cancel it afterwards. A revised PO is added as a new PO version",
   })
   @ApiBody({ schema: openApiSchema(submitSalesOrderSchema) })
   @ApiOkResponse({ schema: openApiSchema(salesOrderResponseSchema) })
