@@ -1,6 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Database } from "../../src/database/database.js";
-import { SalesOrder } from "../../src/modules/orders/domain/sales-order.js";
+import {
+  SalesOrder,
+  type SalesOrderInput,
+} from "../../src/modules/orders/domain/sales-order.js";
 import { PoVersionRepository } from "../../src/modules/orders/po-version.repository.js";
 import { SalesOrderRepository } from "../../src/modules/orders/sales-order.repository.js";
 import { resetTestData } from "../support/reset.js";
@@ -40,6 +43,7 @@ describe("the PO version repository", () => {
     orderNo: string,
     quantity: string,
     description = "Reworded item",
+    over: Partial<SalesOrderInput> = {},
   ): SalesOrder {
     return new SalesOrder({
       orderNo,
@@ -63,6 +67,7 @@ describe("the PO version repository", () => {
           qtyToShip: quantity,
         },
       ],
+      ...over,
     });
   }
 
@@ -80,6 +85,12 @@ describe("the PO version repository", () => {
       include: { lines: { orderBy: { lineNo: "asc" } } },
     });
     return {
+      // The order's own: a revision never moves these.
+      customerNo: head.customerNo,
+      externalDocumentNo: head.externalDocumentNo,
+      currencyCode: head.currencyCode,
+      captureState: head.captureState,
+      navisionNo: head.navisionNo,
       poVersionNo: head.poVersionNo,
       version: head.version,
       orderDate: head.orderDate.toISOString(),
@@ -122,6 +133,39 @@ describe("the PO version repository", () => {
       prepaymentPercent: "50.00",
       lines: [[1, "ITM-0001", "8.000", "35.77"]],
     });
+  });
+
+  it("supersede leaves the customer, the PO number, the currency, the state and the Business Central number alone", async () => {
+    const { id, orderNo } = await storedOrder(db);
+    await db.client.salesOrder.update({
+      where: { id },
+      data: { navisionNo: "SO-BC-0042" },
+    });
+    const before = await snapshotOf(id);
+    // A next order that differs in every one of them: the update must not
+    // carry any of them across.
+    const different = nextOf(orderNo, "8", "Reworded item", {
+      customerNo: "C-10099",
+      externalDocumentNo: "PO-OTHER",
+      currencyCode: "EUR",
+      captureState: "void",
+      navisionNo: "SO-BC-9999",
+    });
+    expect(
+      await db.transaction(() =>
+        repo.supersede(different, 1, { userId: REVISER, at: AT }),
+      ),
+    ).toBe(true);
+    const after = await snapshotOf(id);
+    expect(after).toMatchObject({
+      customerNo: before.customerNo,
+      externalDocumentNo: before.externalDocumentNo,
+      currencyCode: before.currencyCode,
+      captureState: before.captureState,
+      navisionNo: "SO-BC-0042",
+      poVersionNo: 2,
+    });
+    expect(after.externalDocumentNo).not.toBe("PO-OTHER");
   });
 
   it("supersede answers false and changes nothing for a stale number, a draft and a void order", async () => {
@@ -195,6 +239,54 @@ describe("the PO version repository", () => {
     );
     for (const price of ["35.77", "31.97", "33.41"])
       expect(message).not.toContain(price);
+    expect((error as Error).cause).toBeUndefined();
+    expect(await snapshotOf(id)).toEqual(before);
+  });
+
+  it("a Prisma error that quotes the call's arguments, with a price among them, reaches the caller without the price", async () => {
+    const { id, orderNo } = await storedOrder(db);
+    const before = await snapshotOf(id);
+    // A wrong type for one price makes Prisma answer with a validation error
+    // that prints the whole call, and the other line's price with it.
+    const lines = [
+      {
+        lineNo: 1,
+        itemNo: "ITM-0001",
+        description: "Quoted line",
+        quantity: "3.000",
+        unitPrice: "35.77",
+        qtyToShip: "3.000",
+      },
+      {
+        lineNo: 2,
+        itemNo: "ITM-0002",
+        description: "Wrong type",
+        quantity: "1.000",
+        unitPrice: "not a price",
+        qtyToShip: "1.000",
+      },
+    ];
+    // The control: without the wrapper this very call quotes the price.
+    const raw = await db.client.salesOrderLine
+      .createMany({ data: lines.map((line) => ({ ...line, orderId: id })) })
+      .catch((thrown: unknown) => thrown);
+    expect((raw as Error).message).toContain("35.77");
+
+    // The domain would refuse this price before the repository saw it, so the
+    // lines are put in after the order is built: the wrapper is for the error
+    // nobody foresaw, not for one the domain already catches.
+    const failing = nextOf(orderNo, "3");
+    Object.defineProperty(failing, "lines", { value: lines });
+    const error = await db
+      .transaction(() =>
+        repo.supersede(failing, 1, { userId: REVISER, at: AT }),
+      )
+      .catch((thrown: unknown) => thrown);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toMatch(
+      /^PO version 2 of order SO-\d{8}-\d{4} could not be stored \(\w+\)$/,
+    );
+    expect((error as Error).message).not.toContain("35.77");
     expect((error as Error).cause).toBeUndefined();
     expect(await snapshotOf(id)).toEqual(before);
   });
