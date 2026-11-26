@@ -1,6 +1,7 @@
 import { SlidersHorizontal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { TableFilters } from "@/components/common";
+import { CountBadge } from "@/components/common/CountBadge";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -31,14 +32,11 @@ export function MoreFilters({ filters, values, setFilter }: MoreFiltersProps) {
         <Button variant="outline" size="sm" className="lp-more">
           <SlidersHorizontal aria-hidden="true" />
           {t("filters.more")}
-          {applied > 0 ? (
-            <span
-              aria-label={t("filters.moreApplied", { count: applied })}
-              className="lp-count"
-            >
-              {applied}
-            </span>
-          ) : null}
+          <CountBadge
+            count={applied}
+            className="lp-count"
+            label={t("filters.moreApplied", { count: applied })}
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent

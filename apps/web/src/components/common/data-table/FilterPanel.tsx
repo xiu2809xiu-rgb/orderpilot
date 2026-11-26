@@ -2,6 +2,7 @@ import { ListFilter } from "lucide-react";
 import { useId, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { CountBadge } from "../CountBadge";
 import "./data-table.css";
 
 /**
@@ -36,14 +37,11 @@ export function FilterPanel({
       >
         <ListFilter aria-hidden="true" />
         {t("table.filters")}
-        {active > 0 ? (
-          <span
-            className="lp-count"
-            aria-label={t("table.filtersOn", { count: active })}
-          >
-            {active}
-          </span>
-        ) : null}
+        <CountBadge
+          count={active}
+          className="lp-count"
+          label={t("table.filtersOn", { count: active })}
+        />
       </Button>
       <div id={id} className="dt-panel" data-open={open}>
         {children}
