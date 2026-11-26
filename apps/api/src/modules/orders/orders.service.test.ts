@@ -227,6 +227,35 @@ describe("the orders service", () => {
     expect(detail.lines[0]?.shortBy).toBe("3.00");
   });
 
+  it("gives the detail the order's PO version when submitted, and null for a sample, a draft and a void order", async () => {
+    const kinds = [
+      facts({
+        orderNo: "SO-20261108-0010",
+        captureState: "submitted",
+        poVersionNo: 3,
+      }),
+      facts({ orderNo: "SO-20261108-0011", captureState: "draft" }),
+      facts({
+        orderNo: "SO-20261108-0012",
+        captureState: "void",
+        poVersionNo: 1,
+      }),
+      facts({
+        orderNo: "SO-0001",
+        source: "sample",
+        captureState: null,
+        poVersionNo: null,
+      }),
+    ];
+    const { svc } = service(kinds, {});
+    const seen = await Promise.all(
+      kinds.map(
+        async (kind) => (await svc.one(kind.orderNo, "SUPPORT")).poVersionNo,
+      ),
+    );
+    expect(seen).toEqual([3, null, null, null]);
+  });
+
   it("raises not found for an order nobody has", async () => {
     const { svc } = service([], {});
     await expect(svc.one("SO-20990101-0001", "SUPPORT")).rejects.toBeInstanceOf(

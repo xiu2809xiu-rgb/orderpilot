@@ -82,6 +82,7 @@ describe("the orders responses", () => {
       prepaymentPercent: "30",
       navisionNo: null,
       version: null,
+      poVersionNo: null,
       lines: [
         {
           lineNo: 1,
@@ -96,6 +97,22 @@ describe("the orders responses", () => {
       ],
     };
     expect(salesOrderDetailSchema.safeParse(detail).success).toBe(true);
+  });
+  it("refuses a detail without poVersionNo", () => {
+    const detail = {
+      ...row,
+      prepaymentPercent: "30",
+      navisionNo: null,
+      version: null,
+      lines: [],
+    };
+    expect(salesOrderDetailSchema.safeParse(detail).success).toBe(false);
+    expect(
+      salesOrderDetailSchema.safeParse({ ...detail, poVersionNo: 0 }).success,
+    ).toBe(false);
+    expect(
+      salesOrderDetailSchema.safeParse({ ...detail, poVersionNo: 2 }).success,
+    ).toBe(true);
   });
   it("refuses an unknown source", () => {
     expect(

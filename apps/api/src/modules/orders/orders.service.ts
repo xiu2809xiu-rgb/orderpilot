@@ -193,6 +193,9 @@ export class OrdersService {
       prepaymentPercent: facts.prepaymentPercent,
       navisionNo: facts.navisionNo,
       version: facts.version,
+      // Only a submitted order has a PO version: a draft is edited in place and a void order never was submitted (ADR 0074).
+      poVersionNo:
+        facts.captureState === "submitted" ? facts.poVersionNo : null,
       lines: facts.lines.map((line) => ({
         lineNo: line.lineNo,
         itemNo: line.itemNo,

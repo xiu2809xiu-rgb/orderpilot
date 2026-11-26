@@ -42,6 +42,7 @@ export function draftDetail(
     prepaymentPercent: "100.00",
     navisionNo: null,
     version: 3,
+    poVersionNo: null,
     lines: [
       {
         lineNo: 1,

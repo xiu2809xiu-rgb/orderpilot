@@ -102,6 +102,11 @@ export const salesOrderDetailSchema = salesOrderRowSchema.extend({
   navisionNo: z.string().min(1).nullable(),
   /** Counts the saves of a draft. Null for a sample: it cannot be edited. */
   version: z.int().min(1).nullable(),
+  /**
+   * The PO version this order holds now. Null for a sample, a draft and a void
+   * order: only a submitted order has a PO version (ADR 0074).
+   */
+  poVersionNo: z.int().min(1).nullable(),
   lines: z.array(salesOrderLineSchema),
 });
 export type SalesOrderDetail = z.infer<typeof salesOrderDetailSchema>;
