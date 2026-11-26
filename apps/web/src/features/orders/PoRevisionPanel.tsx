@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { countsText } from "@/features/directions/screens/order/versions/differenceText";
 import { PoDifferences } from "@/features/directions/screens/order/versions/PoDifferences";
 import { Button } from "@/components/ui/button";
 import { formatDay } from "@/lib/format";
@@ -171,12 +172,7 @@ export function PoRevisionPanel({
       <p role="status" className="sr-only">
         {phase.kind === "ready" && phase.failure === null && data
           ? t("form.revision.ready", {
-              counts: td(
-                data.pricesCompared
-                  ? "order.versions.counts"
-                  : "order.versions.countsMasked",
-                data.counts,
-              ),
+              counts: countsText(td, data),
             })
           : ""}
       </p>

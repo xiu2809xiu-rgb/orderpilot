@@ -1,72 +1,10 @@
-import type { LineDifferenceView, PriceDifference } from "@orderpilot/shared";
-import { Minus, PenLine, Plus } from "lucide-react";
+import type { LineDifferenceView } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/kit/Badge";
-import { StatusChip } from "@/components/kit/StatusChip";
-import { MaskedValue } from "@/components/parts/MaskedValue";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { formatMoney, formatQuantity } from "@/lib/format";
+import { formatQuantity } from "@/lib/format";
 import { changeText } from "./differenceText";
-
-/** A unit price or a total: a mask with the role's reason, or the figure and its change. */
-export function PriceCell({
-  price,
-  currency,
-}: {
-  price: PriceDifference;
-  currency: string;
-}) {
-  const { t } = useTranslation("directions-orders");
-  if (price.masked) {
-    return <MaskedValue masked reason={t(`mask.${price.reason}`)} />;
-  }
-  return (
-    <span className="numeral">
-      {changeText(t, price, (value) => formatMoney(value, currency))}
-    </span>
-  );
-}
-
-/** The chip of a line's status: a word and an icon, and quiet when nothing changed. */
-function StatusCell({
-  status,
-  pricesCompared,
-}: {
-  status: LineDifferenceView["status"];
-  pricesCompared: boolean;
-}) {
-  const { t } = useTranslation("directions-orders");
-  if (status === "added") {
-    return (
-      <StatusChip kind="success" icon={Plus}>
-        {t("order.versions.status.added")}
-      </StatusChip>
-    );
-  }
-  if (status === "removed") {
-    return (
-      <StatusChip kind="destructive" icon={Minus}>
-        {t("order.versions.status.removed")}
-      </StatusChip>
-    );
-  }
-  if (status === "changed") {
-    return (
-      <StatusChip kind="warning" icon={PenLine}>
-        {t("order.versions.status.changed")}
-      </StatusChip>
-    );
-  }
-  return (
-    <Badge variant="outline" radius="full" className="text-muted-foreground">
-      {t(
-        pricesCompared
-          ? "order.versions.status.unchanged"
-          : "order.versions.status.unchangedMasked",
-      )}
-    </Badge>
-  );
-}
+import { PriceCell } from "./PriceCell";
+import { StatusCell } from "./StatusCell";
 
 /**
  * One line of the differences: the item, its status, and the quantity and the
@@ -111,7 +49,11 @@ export function DifferenceRow({
         ) : null}
       </TableCell>
       <TableCell>
-        <StatusCell status={line.status} pricesCompared={pricesCompared} />
+        <StatusCell
+          status={line.status}
+          moved={line.moved}
+          pricesCompared={pricesCompared}
+        />
       </TableCell>
       <TableCell className="text-right">
         <span className="numeral" aria-hidden={quantityFull ? true : undefined}>

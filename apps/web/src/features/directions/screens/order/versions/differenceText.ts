@@ -1,3 +1,4 @@
+import type { PoVersionDifferences } from "@orderpilot/shared";
 import type { TFunction } from "i18next";
 
 /**
@@ -19,4 +20,41 @@ export function changeText(
   }
   const only = to ?? from;
   return only === null ? "" : format(only);
+}
+
+/**
+ * The counts of a differences view as one sentence, in five numbers that add
+ * up to the lines: a line that only moved is "moved", not also "unchanged", and
+ * a changed line that moved is "changed" (its own row says where it went).
+ */
+export function countsText(
+  t: TFunction,
+  differences: PoVersionDifferences,
+): string {
+  const { counts, lines, pricesCompared } = differences;
+  const movedOnly = lines.filter(
+    (line) => line.status === "unchanged" && line.moved,
+  ).length;
+  // `counts.unchanged` holds the moved-only lines too, so they come out of it.
+  const unchanged = Math.max(0, counts.unchanged - movedOnly);
+  return t(
+    pricesCompared ? "order.versions.counts" : "order.versions.countsMasked",
+    {
+      added: counts.added,
+      removed: counts.removed,
+      changed: counts.changed,
+      moved: movedOnly,
+      unchanged,
+    },
+  );
+}
+
+/** True when the only difference is the order of the lines: same header, same items, same numbers. */
+export function onlyMoved(differences: PoVersionDifferences): boolean {
+  return (
+    !differences.identical &&
+    differences.header.every((field) => !field.changed) &&
+    differences.lines.every((line) => line.status === "unchanged") &&
+    differences.lines.some((line) => line.moved)
+  );
 }

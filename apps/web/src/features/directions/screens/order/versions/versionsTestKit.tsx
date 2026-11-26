@@ -252,11 +252,17 @@ export function serveVersions(api: VersionsApi): VersionsRequests {
 }
 
 /** The Versions tab at its address, signed in as `role`. */
-export function renderVersions(role: Role = "SUPPORT", orderNo = ORDER) {
+export function renderVersions(
+  role: Role = "SUPPORT",
+  orderNo = ORDER,
+  /** Fills the cache before the tab draws, as an earlier visit would have. */
+  seed?: (client: QueryClient) => void,
+) {
   useSessionStore.setState({ status: "active", session: sessionFor(role) });
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  seed?.(client);
   return render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[`/orders/${orderNo}?tab=versions`]}>

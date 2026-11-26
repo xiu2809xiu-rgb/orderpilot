@@ -82,6 +82,14 @@ export function useConfirmRevision(options: {
     queryClient.setQueryData(getOrdersOneQueryKey(orderNo), {
       data: result.answer.order,
     });
+    // Dropped, not only marked stale: a list read at the old number would be
+    // drawn at once, saying that the order has one PO version, until its
+    // refetch landed. The tab reads them again from nothing.
+    const versionsPath = `/api/v1/orders/${orderNo}/po-versions`;
+    queryClient.removeQueries({
+      predicate: ({ queryKey }) =>
+        typeof queryKey[0] === "string" && queryKey[0].startsWith(versionsPath),
+    });
     void queryClient.invalidateQueries();
     void navigate(`/orders/${orderNo}?tab=versions`, { replace: true });
   }, [

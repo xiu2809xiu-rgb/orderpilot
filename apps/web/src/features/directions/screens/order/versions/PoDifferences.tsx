@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { countsText, onlyMoved } from "./differenceText";
 import { DifferenceRow } from "./DifferenceRow";
 import { HeaderDifferences } from "./HeaderDifferences";
 
@@ -36,7 +37,7 @@ export function PoDifferences({
   const { t } = useTranslation("directions-orders");
   const tableId = useId();
   const [all, setAll] = useState(false);
-  const { pricesCompared, counts } = differences;
+  const { pricesCompared } = differences;
   const quiet = (line: PoVersionDifferences["lines"][number]) =>
     line.status === "unchanged" && !line.moved;
   const hidden = compact && !all ? differences.lines.filter(quiet).length : 0;
@@ -65,37 +66,44 @@ export function PoDifferences({
           )}
         </p>
       ) : (
-        <ScrollRegion label={t("order.versions.region")}>
-          <Table id={tableId} className="od-table od-lines">
-            <caption className="sr-only">{t("order.versions.caption")}</caption>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead scope="col">
-                  {t("order.versions.col.item")}
-                </TableHead>
-                <TableHead scope="col">
-                  {t("order.versions.col.status")}
-                </TableHead>
-                <TableHead scope="col" className="text-right">
-                  {t("order.versions.col.quantity")}
-                </TableHead>
-                <TableHead scope="col" className="text-right">
-                  {t("order.versions.col.unitPrice")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {shown.map((line) => (
-                <DifferenceRow
-                  key={`${line.itemNo}-${String(line.fromLineNo)}-${String(line.toLineNo)}`}
-                  line={line}
-                  currency={currency}
-                  pricesCompared={pricesCompared}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollRegion>
+        <>
+          {onlyMoved(differences) ? (
+            <p className="fs-14 max-w-prose">{t("order.versions.onlyMoved")}</p>
+          ) : null}
+          <ScrollRegion label={t("order.versions.region")}>
+            <Table id={tableId} className="od-table od-lines">
+              <caption className="sr-only">
+                {t("order.versions.caption")}
+              </caption>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead scope="col">
+                    {t("order.versions.col.item")}
+                  </TableHead>
+                  <TableHead scope="col">
+                    {t("order.versions.col.status")}
+                  </TableHead>
+                  <TableHead scope="col" className="text-right">
+                    {t("order.versions.col.quantity")}
+                  </TableHead>
+                  <TableHead scope="col" className="text-right">
+                    {t("order.versions.col.unitPrice")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {shown.map((line) => (
+                  <DifferenceRow
+                    key={`${line.itemNo}-${String(line.fromLineNo)}-${String(line.toLineNo)}`}
+                    line={line}
+                    currency={currency}
+                    pricesCompared={pricesCompared}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollRegion>
+        </>
       )}
       {compact && !differences.identical && (hidden > 0 || all) ? (
         <Button
@@ -118,12 +126,7 @@ export function PoDifferences({
         className="fs-14 text-muted-foreground"
         {...(liveCounts ? { role: "status" } : {})}
       >
-        {t(
-          pricesCompared
-            ? "order.versions.counts"
-            : "order.versions.countsMasked",
-          counts,
-        )}
+        {countsText(t, differences)}
       </p>
     </div>
   );

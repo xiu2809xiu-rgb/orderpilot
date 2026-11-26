@@ -2,7 +2,7 @@ import type { PoVersionDifferences } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/kit/Badge";
 import { formatDay } from "@/lib/format";
-import { PriceCell } from "./DifferenceRow";
+import { PriceCell } from "./PriceCell";
 
 type HeaderField = PoVersionDifferences["header"][number]["field"];
 

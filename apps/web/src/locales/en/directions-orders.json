@@ -344,6 +344,7 @@
         "removed": "Removed",
         "changed": "Changed",
         "unchanged": "Unchanged",
+        "moved": "Moved",
         "unchangedMasked": "Same quantity"
       },
       "col": {
@@ -355,9 +356,11 @@
       "region": "Differences by line",
       "caption": "Lines that differ between the two PO versions",
       "moved": "Moved from line {{from}} to line {{to}}",
-      "counts": "{{added}} added, {{removed}} removed, {{changed}} changed, {{unchanged}} unchanged",
-      "countsMasked": "{{added}} added, {{removed}} removed, {{changed}} changed, {{unchanged}} with the same quantity",
-      "showUnchanged": "Show the {{count}} unchanged lines",
+      "counts": "{{added}} added, {{removed}} removed, {{changed}} changed, {{moved}} moved, {{unchanged}} unchanged",
+      "countsMasked": "{{added}} added, {{removed}} removed, {{changed}} changed, {{moved}} moved, {{unchanged}} with the same quantity",
+      "onlyMoved": "Only the order of the lines differs between these PO versions.",
+      "showUnchanged_one": "Show the {{count}} unchanged line",
+      "showUnchanged_other": "Show the {{count}} unchanged lines",
       "hideUnchanged": "Hide the unchanged lines",
       "loading": "Loading PO versions",
       "diffLoading": "Working out the differences"

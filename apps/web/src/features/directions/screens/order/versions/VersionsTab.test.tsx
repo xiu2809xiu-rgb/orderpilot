@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { getPoVersionsListQueryKey } from "@/lib/api/generated/endpoints/orders/orders";
 import i18n from "@/i18n";
 import { axeViolations } from "@/test/axe";
 import { server } from "@/test/server";
@@ -166,7 +167,7 @@ describe("the Versions tab", () => {
     expect(within(facts).getAllByText("Same")).toHaveLength(2);
     expect(within(facts).getAllByText("Changed")).toHaveLength(3);
     expect(screen.getByRole("status")).toHaveTextContent(
-      "1 added, 0 removed, 1 changed, 2 unchanged",
+      "1 added, 0 removed, 1 changed, 1 moved, 1 unchanged",
     );
   });
 
@@ -205,6 +206,10 @@ describe("the Versions tab", () => {
     expect(row("I-0001")).toHaveTextContent("Changed");
     expect(row("I-0001")).toHaveTextContent("2 to 5");
     expect(row("I-0002")).toHaveTextContent("Moved from line 2 to line 3");
+    // A line that only moved says "Moved" in its chip, never "Unchanged".
+    const chip = row("I-0002").querySelector("[data-slot=badge]");
+    expect(chip).toHaveTextContent(/^Moved$/);
+    expect(row("I-0002")).not.toHaveTextContent("Unchanged");
     expect(row("I-0004")).toHaveTextContent("Unchanged");
     expect(row("I-0004").querySelector("[data-slot=badge]")).toHaveClass(
       "text-muted-foreground",
@@ -249,7 +254,7 @@ describe("the Versions tab", () => {
     }
     expect(screen.getAllByText("Same quantity").length).toBeGreaterThan(0);
     expect(screen.getByRole("status")).toHaveTextContent(
-      "2 with the same quantity",
+      "1 moved, 1 with the same quantity",
     );
     expect(
       screen.getAllByText(/Hidden: prices are for roles that work with pricing/)
@@ -455,6 +460,47 @@ describe("the Versions tab", () => {
     renderVersions();
     await screen.findByRole("list", { name: "PO versions, newest first" });
     expect(screen.queryByText(/Nobody was told/)).toBeNull();
+  });
+
+  it("does not draw a list that is behind the order, and draws the new one when it arrives", async () => {
+    serveVersions({
+      detail: submittedDetail({ poVersionNo: 2 }),
+      versions: TWO,
+      diff: differences(),
+    });
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    server.use(
+      http.get("*/api/v1/orders/:orderNo/po-versions", async () => {
+        await gate;
+        return HttpResponse.json({
+          data: { orderNo: ORDER, currentPoVersionNo: 2, versions: TWO },
+        });
+      }),
+    );
+    // A list read at PO version 1, left in the cache by an earlier visit.
+    renderVersions("SUPPORT", ORDER, (client) => {
+      client.setQueryData(getPoVersionsListQueryKey(ORDER), {
+        data: {
+          orderNo: ORDER,
+          currentPoVersionNo: 1,
+          versions: [versionRow(1, true)],
+        },
+      });
+    });
+    expect(await screen.findByText("Loading PO versions")).toBeVisible();
+    expect(screen.queryByText("Only PO version 1 exists.")).toBeNull();
+    expect(screen.queryByText(/Nobody was told about PO version 1/)).toBeNull();
+    release();
+    expect(
+      await screen.findByRole("list", { name: "PO versions, newest first" }),
+    ).toBeVisible();
+    expect(screen.queryByText("Only PO version 1 exists.")).toBeNull();
+    expect(
+      screen.getByText(/Nobody was told about PO version 2/),
+    ).toBeVisible();
   });
 
   it("takes focus once after a confirmation and not on a later visit", async () => {

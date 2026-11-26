@@ -461,7 +461,7 @@ describe("the panel that adds a re-sent PO to a submitted order", () => {
       statuses.some(
         (status) =>
           status.textContent ===
-          "Differences ready: 1 added, 0 removed, 1 changed, 2 unchanged",
+          "Differences ready: 1 added, 0 removed, 1 changed, 1 moved, 1 unchanged",
       ),
     ).toBe(true);
   });

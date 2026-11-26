@@ -18,6 +18,7 @@ import {
 } from "@/features/directions/screens/order/versions/versionsTestKit";
 import { loadNamespaces } from "@/features/directions/screens/orders/ordersTestKit";
 import i18n from "@/i18n";
+import { getPoVersionsListQueryKey } from "@/lib/api/generated/endpoints/orders/orders";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import NewOrderPage from "./NewOrderPage";
@@ -139,11 +140,15 @@ function serveAfter(api: ReturnType<typeof serveRevision>["api"]) {
   };
 }
 
-async function confirmed() {
+async function confirmed(
+  /** Runs before the form is filled: what an earlier visit left in the cache. */
+  before?: (routes: ReturnType<typeof renderRoutes>) => void,
+) {
   const user = userEvent.setup();
   const served = serveRevision();
   const answer = serveAfter(served.api);
   const routes = renderRoutes();
+  before?.(routes);
   await saveRefused(user);
   await openPanel(user);
   answerConfirm(served.requests, answer);
@@ -187,6 +192,49 @@ describe("confirming a revised PO on the routes the app uses", () => {
       ),
     ).toBeVisible();
     expect(screen.queryByText("We could not load this")).toBeNull();
+  });
+
+  it("never draws the PO versions list that an earlier visit left at the old number", async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await confirmed(({ client }) => {
+      // Read at PO version 1, before the revision: the page would otherwise
+      // say "only one PO version" beside an order that is at version 2.
+      client.setQueryData(getPoVersionsListQueryKey(EXISTING), {
+        data: {
+          orderNo: EXISTING,
+          currentPoVersionNo: 1,
+          versions: [versionRow(1, true)],
+        },
+      });
+      server.use(
+        http.get("*/api/v1/orders/:orderNo/po-versions", async () => {
+          await gate;
+          return HttpResponse.json({
+            data: {
+              orderNo: EXISTING,
+              currentPoVersionNo: 2,
+              versions: [versionRow(2, true), versionRow(1, false)],
+            },
+          });
+        }),
+      );
+    });
+    const panel = await screen.findByRole("tabpanel", { name: "Versions" });
+    expect(await within(panel).findByText("Loading PO versions")).toBeVisible();
+    expect(within(panel).queryByText("Only PO version 1 exists.")).toBeNull();
+    expect(
+      within(panel).queryByText(/Nobody was told about PO version 1/),
+    ).toBeNull();
+    release();
+    expect(
+      await within(panel).findByRole("list", {
+        name: "PO versions, newest first",
+      }),
+    ).toBeVisible();
+    expect(within(panel).queryByText("Only PO version 1 exists.")).toBeNull();
   });
 
   it("opening New order after a confirmed revision shows a blank form", async () => {

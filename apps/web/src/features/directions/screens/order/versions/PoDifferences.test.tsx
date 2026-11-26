@@ -97,7 +97,7 @@ describe("the differences between two PO versions", () => {
     expect(within(table).getByText("I-0002")).toBeVisible();
     expect(within(table).queryByText("I-0004")).toBeNull();
     const more = screen.getByRole("button", {
-      name: "Show the 1 unchanged lines",
+      name: "Show the 1 unchanged line",
     });
     expect(more).toHaveAttribute("aria-expanded", "false");
     await user.click(more);
@@ -112,7 +112,7 @@ describe("the differences between two PO versions", () => {
       <PoDifferences currency="USD" differences={differences()} />,
     );
     expect(screen.getByRole("status")).toHaveTextContent(
-      "1 added, 0 removed, 1 changed, 2 unchanged",
+      "1 added, 0 removed, 1 changed, 1 moved, 1 unchanged",
     );
     view.rerender(
       <PoDifferences
@@ -122,5 +122,45 @@ describe("the differences between two PO versions", () => {
       />,
     );
     expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  describe("when the lines only changed places", () => {
+    const base = differences();
+    const kept = base.lines.filter((line) => line.status === "unchanged");
+    const moved = {
+      ...base,
+      identical: false,
+      header: base.header.map((row) => ({
+        ...row,
+        to: row.from,
+        changed: false,
+      })),
+      lines: kept,
+      counts: { added: 0, removed: 0, changed: 0, moved: 1, unchanged: 2 },
+    };
+
+    it("says that only the order differs, marks the moved line, and counts it as moved", () => {
+      render(<PoDifferences currency="USD" differences={moved} />);
+      expect(
+        screen.getByText(
+          "Only the order of the lines differs between these PO versions.",
+        ),
+      ).toBeVisible();
+      const row = screen
+        .getAllByRole("row")
+        .find((candidate) => candidate.textContent.includes("I-0002"));
+      if (!row) throw new Error("no row");
+      expect(row.querySelector("[data-slot=badge]")).toHaveTextContent(
+        /^Moved$/,
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "0 added, 0 removed, 0 changed, 1 moved, 1 unchanged",
+      );
+    });
+
+    it("does not say it when a date, a quantity or a line also differs", () => {
+      render(<PoDifferences currency="USD" differences={differences()} />);
+      expect(screen.queryByText(/Only the order of the lines/)).toBeNull();
+    });
   });
 });
