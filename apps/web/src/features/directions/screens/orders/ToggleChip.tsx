@@ -21,7 +21,6 @@ export function ToggleChip({
       type="button"
       variant="outline"
       aria-pressed={pressed}
-      data-pressed={pressed}
       className="od-control od-toggle"
       onClick={() => {
         onPressedChange(!pressed);

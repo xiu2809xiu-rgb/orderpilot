@@ -247,7 +247,10 @@ export function statusesOfStage(stage: LifecycleStageTab): readonly string[] {
     : LIFECYCLE_STAGES.flatMap((candidate) => candidate.statuses);
 }
 
-/** The statuses the address names, in the order the lifecycle lists them. */
+/**
+ * The statuses the address names, in the order it gives them. The chips write
+ * them in the lifecycle's order, a hand-edited link may not.
+ */
 export function statusCodes(status: string | null): string[] {
   return status ? status.split(",").filter(Boolean) : [];
 }

@@ -1,8 +1,9 @@
 /* Lists of the app, drawn as the Orders workspace draws its own: labelled
    fields, toggle chips, a work card with a sticky head and 40 px rows, quiet
    record links. Plain rules with no layer, so they sit above Tailwind's
-   utilities on the same elements. Repeats .od-field, .od-control, .od-toggle,
-   .od-chip, .od-clear, .od-table and .od-foot of orders.css. */
+   utilities on the same elements. Repeats .od-field, .od-control, .od-chip,
+   .od-clear, .od-table and .od-foot of orders.css; the toggle chip is in
+   components/common/chip.css. */
 
 /* ---- Fields: the label above the control ---- */
 .dt-field {
