@@ -59,8 +59,9 @@
 
 /* The check's slot is always in the chip. Closed it is 0 wide, open it is the
    icon and the gap to the label (1rem + 0.375rem), the same width the chip
-   always grew by, so the label slides and no neighbour is animated: the bar
-   reflows once, at the end width. */
+   always grew by. The label slides and the chips after it slide with it; the
+   bar's height, and so the table below, can change only if the chip no longer
+   fits its line at the end width. */
 .chip-slot {
   display: inline-flex;
   width: 0;
