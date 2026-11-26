@@ -416,6 +416,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #356  | A day-night switch replaces the theme menu            | `feat/area1-pixel-theme-switch`  | This pull request. The pixel toggle in the bar, menu and sign-in corner             |
 | #364  | Visual hierarchy and breathing room                   | `feat/area1-visual-hierarchy`    | This pull request. One rhythm in four tokens, one page stack, card padding of 24 px |
 | #384  | Scroll areas show which side has more                 | `feat/area1-scroll-edge-hint`    | This pull request. A quiet mark on each side of a scroll area that has more         |
+| #416  | The orders list test counts its days from today       | `test/web-date-range-days`       | This pull request. The date-range test holds a sample order on any day              |
 | #381  | Profile pictures a person approves                    | `feat/area1-profile-pictures`    | This pull request. Upload, review and show a picture; the AI check waits for area 4 |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |

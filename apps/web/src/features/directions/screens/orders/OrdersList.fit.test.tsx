@@ -13,6 +13,7 @@ import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import OrdersScreen from "./OrdersScreen";
 import {
+  daysAgo,
   loadNamespaces,
   LocationProbe,
   manySpecs,
@@ -142,8 +143,10 @@ describe("the date range", () => {
 
   it("says nothing on the button for a range in order", async () => {
     stubApi();
-    open("?from=2026-11-01&to=2026-11-10");
-    await bodyRows();
+    // Counted back from today, as the sample orders are dated: of the four,
+    // the range holds the two placed 14 and 15 days ago, whatever the day.
+    open(`?from=${daysAgo(20)}&to=${daysAgo(10)}`);
+    expect(await bodyRows()).toHaveLength(2);
     expect(screen.queryByText("Dates not in order")).toBeNull();
   });
 
