@@ -20,8 +20,12 @@ import { sessionFor, type StoredSession } from "../src/session.js";
 // looks. Setting it changes no rule, so the other specs that use these two
 // roles are not affected. The spec puts SUPPORT back to Available before it
 // starts and after it ends, even when a test fails. A run killed in between
-// leaves a choice for at most 12 hours and harms nothing. It makes a handful of
-// writes: the stack's one shared address allows 30 a minute.
+// leaves a choice for at most 12 hours and harms nothing. A full run makes 20
+// writes: 9 set through the API, 7 puts back to Available and 4 picks made by
+// the app (the double-click test alone makes 8 of them, and a retry repeats a
+// test's writes). The stack's one shared address allows 30 a minute, so even
+// a run squeezed into one minute stays under it. Count again when a test is
+// added.
 
 const SETTER = "SUPPORT" satisfies Role;
 const LOOKER = "PRODUCT_MANAGER" satisfies Role;
@@ -291,7 +295,7 @@ test("a press and a release of the mouse on the ring or the dot opens the menu a
   }
 });
 
-test("a double click on the ring opens the menu and picks nothing, at every gap up to the system's double-click time, and a press after a pause picks", async ({
+test("a double click on the ring at gaps of 60, 200, 320 and 400 ms, and a triple click 300 ms apart, open the menu and pick nothing, and a press after a pause picks", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -331,25 +335,36 @@ test("a double click on the ring opens the menu and picks nothing, at every gap 
   try {
     // The pill opens over the ring, so the second click lands on its first
     // choice. The quarter second stops a fast double click; the opening press
-    // said again at its place stops a slower one, up to 500 ms.
-    for (const gap of [60, 200, 320, 440]) {
+    // said again at its place stops a slower one, within a fixed 500 ms, and a
+    // repeat restarts the half second, so a third click at the same gap is
+    // stopped too. The largest gap is 400 ms: 440 leaves too little room before
+    // the half second on a slow runner.
+    const rounds: { name: string; gaps: number[] }[] = [
+      { name: "a double click at 60 ms", gaps: [60] },
+      { name: "a double click at 200 ms", gaps: [200] },
+      { name: "a double click at 320 ms", gaps: [320] },
+      { name: "a double click at 400 ms", gaps: [400] },
+      { name: "a triple click 300 ms apart", gaps: [300, 300] },
+    ];
+    for (const { name, gaps } of rounds) {
       const ring = await fromDoNotDisturb();
       const { x, y } = await centreOf(ring);
       await page.mouse.move(x, y);
       await page.mouse.down();
       await page.mouse.up();
-      await page.waitForTimeout(gap);
-      await page.mouse.down();
-      await page.mouse.up();
+      for (const gap of gaps) {
+        await page.waitForTimeout(gap);
+        await page.mouse.down();
+        await page.mouse.up();
+      }
+      // Open after the last click, so that a trigger that never opens cannot pass.
+      await expect(pill(page), `${name} leaves the menu open`).toBeVisible();
       await page.waitForTimeout(900);
-      expect(
-        await mine(),
-        `still Do not disturb after a gap of ${String(gap)} ms`,
-      ).toBe("DO_NOT_DISTURB");
-      expect(
-        puts,
-        `no change is sent after a gap of ${String(gap)} ms`,
-      ).toEqual([]);
+      await expect(pill(page), `${name} still has it open`).toBeVisible();
+      expect(await mine(), `still Do not disturb after ${name}`).toBe(
+        "DO_NOT_DISTURB",
+      );
+      expect(puts, `no change is sent after ${name}`).toEqual([]);
     }
     // A person who waits has chosen: one press to open, a pause, one press
     // and release at the same point picks the first choice.
@@ -366,6 +381,66 @@ test("a double click on the ring opens the menu and picks nothing, at every gap 
       .poll(mine, { message: "Available is picked" })
       .toBe("AVAILABLE");
     expect(puts, "one change is sent").toHaveLength(1);
+  } finally {
+    await putBack();
+  }
+});
+
+test("a held Enter opens the menu and picks nothing, and the value is unchanged", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  // A value that a pick of the focused choice would send again.
+  expect(
+    (
+      await call(SETTER, "PUT", "/availability/mine", {
+        value: "DO_NOT_DISTURB",
+      })
+    ).status,
+  ).toBe(200);
+  const puts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "PUT" && request.url().includes("/availability")) {
+      puts.push(request.url());
+    }
+  });
+  try {
+    await page.goto("/");
+    await page.evaluate(() => {
+      const keys: { key: string; repeat: boolean }[] = [];
+      Object.assign(window, { heldKeys: keys });
+      document.addEventListener(
+        "keydown",
+        (event) => keys.push({ key: event.key, repeat: event.repeat }),
+        true,
+      );
+    });
+    await dot(page, "Do not disturb").focus();
+    // Pressed down and not released: Playwright sends a repeat for each press
+    // of a key that is already down, as the system does while it is held.
+    await page.keyboard.down("Enter");
+    await expect(pill(page)).toBeVisible();
+    await expect(choice(page, "Do not disturb")).toBeFocused();
+    for (let repeats = 0; repeats < 4; repeats += 1) {
+      await page.keyboard.down("Enter");
+      await page.waitForTimeout(60);
+    }
+    const keys = await page.evaluate(
+      () =>
+        (window as unknown as { heldKeys: { key: string; repeat: boolean }[] })
+          .heldKeys,
+    );
+    expect(
+      keys.map((k) => k.repeat),
+      "the page saw the key's repeats",
+    ).toEqual([false, true, true, true, true]);
+    await expect(pill(page), "the menu is still open").toBeVisible();
+    await page.keyboard.up("Enter");
+    expect(puts, "no change is sent").toEqual([]);
+    const { body } = await call(SETTER, "GET", "/availability/mine");
+    expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+      "DO_NOT_DISTURB",
+    );
   } finally {
     await putBack();
   }
@@ -536,13 +611,6 @@ test("the pages pass the accessibility check, and so does the open menu in light
     await page.goto("/");
     await dot(page).click();
     await expect(pill(page)).toBeVisible();
-    // The pill's glass is switched on after its growth: wait for that, so the
-    // contrast of the words on it is measured as a person sees it.
-    await expect(pill(page))
-      .toHaveAttribute("data-settled", "", {
-        timeout: 2_000,
-      })
-      .catch(() => undefined);
     // Radix hides the page behind any open menu with aria-hidden while its
     // buttons stay focusable, and axe flags that for the account menu too:
     // it is the menu library's way of holding focus, not this story's.
