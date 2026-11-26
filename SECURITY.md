@@ -50,7 +50,7 @@ A person can turn on two-step verification in Settings, Account ([ADR 0068](docs
 - **A code works once, one step either side of the clock.** Five wrong codes end a sign-in. Ten wrong codes in 15 minutes lock the code entry, and the third lock in a row lasts 24 hours. A recovery code still works during a lock.
 - **The secret is sealed under `JWT_SECRET`,** so it is only as strong as that secret. With the public default of `.env.example` the seal is obfuscation, not protection. Production has no password sign-in, so two-step guards the local and demo stacks today.
 - **Never in a log:** a code, a secret, a setup key or a recovery code is never written to the audit trail, a log line, an error or a URL. Recovery codes are stored as hashes and shown once.
-- **A System admin can reset another person's two-step** (not their own). The reset ends that person's sessions and is audited. It removes the second step, so a notice to the person is a condition of using it outside the demo stacks.
+- **A System admin can reset another person's two-step** (not their own), except in production. The reset ends that person's sessions and is audited. It removes the second step, so in production the route refuses, with an audited refusal, until a person is told when their two-step is reset (issue 390).
 - **Not built:** making it compulsory for a role, "remember this device", codes by email or SMS, passkeys.
 
 ## Since the repository went private
