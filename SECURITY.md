@@ -42,6 +42,21 @@ None of these run yet. Until the second one does, Dependabot proposes new versio
 
 [Security testing](docs/security/security-testing.md) says what runs where and how we triage findings.
 
+## Two-step sign-in
+
+A person can turn on two-step verification in Settings, Account ([ADR 0068](docs/adr/0068-two-step-sign-in-with-an-authenticator-app.md)). It adds a six-digit code from an authenticator app after the email and password. What it does and does not guard:
+
+- **It guards the email and password sign-in only.** The demo role buttons skip it, so a shared demo account is never locked by one visitor's phone. A demo session cannot turn it on for an account whose role can manage users.
+- **A code works once, one step either side of the clock.** Five wrong codes end a sign-in. Ten wrong codes in 15 minutes lock the code entry, and the third lock in a row lasts 24 hours. A recovery code still works during a lock.
+- **The secret is sealed under `JWT_SECRET`,** so it is only as strong as that secret. With the public default of `.env.example` the seal is obfuscation, not protection. Production has no password sign-in, so two-step guards the local and demo stacks today.
+- **Never in a log:** a code, a secret, a setup key or a recovery code is never written to the audit trail, a log line, an error or a URL. Recovery codes are stored as hashes and shown once.
+- **A System admin can reset another person's two-step** (not their own). The reset ends that person's sessions and is audited. It removes the second step, so a notice to the person is a condition of using it outside the demo stacks.
+- **Not built:** making it compulsory for a role, "remember this device", codes by email or SMS, passkeys.
+
+## Uploads
+
+One route accepts a file today: a profile picture (ADR 0069). It takes one JPEG as the raw request body, at most 256 KB, only from a signed-in person, behind the CSRF check, with a limit of ten uploads in 24 hours and one in flight per person. The server sniffs the bytes, refuses anything that is not a baseline or progressive JPEG of the right shape, removes every metadata segment and cuts everything after the end marker before it stores one byte. A person approves each picture before it is shown, and a pending picture is shown only to its owner and the reviewers. Document upload (PDF, PNG, JPEG, XLSX and CSV, with type sniffing and a zip-bomb guard) is still planned for P-18 and does not exist yet.
+
 ## Since the repository went private
 
 Richie made the repository private on 5 Nov 2026 ([ADR 0040](docs/adr/0040-what-going-private-changed.md)).

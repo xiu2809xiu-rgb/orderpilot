@@ -1,6 +1,7 @@
 import type { Session } from "@orderpilot/shared";
 import {
   Activity,
+  Image as ImageIcon,
   Keyboard,
   Palette,
   Shield,
@@ -20,6 +21,7 @@ export const SECTION_IDS = [
   "ai",
   "controls",
   "health",
+  "pictures",
 ] as const;
 export type SectionId = (typeof SECTION_IDS)[number];
 
@@ -58,6 +60,12 @@ export const SECTIONS: readonly SectionDef[] = [
     group: "app",
     icon: Activity,
     visible: (session) => hasPermission(session, "settings.manage"),
+  },
+  {
+    id: "pictures",
+    group: "app",
+    icon: ImageIcon,
+    visible: (session) => hasPermission(session, "users.manage"),
   },
 ];
 

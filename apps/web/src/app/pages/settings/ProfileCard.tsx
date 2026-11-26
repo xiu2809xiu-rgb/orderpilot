@@ -6,24 +6,26 @@ import {
   SettingList,
   SettingRow,
 } from "@/components/parts/SettingRow";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { initials } from "@/lib/initials";
+import { UserAvatar } from "@/components/parts/UserAvatar";
+import { useMyPicture } from "@/lib/useMyPicture";
 import { useSessionStore } from "@/stores/session";
 
 /** Who is signed in, and what the role is for. The name and email are not editable here. */
 export function ProfileCard() {
   const { t } = useTranslation(["settings", "common"]);
   const session = useSessionStore((state) => state.session);
+  const { picture } = useMyPicture();
   if (!session) return null;
   const { user } = session;
   return (
     <Section title={t("account.profile")}>
       <div className="flex items-center gap-s3 pb-s4">
-        <Avatar className="size-12 shrink-0" aria-hidden="true">
-          <AvatarFallback className="fs-18 bg-accent font-semibold text-accent-foreground">
-            {initials(user.displayName)}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          name={user.displayName}
+          pictureId={picture?.approved?.id}
+          className="size-12"
+          textClassName="fs-18"
+        />
         <div className="min-w-0">
           <p className="fs-18 font-semibold break-words">{user.displayName}</p>
           <p className="fs-14 break-words text-muted-foreground">

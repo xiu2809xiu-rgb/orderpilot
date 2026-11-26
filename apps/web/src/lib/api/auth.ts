@@ -15,7 +15,8 @@ export async function fetchAuthOptions(): Promise<AuthOptions> {
   return (await apiClient.call(authRoutes.options)).data;
 }
 
-function begin(session: Session): Session {
+/** Adopts a session the server has issued. The second step calls it once its code is right and its green hold is over. */
+export function finishSignIn(session: Session): Session {
   apiClient.markSessionStarted();
   // The guard for a different person is in adoptSession, which a silent
   // refresh goes through as well.
@@ -24,11 +25,13 @@ function begin(session: Session): Session {
 }
 
 export async function demoLogin(role: Role): Promise<Session> {
-  return begin((await apiClient.call(authRoutes.demoLogin, { role })).data);
+  return finishSignIn(
+    (await apiClient.call(authRoutes.demoLogin, { role })).data,
+  );
 }
 
 export async function login(body: LoginRequest): Promise<Session> {
-  return begin((await apiClient.call(authRoutes.login, body)).data);
+  return finishSignIn((await apiClient.call(authRoutes.login, body)).data);
 }
 
 export async function logout(): Promise<void> {
@@ -61,7 +64,7 @@ export function bootstrapSession(): Promise<void> {
       return;
     }
     try {
-      begin((await apiClient.call(authRoutes.me)).data);
+      finishSignIn((await apiClient.call(authRoutes.me)).data);
     } catch {
       apiClient.markSessionEnded();
       useSessionStore.getState().setAnonymous();

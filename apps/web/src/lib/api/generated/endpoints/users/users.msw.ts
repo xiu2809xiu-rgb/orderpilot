@@ -21,7 +21,8 @@ import type {
   UsersDisable200,
   UsersEnable200,
   UsersGet200,
-  UsersList200
+  UsersList200,
+  UsersResetTwoStep200
 } from '../../model';
 
 
@@ -32,6 +33,8 @@ export const getUsersGetResponseMock = (overrideResponse: Partial<Extract<UsersG
 export const getUsersDisableResponseMock = (overrideResponse: Partial<Extract<UsersDisable200, object>> = {}): UsersDisable200 => ({data: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 1, max: 20}}), email: faker.internet.email(), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), disabled: faker.datatype.boolean(), disabledAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z'}, ...overrideResponse})
 
 export const getUsersEnableResponseMock = (overrideResponse: Partial<Extract<UsersEnable200, object>> = {}): UsersEnable200 => ({data: {id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 1, max: 20}}), email: faker.internet.email(), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), disabled: faker.datatype.boolean(), disabledAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z'}, ...overrideResponse})
+
+export const getUsersResetTwoStepResponseMock = (overrideResponse: Partial<Extract<UsersResetTwoStep200, object>> = {}): UsersResetTwoStep200 => ({data: {wasOn: faker.datatype.boolean(), sessionsEnded: faker.number.int({min: 0, max: 9007199254740991})}, ...overrideResponse})
 
 
 export const getUsersListMockHandler = (overrideResponse?: UsersList200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<UsersList200> | UsersList200), options?: RequestHandlerOptions) => {
@@ -81,9 +84,22 @@ export const getUsersEnableMockHandler = (overrideResponse?: UsersEnable200 | ((
       })
   }, options)
 }
+
+export const getUsersResetTwoStepMockHandler = (overrideResponse?: UsersResetTwoStep200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UsersResetTwoStep200> | UsersResetTwoStep200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/users/:id/two-step/reset', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getUsersResetTwoStepResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getUsersMock = () => [
   getUsersListMockHandler(),
   getUsersGetMockHandler(),
   getUsersDisableMockHandler(),
-  getUsersEnableMockHandler()
+  getUsersEnableMockHandler(),
+  getUsersResetTwoStepMockHandler()
 ]

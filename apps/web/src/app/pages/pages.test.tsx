@@ -130,6 +130,7 @@ describe("settings", () => {
       "AI assistant",
       "Controls",
       "System health",
+      "Profile pictures",
     ]);
     expect(
       within(nav).getByRole("link", { name: "System health" }),

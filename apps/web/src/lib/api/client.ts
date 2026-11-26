@@ -2,6 +2,7 @@ import {
   COOKIES,
   ERROR_HTTP_STATUS,
   HEADERS,
+  TWO_STEP_VERIFY_PATH,
   apiPath,
   authRoutes,
   errorEnvelopeSchema,
@@ -26,6 +27,8 @@ export interface RouteLike<
   csrf: boolean;
   request: Req;
   response: Res;
+  /** Set when the body is raw bytes, such as a picture: the one content type the route takes. */
+  rawContentType?: string;
 }
 
 export interface ApiClientOptions {
@@ -50,6 +53,8 @@ const NO_REFRESH = new Set<string>([
   authRoutes.login.path,
   authRoutes.refresh.path,
   authRoutes.logout.path,
+  // A wrong code or an ended challenge is a 401 that must never be resent.
+  TWO_STEP_VERIFY_PATH,
 ]);
 
 const STATUS_TO_CODE: Record<number, ErrorCode> = Object.fromEntries(
@@ -110,11 +115,28 @@ export class ApiClient {
     return this.#sessionStarted || this.#readCookie(COOKIES.csrf) !== undefined;
   }
 
-  async call<Req extends z.ZodType | null, Res extends z.ZodType>(
+  call<Req extends z.ZodType | null, Res extends z.ZodType>(
     route: RouteLike<Req, Res>,
     ...args: CallArgs<Req>
   ): Promise<z.output<Res>> {
-    const body: unknown = args[0];
+    return this.#callWith(route, args[0]);
+  }
+
+  /**
+   * Sends raw bytes as the body, with the content type the route names. It
+   * takes the same road as `call`: the same blob goes again after a refresh.
+   */
+  upload<Res extends z.ZodType>(
+    route: RouteLike<null, Res> & { rawContentType: string },
+    body: Blob,
+  ): Promise<z.output<Res>> {
+    return this.#callWith(route, body);
+  }
+
+  async #callWith<Req extends z.ZodType | null, Res extends z.ZodType>(
+    route: RouteLike<Req, Res>,
+    body: unknown,
+  ): Promise<z.output<Res>> {
     try {
       return await this.#send(route, body);
     } catch (error) {
@@ -191,7 +213,7 @@ export class ApiClient {
       Accept: "application/json",
       [HEADERS.requestId]: requestId,
     };
-    let payload: string | undefined;
+    let payload: string | Blob | undefined;
     if (route.request) {
       const parsed = route.request.safeParse(body);
       if (!parsed.success) {
@@ -203,6 +225,9 @@ export class ApiClient {
       }
       headers["Content-Type"] = "application/json";
       payload = JSON.stringify(parsed.data);
+    } else if (route.rawContentType && body instanceof Blob) {
+      headers["Content-Type"] = route.rawContentType;
+      payload = body;
     }
     if (route.csrf || route.method !== "GET") {
       const token = this.#readCookie(COOKIES.csrf);
@@ -232,7 +257,14 @@ export class ApiClient {
     const text = await response.text();
     const json: unknown = parseJson(text);
 
-    if (!response.ok) throw toApiError(response.status, json, traceId);
+    if (!response.ok) {
+      throw toApiError(
+        response.status,
+        json,
+        traceId,
+        retryAfterOf(response.headers.get("Retry-After")),
+      );
+    }
 
     const result = route.response.safeParse(json);
     if (!result.success) {
@@ -255,7 +287,18 @@ function parseJson(text: string): unknown {
   }
 }
 
-function toApiError(status: number, json: unknown, traceId: string): ApiError {
+/** Whole seconds from a Retry-After header; a date or anything else is not used. */
+function retryAfterOf(header: string | null): number | null {
+  if (header === null || !/^\d{1,9}$/.test(header.trim())) return null;
+  return Number(header.trim());
+}
+
+function toApiError(
+  status: number,
+  json: unknown,
+  traceId: string,
+  retryAfterSeconds: number | null,
+): ApiError {
   const envelope = errorEnvelopeSchema.safeParse(json);
   if (envelope.success) {
     const { code, message, details } = envelope.data.error;
@@ -265,6 +308,8 @@ function toApiError(status: number, json: unknown, traceId: string): ApiError {
       status,
       envelope.data.error.traceId,
       details ?? [],
+      true,
+      retryAfterSeconds,
     );
   }
   // Not our envelope (a proxy page, say): keep the status and the trace id.

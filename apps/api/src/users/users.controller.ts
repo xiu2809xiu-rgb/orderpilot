@@ -22,6 +22,7 @@ import { openApiQuery, openApiSchema } from "../common/openapi.js";
 import { requestIdOf } from "../common/request-id.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
 import {
+  twoStepResetResponseSchema,
   userListResponseSchema,
   userParamsSchema,
   userResponseSchema,
@@ -92,5 +93,24 @@ export class UsersController {
     @Req() req: Request,
   ) {
     return { data: await this.users.enable(params.id, auth, infoOf(req)) };
+  }
+
+  @Post(":id/two-step/reset")
+  @HttpCode(200)
+  @RequirePermission("users.manage")
+  @idDoc
+  @ApiOperation({
+    summary:
+      "Reset another person's two-step verification and end all their sessions. Never your own. Refused in production",
+  })
+  @ApiOkResponse({ schema: openApiSchema(twoStepResetResponseSchema) })
+  async resetTwoStep(
+    @Param(idParam) params: { id: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.users.resetTwoStep(params.id, auth, infoOf(req)),
+    };
   }
 }

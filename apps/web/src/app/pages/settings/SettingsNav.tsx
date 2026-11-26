@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import type { Session } from "@orderpilot/shared";
+import { PicturesNavCount } from "./PicturesNavCount";
 import { visibleSections, type SectionId } from "./sections";
 import "./settings.css";
 
@@ -58,6 +59,7 @@ export function SettingsNav({
               >
                 <Icon className="size-4 shrink-0" aria-hidden="true" />
                 {t(`nav.sections.${id}`)}
+                {id === "pictures" ? <PicturesNavCount /> : null}
               </Link>
             ))}
           </div>
