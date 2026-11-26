@@ -16124,7 +16124,7 @@
             }
           }
         },
-        "summary": "Reset another person's two-step verification and end all their sessions. Never your own",
+        "summary": "Reset another person's two-step verification and end all their sessions. Never your own. Refused in production",
         "tags": ["Users"]
       }
     }

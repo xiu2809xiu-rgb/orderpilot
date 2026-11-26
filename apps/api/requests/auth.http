@@ -134,5 +134,6 @@ X-CSRF-Token: {{csrf}}
 ### removed and audited too (wasOn false, pendingRemoved true), and ends no session.
 ### A person with no row at all is a harmless no-op with no audit row. Never your
 ### own: 409 CONFLICT, and the refusal is audited.
+### Refused in production (409 CONFLICT, audited with reason "production") until a person is told of a reset.
 POST {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000/two-step/reset
 X-CSRF-Token: {{csrf}}
