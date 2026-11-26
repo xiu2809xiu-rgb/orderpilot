@@ -44,7 +44,7 @@ export function ReviewHead({
             {t("review.classifiedAs", { type: t("review.documentType") })}
           </Badge>
         </div>
-        <p className="numeral fs-14 text-muted-foreground">
+        <p className="fs-14 tabular-nums text-faint-foreground">
           {customer
             ? `${doc.documentNumber}, ${customer.text}`
             : doc.documentNumber}
@@ -57,7 +57,7 @@ export function ReviewHead({
             unsure,
           })}
         </p>
-        <p className="fs-12 text-muted-foreground">{t("review.mock")}</p>
+        <p className="fs-12 text-faint-foreground">{t("review.mock")}</p>
       </div>
       <Button
         type="button"
