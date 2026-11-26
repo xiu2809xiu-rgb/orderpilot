@@ -23,9 +23,10 @@ import { sessionFor, type StoredSession } from "../src/session.js";
 // leaves a choice for at most 12 hours and harms nothing. A full run makes 20
 // writes: 9 set through the API, 7 puts back to Available and 4 picks made by
 // the app (the double-click test alone makes 8 of them, and a retry repeats a
-// test's writes). The stack's one shared address allows 30 a minute, so even
-// a run squeezed into one minute stays under it. Count again when a test is
-// added.
+// test's writes; so does a round of that test whose real gap came out too long
+// on a slow runner, which is tried again at most twice). The stack's one shared
+// address allows 30 a minute, so even a run squeezed into one minute stays
+// under it. Count again when a test is added.
 
 const SETTER = "SUPPORT" satisfies Role;
 const LOOKER = "PRODUCT_MANAGER" satisfies Role;
@@ -95,6 +96,32 @@ async function pickByMouse(page: Page, name: string): Promise<void> {
   await expect(pill(page)).toBeVisible();
   await page.waitForTimeout(300);
   await choice(page, name).click();
+}
+
+/**
+ * The shell loads its menu code, and the control its pill and spring, after
+ * the first paint (on idle, or at once on hover). Until they have arrived the
+ * trigger is a stand-in button: a press that straddles the swap to the real
+ * trigger opens nothing, and a press before the pill's code is in makes a
+ * second click land on the trigger and close the menu. A script presses the
+ * moment the control is visible, so a timed press waits for all three chunks
+ * and for the real trigger (Radix gives it an id). This tests the control, not
+ * that race.
+ */
+async function realTrigger(trigger: Locator): Promise<void> {
+  await expect(trigger).toBeVisible();
+  await trigger.hover();
+  await trigger
+    .page()
+    .waitForFunction(() =>
+      ["dropdown-menu-", "AvailabilityPicker-", "useChipSpring-"].every(
+        (name) =>
+          performance
+            .getEntriesByType("resource")
+            .some((entry) => entry.name.includes(name)),
+      ),
+    );
+  await expect(trigger).toHaveAttribute("id", /^radix-/);
 }
 
 /** The pill lies inside the viewport with room to spare. */
@@ -266,7 +293,7 @@ test("a press and a release of the mouse on the ring or the dot opens the menu a
       ["/", page.locator(".dx-person-dot")],
     ] as const) {
       await page.goto(route);
-      await expect(trigger).toBeVisible();
+      await realTrigger(trigger);
       const box = await trigger.boundingBox();
       expect(box, "the control has a box").not.toBeNull();
       if (!box) return;
@@ -318,7 +345,7 @@ test("a double click on the ring at gaps of 60, 200, 320 and 400 ms, and a tripl
     puts.length = 0;
     await page.goto("/settings?section=account");
     const ring = page.locator('.ap-trigger[data-skin="ring"]');
-    await expect(ring).toBeVisible();
+    await realTrigger(ring);
     return ring;
   };
   const centreOf = async (ring: Locator) => {
@@ -348,24 +375,56 @@ test("a double click on the ring at gaps of 60, 200, 320 and 400 ms, and a tripl
       { name: "a triple click 300 ms apart", gaps: [300, 300] },
     ];
     for (const { name, gaps } of rounds) {
-      const ring = await fromDoNotDisturb();
-      const { x, y } = await centreOf(ring);
-      await page.mouse.move(x, y);
-      await page.mouse.down();
-      await page.mouse.up();
-      for (const gap of gaps) {
-        await page.waitForTimeout(gap);
+      // The gaps are aimed with the time a press itself takes taken off, and
+      // read back from the page's own clock: a slow runner stretches them, and
+      // a round whose real gap reached the half second says nothing about the
+      // rule, so it is tried again (three times at most).
+      let accepted = false;
+      for (let attempt = 1; attempt <= 3 && !accepted; attempt += 1) {
+        const ring = await fromDoNotDisturb();
+        await page.evaluate(() => {
+          const downs: number[] = [];
+          Object.assign(window, { pressTimes: downs });
+          document.addEventListener(
+            "pointerdown",
+            () => downs.push(performance.now()),
+            true,
+          );
+        });
+        const { x, y } = await centreOf(ring);
+        await page.mouse.move(x, y);
+        let pressedAt = Date.now();
         await page.mouse.down();
         await page.mouse.up();
+        for (const gap of gaps) {
+          await page.waitForTimeout(
+            Math.max(0, gap - (Date.now() - pressedAt)),
+          );
+          pressedAt = Date.now();
+          await page.mouse.down();
+          await page.mouse.up();
+        }
+        const times = await page.evaluate(
+          () => (window as unknown as { pressTimes: number[] }).pressTimes,
+        );
+        const real = times.slice(1).map((time, i) => time - (times[i] ?? 0));
+        const total = (times.at(-1) ?? 0) - (times[0] ?? 0);
+        const inRule = real.every((gap) => gap < 460) && total < 950;
+        if (!inRule && attempt < 3) continue;
+        expect(
+          inRule,
+          `${name}: real gaps ${real.map(Math.round).join(", ")} ms, together ${String(Math.round(total))} ms, must stay under the half second each and the first second together`,
+        ).toBe(true);
+        accepted = true;
+        // Open after the last click, so that a trigger that never opens cannot pass.
+        await expect(pill(page), `${name} leaves the menu open`).toBeVisible();
+        await page.waitForTimeout(900);
+        await expect(pill(page), `${name} still has it open`).toBeVisible();
+        expect(await mine(), `still Do not disturb after ${name}`).toBe(
+          "DO_NOT_DISTURB",
+        );
+        expect(puts, `no change is sent after ${name}`).toEqual([]);
       }
-      // Open after the last click, so that a trigger that never opens cannot pass.
-      await expect(pill(page), `${name} leaves the menu open`).toBeVisible();
-      await page.waitForTimeout(900);
-      await expect(pill(page), `${name} still has it open`).toBeVisible();
-      expect(await mine(), `still Do not disturb after ${name}`).toBe(
-        "DO_NOT_DISTURB",
-      );
-      expect(puts, `no change is sent after ${name}`).toEqual([]);
     }
     // A person who waits has chosen: one press to open, a pause, one press
     // and release at the same point picks the first choice.
