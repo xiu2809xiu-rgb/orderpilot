@@ -1,5 +1,6 @@
 import { CircleCheck, FlaskConical, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { ProgressBar } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { FileType } from "@/components/kit/FileType";
 import type { UploadRow } from "./useUploads";
@@ -52,19 +53,10 @@ export function FileRow({
           </span>
         </div>
         {row.status === "reading" ? (
-          <div
-            role="progressbar"
-            aria-label={t("files.progress", { name: row.name })}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(row.progress * 100)}
-            className="h-1.5 w-full overflow-hidden bg-muted"
-          >
-            <div
-              className="h-full bg-ring"
-              style={{ width: `${String(Math.round(row.progress * 100))}%` }}
-            />
-          </div>
+          <ProgressBar
+            label={t("files.progress", { name: row.name })}
+            value={row.progress * 100}
+          />
         ) : null}
         {row.status === "ready" ? (
           <p className="fs-14 flex items-center gap-1.5 text-success">
