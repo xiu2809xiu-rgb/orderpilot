@@ -46,8 +46,8 @@ ALTER TABLE "SalesOrderPoVersion" ADD CONSTRAINT "SalesOrderPoVersion_orderId_fk
 -- AddForeignKey
 ALTER TABLE "SalesOrderPoVersionLine" ADD CONSTRAINT "SalesOrderPoVersionLine_versionId_fkey" FOREIGN KEY ("versionId") REFERENCES "SalesOrderPoVersion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- Prisma cannot declare a CHECK, so these three are written by hand. A PO
--- version starts at 1, on the order and on both copies.
+-- Prisma cannot declare a CHECK, so these two are written by hand. A PO
+-- version starts at 1, on the order and on its copy.
 ALTER TABLE "SalesOrder" ADD CONSTRAINT "SalesOrder_poVersionNo_check" CHECK ("poVersionNo" >= 1);
 ALTER TABLE "SalesOrderPoVersion" ADD CONSTRAINT "SalesOrderPoVersion_poVersionNo_check" CHECK ("poVersionNo" >= 1);
 
