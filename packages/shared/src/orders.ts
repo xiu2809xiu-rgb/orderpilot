@@ -155,7 +155,7 @@ export const SHIPMENT_BEFORE_ORDER_MESSAGE =
 // The fields apart from the cross-field check, which is a refinement: a
 // refinement is lost on .partial(), so the patch is built from this and
 // carries the check itself.
-const createSalesOrderFields = z.object({
+export const createSalesOrderFields = z.object({
   customerNo: navisionNoSchema,
   externalDocumentNo: z.string().trim().min(1).max(ORDER_PO_MAX_LENGTH),
   orderDate: z.iso.date(),
