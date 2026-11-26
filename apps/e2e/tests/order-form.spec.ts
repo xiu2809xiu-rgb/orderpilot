@@ -470,7 +470,11 @@ test.describe("Submit an order", () => {
       await row.getByRole("cell").nth(2).click();
       const peek = page.getByRole("dialog");
       await expect(peek.getByText(orderNo)).toBeVisible();
-      await expect(peek.getByText("Not in the order flow")).toBeVisible();
+      // The peek says it twice, in its facts and in the journey's sentence:
+      // the facts' words are the whole of their element.
+      await expect(
+        peek.getByText("Not in the order flow", { exact: true }),
+      ).toBeVisible();
       await expect(peek.getByText("Nobody", { exact: true })).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(peek).toHaveCount(0);
