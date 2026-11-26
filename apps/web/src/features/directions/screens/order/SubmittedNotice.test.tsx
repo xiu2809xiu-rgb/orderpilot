@@ -85,7 +85,7 @@ describe("the notice of a submitted order", () => {
     const region = await notice();
     expect(
       within(region).getByText(
-        /If it was submitted by mistake: OrderPilot cannot change or cancel it/,
+        /If it was submitted by mistake: OrderPilot cannot cancel it, and its PO number stays with it\. If the customer sends a corrected PO with the same number, enter it in New order and confirm that it revises this order/,
       ),
     ).toBeVisible();
     view.unmount();

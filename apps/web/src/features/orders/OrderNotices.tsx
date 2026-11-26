@@ -1,11 +1,26 @@
+import type { CreateSalesOrderBody } from "@orderpilot/shared";
 import { CircleAlert, Info, RefreshCw } from "lucide-react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
+import { DuplicateNotice } from "./DuplicateNotice";
+import type { usePoRevision } from "./usePoRevision";
 
-/** What the last save learned: a repeated PO number, or a draft that moved on. */
+/**
+ * What the last save learned: a repeated PO number, or a draft that moved on. A
+ * repeated PO number keeps the body that was refused and a key of the form, but
+ * only a create can become a revision: an update of a draft has no body.
+ */
 export type OrderNotice =
-  | { kind: "duplicate"; orderNo: string; customerNo: string; po: string }
+  | {
+      kind: "duplicate";
+      orderNo: string;
+      customerNo: string;
+      po: string;
+      fromCreate: boolean;
+      body: CreateSalesOrderBody | null;
+      formKey: string;
+    }
   | { kind: "stale" };
 
 /** Why a page cannot be edited, when it cannot. */
@@ -15,6 +30,8 @@ interface OrderNoticesProps {
   notice: OrderNotice | null;
   readOnly: ReadOnlyReason | null;
   onReload: () => void;
+  /** What the repeated PO number leads to: the state of the order, the offer and the panel. */
+  revision: ReturnType<typeof usePoRevision>;
 }
 
 const BOX =
@@ -22,42 +39,29 @@ const BOX =
 
 /**
  * What the document needs to say before its fields: the order a repeated PO
- * number already belongs to, a draft someone else changed, or why a page is
- * read-only. A field message cannot hold a link, so the duplicate is here.
+ * number already belongs to, and the panel that adds a revised PO to it, a draft
+ * someone else changed, or why a page is read-only.
  */
 export function OrderNotices({
   notice,
   readOnly,
   onReload,
-}: OrderNoticesProps) {
+  revision,
+}: OrderNoticesProps): ReactNode {
   const { t } = useTranslation("orders");
   if (!notice && !readOnly) return null;
   return (
     <div className="space-y-s1">
       {notice?.kind === "duplicate" ? (
-        <div role="alert" className={BOX}>
-          <CircleAlert
-            className="mt-0.5 size-4 shrink-0 text-destructive"
-            aria-hidden="true"
-          />
-          <div className="min-w-0 flex-1 basis-48 space-y-1">
-            <p className="font-medium">{t("form.notices.duplicateTitle")}</p>
-            <p className="text-muted-foreground">
-              {t("form.notices.duplicateBody", { orderNo: notice.orderNo })}
-            </p>
-          </div>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="pointer-coarse:h-11"
-          >
-            <Link to={`/orders/${notice.orderNo}`}>
-              {t("form.notices.duplicateOpen", { orderNo: notice.orderNo })}
-            </Link>
-          </Button>
-        </div>
+        <DuplicateNotice
+          notice={notice}
+          existing={revision.existing}
+          offer={revision.offer}
+          moved={revision.moved}
+          mayEdit={revision.mayEdit}
+        />
       ) : null}
+      {revision.node}
       {notice?.kind === "stale" ? (
         <div role="alert" className={BOX}>
           <CircleAlert

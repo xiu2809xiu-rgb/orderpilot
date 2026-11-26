@@ -223,7 +223,7 @@
     "submitted": {
       "title": "Submitted. No team has a task for it",
       "body": "This order is entered and saved. It is not approved. Keep handling it as you do today: it does not appear in the Order tracker. It counts as an open order on the customer's page and on its items' pages.",
-      "mistake": "If it was submitted by mistake: OrderPilot cannot change or cancel it, and its PO number stays with it. Tell whoever looks after OrderPilot. A corrected order needs a different PO number.",
+      "mistake": "If it was submitted by mistake: OrderPilot cannot cancel it, and its PO number stays with it. If the customer sends a corrected PO with the same number, enter it in New order and confirm that it revises this order. Otherwise tell whoever looks after OrderPilot.",
       "who": "See who submitted it, and when",
       "auditSubject": "order {{orderNo}}"
     },

@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DocumentForm,
+  type DocumentAction,
   type DocumentRecordState,
 } from "@/components/document-form";
 import { useZodForm } from "@/components/form";
@@ -28,7 +29,11 @@ import { searchItems } from "./orderSearches";
 import { useLineColumns } from "./useLineColumns";
 import { useOrderActions } from "./useOrderActions";
 import { useOrderSave } from "./useOrderSave";
+import { usePoRevision } from "./usePoRevision";
 import { useSubmitOrder } from "./useSubmitOrder";
+
+/** The bar draws nothing while the revision panel is open, so the view has one primary button. */
+const NO_ACTIONS: readonly DocumentAction[] = [];
 
 interface OrderDocumentProps {
   /** Null while the order is new. */
@@ -67,6 +72,10 @@ export function OrderDocument({
     prepare: withoutBlankTail,
   });
   const save = useOrderSave({ form, orderNo, priceMasked });
+  const revision = usePoRevision({ form, notice: save.notice });
+  // While the panel is open the form shows what a confirmation would send, so
+  // nothing in it can be changed.
+  const locked = readOnly !== null || revision.open;
   const submit = useSubmitOrder({
     form,
     record,
@@ -126,6 +135,7 @@ export function OrderDocument({
           <OrderNotices
             notice={save.notice}
             readOnly={readOnly}
+            revision={revision}
             onReload={() => {
               // Drops the typed draft first, or the reload would bring it back.
               form.reset();
@@ -133,14 +143,14 @@ export function OrderDocument({
             }}
           />
         }
-        header={<OrderHeaderFields form={form} readOnly={readOnly !== null} />}
+        header={<OrderHeaderFields form={form} readOnly={locked} />}
         lines={
           <>
             <LinesGrid
               label={t("form.lines.tableLabel")}
               columns={columns}
               searchItems={searchItems}
-              readOnly={readOnly !== null}
+              readOnly={locked}
               priceMask={priceMask}
               itemPrice="reference"
               itemDescription="own"
@@ -160,12 +170,12 @@ export function OrderDocument({
               form={form}
               priceMasked={priceMasked}
               paused={captureState === "void"}
-              editable={readOnly === null}
+              editable={!locked}
             />
           </>
         }
         status={statusOf(t, record, captureState)}
-        actions={actions}
+        actions={revision.open ? NO_ACTIONS : actions}
         draftKey={draftKeyOf(orderNo, readOnly)}
         draftOptions={draftOptions}
         onSave={save.onSave}
