@@ -49,7 +49,7 @@ The lowest ratio of any changed text that is not disabled is 4.95 (the filled bu
 
 ## Did anything move
 
-The box of every text in the page was read before and after (103 to 131 matched texts a page). On Home, Insights, Settings and Upload review no text box moved by more than half a pixel, except the label of the Upload review's progress buttons: the two buttons swapped looks, so "Next to approve" is 153 px wide against 155, "Finish review" is 136 px against 134 while it waits, and the text of "Finish review" sits 2 px further right. Their height is 36 px on desktop and 44 px on the phone, before and after.
+The box of every text in the page was read before and after (61 to 131 matched texts a page). On Home, Settings and Upload review no text box moved by more than half a pixel, except the label of the Upload review's progress buttons: the two buttons swapped looks, so "Next to approve" is 153 px wide against 155, "Finish review" is 136 px against 134 while it waits, and the text of "Finish review" sits 2 px further right. Their height is 36 px on desktop and 44 px on the phone, before and after. On Insights the "With OrderPilot" figures are 0.7 to 2.7 px wider, because they are now the 600 numeral, and no tile changed height.
 
 ## What the blurred pair shows
 
