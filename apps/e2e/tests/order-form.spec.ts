@@ -670,6 +670,48 @@ async function reviseThroughApi(
   return sent.status;
 }
 
+/**
+ * At 390 by 844, the page's main panel does not scroll sideways and the table of
+ * differences, whatever its width, scrolls inside its own region: scrolling that
+ * region to its end moves the region and nothing else. `checkPage` measures only
+ * the document, and the shell scrolls inside `main`, so `main` is measured here.
+ * (Written without a browser run: the first run on a Docker build is its test.)
+ */
+async function expectDifferencesContained(page: Page): Promise<void> {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const region = page.getByRole("region", { name: "Differences by line" });
+  await expect(region).toBeVisible();
+  const main = page.locator("main");
+  const fit = () =>
+    main.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth }));
+  const before = await fit();
+  expect(before.scroll, "main does not scroll sideways").toBeLessThanOrEqual(
+    before.client,
+  );
+  const inside = await region.evaluate((el) => {
+    const table = el.querySelector("table");
+    return {
+      overflowX: getComputedStyle(el).overflowX,
+      tableWidth: table?.getBoundingClientRect().width ?? 0,
+      regionWidth: el.clientWidth,
+    };
+  });
+  expect(["auto", "scroll"], "the region holds the overflow").toContain(
+    inside.overflowX,
+  );
+  expect(inside.tableWidth).toBeGreaterThan(0);
+  if (inside.tableWidth > inside.regionWidth) {
+    // The table is wider than the region: it scrolls there, and main stays put.
+    await region.evaluate((el) => {
+      el.scrollLeft = el.scrollWidth;
+    });
+    expect(await region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    const after = await fit();
+    expect(after.scroll).toBeLessThanOrEqual(after.client);
+    expect(await main.evaluate((el) => el.scrollLeft)).toBe(0);
+  }
+}
+
 const versionsTab = (page: Page) =>
   page.getByRole("tabpanel", { name: "Versions" });
 
@@ -808,10 +850,15 @@ test.describe("PO versions", () => {
 
   test("Warehouse reads the versions with prices masked and has no way to add one", async ({
     page,
+    browser,
   }) => {
-    test.setTimeout(120_000);
+    test.setTimeout(180_000);
     const po = freshPo();
     const orderNo = await submittedOrderFor(po);
+    // An order that has never been revised, for the sentence about how to add a
+    // revised PO: it is drawn only at PO version 1, and only for a role that
+    // may edit.
+    const single = await submittedOrderFor(freshPo());
     const revised = {
       customerNo: "C-0001",
       externalDocumentNo: po,
@@ -833,7 +880,36 @@ test.describe("PO versions", () => {
       versionsTab(page).getByText("Prices are not compared for your role."),
     ).toBeVisible();
     await expect(page.getByText(/USD\s?[\d,]+\.\d{2}/)).toHaveCount(0);
+    // The way to add a revised PO starts at New order: the Orders list has no
+    // link to it for Warehouse, and an order's page never had one.
+    await page.goto("/orders");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Orders" }),
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: "New order" })).toHaveCount(0);
+    const howTo = /To add a revised PO, enter it in New order/;
+    await page.goto(`/orders/${single}?tab=versions`);
+    await expect(
+      versionsTab(page).getByText("Only PO version 1 exists."),
+    ).toBeVisible();
+    await expect(versionsTab(page).getByText(howTo)).toHaveCount(0);
+    // The same page for Support says how, and its Orders list has the link.
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    try {
+      const support = await context.newPage();
+      await signInAs(support, "SUPPORT");
+      await support.goto(`/orders/${single}?tab=versions`);
+      await expect(
+        versionsTab(support).getByText("Only PO version 1 exists."),
+      ).toBeVisible();
+      await expect(versionsTab(support).getByText(howTo)).toBeVisible();
+      await support.goto("/orders");
+      await expect(
+        support.getByRole("link", { name: "New order" }),
+      ).toBeVisible();
+    } finally {
+      await context.close();
+    }
     await expectRefused("WAREHOUSE", "POST", `/orders/${orderNo}/po-versions`, {
       ...revised,
       confirmed: true,
@@ -874,7 +950,9 @@ test.describe("PO versions", () => {
     page,
   }) => {
     test.setTimeout(240_000);
-    // Twelve lines, so that the table of differences has to scroll at 390 px.
+    // Twelve lines are stored. The form below sends one of them again, so the
+    // panel's table lists it as changed and the other eleven as removed:
+    // twelve rows, which the table of differences must hold at 390 px.
     const lines = Array.from({ length: 12 }, (_, i) => ({
       itemNo: `I-${String(i + 1).padStart(4, "0")}`,
       quantity: "2",
@@ -891,6 +969,7 @@ test.describe("PO versions", () => {
     } satisfies CreateSalesOrderBody;
     const orderNo = await submitThroughApi(create);
     await signInAs(page, "SUPPORT");
+    const wide = page.viewportSize();
 
     await test.step("the open panel", async () => {
       // The first line sent again with quantity 3, the others as they are.
@@ -906,6 +985,7 @@ test.describe("PO versions", () => {
           name: `Add this PO as PO version 2 of ${orderNo}`,
         }),
       ).toBeVisible();
+      await expectDifferencesContained(page);
       await checkPage(page);
     });
 
@@ -918,7 +998,9 @@ test.describe("PO versions", () => {
       ).toBe(201);
       await page.goto(`/orders/${orderNo}?tab=versions`);
       await expect(versionsTab(page).getByRole("table")).toBeVisible();
+      await expectDifferencesContained(page);
       await checkPage(page);
     });
+    if (wide) await page.setViewportSize(wide);
   });
 });
