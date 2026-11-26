@@ -5,9 +5,9 @@
 // a flash of light after a pick, the keyboard model): no source, markup, picture, font, colour or glyph drawing was
 // copied. A private prototype for a school module. Adapted to OrderPilot's tokens.
 import type { PersonAvailability } from "@orderpilot/shared";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useStill } from "../env";
-import { pickerMotion } from "./pickerMotion";
+import { arrivingOpacity, pickerMotion } from "./pickerMotion";
 
 /** A little after the fade is meant to end, for a tab that never fires its event. */
 const LEAVE_NET_MS = 100;
@@ -15,6 +15,8 @@ const LEAVE_NET_MS = 100;
 interface Leaving {
   id: number;
   text: string;
+  /** The opacity the word had when the caption moved on: its fade starts there. */
+  from: number;
 }
 
 /**
@@ -24,6 +26,11 @@ interface Leaving {
  * first. Under reduced motion, and where the kit is still, the words change at
  * once and no old word is drawn. The capsule's box is aria-hidden, so the old
  * word is for the eye only.
+ *
+ * The old word starts its fade from the opacity it had: a word that was still
+ * arriving would otherwise be redrawn at full and flash on a quick move across
+ * the choices. One that had not yet become visible (it was still in its wait)
+ * leaves nothing behind.
  */
 export function CaptionWords({
   stop,
@@ -36,13 +43,23 @@ export function CaptionWords({
   const [leaving, setLeaving] = useState<Leaving | null>(null);
   const shown = useRef({ stop, text });
   const count = useRef(0);
+  // When the current word was drawn: its arriving fade runs from here.
+  const arrivedAt = useRef(performance.now());
 
   useLayoutEffect(() => {
     const before = shown.current;
     shown.current = { stop, text };
-    if (still || before.stop === stop) return;
+    if (before.stop === stop) return;
+    const now = performance.now();
+    const from = arrivingOpacity(now - arrivedAt.current);
+    arrivedAt.current = now;
+    if (still || from === 0) return;
     count.current += 1;
-    setLeaving({ id: count.current, text: before.text });
+    setLeaving({
+      id: count.current,
+      text: before.text,
+      from: Math.round(from * 1000) / 1000,
+    });
   }, [stop, text, still]);
 
   useLayoutEffect(() => {
@@ -62,6 +79,7 @@ export function CaptionWords({
           key={`leaving-${String(leaving.id)}`}
           className="ap-chip-text"
           data-leaving=""
+          style={{ "--ap-out-from": leaving.from } as CSSProperties}
           onAnimationEnd={(event) => {
             if (event.animationName === "ap-text-out") setLeaving(null);
           }}

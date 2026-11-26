@@ -30,6 +30,11 @@
   transform-origin: var(--radix-dropdown-menu-content-transform-origin);
   outline: none;
 }
+/* A pill that is folding takes no press: Radix keeps it mounted to the end of
+   its fold, and a press on it must reach what lies under it. */
+.ap-pill[data-state="closed"] {
+  pointer-events: none;
+}
 .dark .ap-pill {
   box-shadow:
     var(--shadow-pop),
@@ -268,9 +273,11 @@
     opacity: 1;
   }
 }
+/* The word starts from the opacity that it had when the caption moved on
+   (CaptionWords works it out from the time since it arrived). */
 @keyframes ap-text-out {
   from {
-    opacity: 1;
+    opacity: var(--ap-out-from, 1);
   }
   to {
     opacity: 0;

@@ -121,6 +121,17 @@ describe("the pill's sheet", () => {
     }
   });
 
+  it("takes no press on a pill that is folding, so a press on it reaches what lies under it", () => {
+    expect(picker).toMatch(
+      /\.ap-pill\[data-state="closed"\]\s*\{[^}]*pointer-events:\s*none/,
+    );
+  });
+
+  it("starts the leaving word's fade from the opacity that the caption hands it", () => {
+    const keyframes = atRule(picker, "@keyframes ap-text-out");
+    expect(keyframes).toMatch(/opacity:\s*var\(--ap-out-from, 1\)/);
+  });
+
   it("has an exit animation for the closed state, so Radix keeps it mounted until it ends", () => {
     expect(picker).toMatch(
       /\.ap-pill\[data-state="closed"\]\s*{\s*animation: ap-fold/,

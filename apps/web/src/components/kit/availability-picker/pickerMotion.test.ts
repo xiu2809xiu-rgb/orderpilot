@@ -3,9 +3,11 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { must } from "@/test/must";
 import {
+  EASE_OUT,
   GROW_COARSE,
   GROW_FINE,
   PILL_EDGE_GAP,
+  arrivingOpacity,
   chipPlace,
   pickerMotion,
   pillGeometry,
@@ -101,6 +103,59 @@ describe("the picker's motion", () => {
     ).toBeLessThanOrEqual(250);
     expect(pickerCss).toContain("calc(var(--ap-i, 0) * 30ms)");
     expect(pickerMotion.orbStaggerMs).toBe(30);
+  });
+});
+
+describe("a caption word's arrival", () => {
+  it("waits as long as the sheet makes a new word wait, on the curve of --ease-out", () => {
+    const wait =
+      /animation: ap-text-in var\(--motion-fast\) var\(--ease-out\) (\d+)ms both/.exec(
+        pickerCss,
+      );
+    expect(Number(must(wait)[1])).toBe(pickerMotion.chipTextWaitMs);
+    const curve =
+      /--ease-out:\s*cubic-bezier\(([^)]+)\)/.exec(tokens)?.[1] ?? "";
+    expect(curve.split(",").map(Number)).toEqual([
+      EASE_OUT.x1,
+      EASE_OUT.y1,
+      EASE_OUT.x2,
+      EASE_OUT.y2,
+    ]);
+  });
+
+  it("is nothing while it waits, and full once the fade is over", () => {
+    const { chipTextWaitMs, chipTextMs } = pickerMotion;
+    expect(arrivingOpacity(0)).toBe(0);
+    expect(arrivingOpacity(chipTextWaitMs)).toBe(0);
+    expect(arrivingOpacity(chipTextWaitMs + chipTextMs)).toBe(1);
+    expect(arrivingOpacity(5000)).toBe(1);
+  });
+
+  it("follows the ease-out curve that the sheet draws, to within a fiftieth of full", () => {
+    // The curve by brute force: sweep its parameter and keep the sample whose
+    // time is nearest, which does not share the solver's bisection.
+    const { x1, y1, x2, y2 } = EASE_OUT;
+    const point = (t: number, a: number, b: number) =>
+      3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t * t * b + t ** 3;
+    for (const progress of [0.1, 0.25, 0.5, 0.75, 0.9]) {
+      let best = { gap: Infinity, y: 0 };
+      for (let t = 0; t <= 1; t += 0.0005) {
+        const gap = Math.abs(point(t, x1, x2) - progress);
+        if (gap < best.gap) best = { gap, y: point(t, y1, y2) };
+      }
+      const ms =
+        pickerMotion.chipTextWaitMs + progress * pickerMotion.chipTextMs;
+      expect(Math.abs(arrivingOpacity(ms) - best.y)).toBeLessThan(0.02);
+    }
+  });
+
+  it("only rises", () => {
+    let last = 0;
+    for (let ms = 0; ms <= 300; ms += 5) {
+      const now = arrivingOpacity(ms);
+      expect(now).toBeGreaterThanOrEqual(last);
+      last = now;
+    }
   });
 });
 

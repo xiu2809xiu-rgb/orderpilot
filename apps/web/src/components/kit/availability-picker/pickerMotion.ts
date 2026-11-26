@@ -25,11 +25,42 @@ export const pickerMotion = {
   orbStaggerMs: 30,
   /** The pulse and the sheen after a pick (--motion-slow). */
   pickMs: 250,
-  /** A new caption word fades in (--motion-fast). */
+  /** A new caption word fades in (--motion-fast), after waiting for the capsule's box to catch up (the delay in the sheet). */
   chipTextMs: 160,
+  chipTextWaitMs: 60,
   /** The old caption word fades out as the new one fades in (--motion-fast). */
   chipLeaveMs: 160,
 } as const;
+
+/** The curve of `--ease-out` (tokens.css), which a new caption word fades in on: the two control points of a cubic Bezier. */
+export const EASE_OUT = { x1: 0.2, y1: 0.8, x2: 0.2, y2: 1 } as const;
+
+function bezier(a: number, b: number, t: number): number {
+  const u = 1 - t;
+  return 3 * u * u * t * a + 3 * u * t * t * b + t * t * t;
+}
+
+/**
+ * The opacity of a caption word `ms` after it was drawn: nothing while it
+ * waits, then the ease-out curve over `chipTextMs`. A word that the caption
+ * leaves starts its fade from this, so that it never jumps to full.
+ */
+export function arrivingOpacity(ms: number): number {
+  const progress = (ms - pickerMotion.chipTextWaitMs) / pickerMotion.chipTextMs;
+  if (progress <= 0) return 0;
+  if (progress >= 1) return 1;
+  const { x1, y1, x2, y2 } = EASE_OUT;
+  // The curve's x is time and its y is the opacity: find the t whose x is the
+  // progress. x rises with t because both control points lie inside 0 to 1.
+  let low = 0;
+  let high = 1;
+  for (let step = 0; step < 24; step += 1) {
+    const mid = (low + high) / 2;
+    if (bezier(x1, x2, mid) < progress) low = mid;
+    else high = mid;
+  }
+  return bezier(y1, y2, (low + high) / 2);
+}
 
 /**
  * The pill's border boxes in CSS px: a fine pointer gets a caption, a finger
