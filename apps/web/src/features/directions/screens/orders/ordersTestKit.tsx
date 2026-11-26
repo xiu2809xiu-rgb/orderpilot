@@ -85,6 +85,8 @@ export interface OrderSpec {
   entered?: "draft" | "submitted" | "void";
   /** The label area 2 reports for an entered order, when a team holds it. */
   workflowLabel?: string;
+  /** The PO version a submitted order is at; 1 when it is not said. */
+  poVersionNo?: number;
   /** How many items are short, when `shortBy` is set. The first is I-0190. */
   shortItems?: number;
 }
@@ -278,6 +280,8 @@ function detailOf(spec: OrderSpec, masked: boolean) {
     prepaymentPercent: "30",
     navisionNo: spec.orderNo,
     version: null,
+    // Only a submitted order has a PO version, as the API says.
+    poVersionNo: spec.entered === "submitted" ? (spec.poVersionNo ?? 1) : null,
     lines: [line(1, "169.19", "83"), line(2, "553.93", "20")],
   };
 }

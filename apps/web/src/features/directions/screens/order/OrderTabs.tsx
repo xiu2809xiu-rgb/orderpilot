@@ -8,18 +8,20 @@ import { DocumentsTab } from "./DocumentsTab";
 import { documentsOf, withFlow, withPending } from "./documentsModel";
 import { LinesTab } from "./LinesTab";
 import { useOrderFlow } from "./useOrderFlow";
+import { VersionsTab } from "./versions/VersionsTab";
 
-const TABS = ["lines", "documents", "checks", "activity"] as const;
+const TABS = ["lines", "documents", "checks", "activity", "versions"] as const;
 type Tab = (typeof TABS)[number];
 const isTab = (value: string | null): value is Tab =>
   TABS.some((tab) => tab === value);
 
 /**
- * Lines, Documents, Checks and Activity, each filled from the real data. The
+ * Lines, Documents, Checks, Activity and Versions, each filled from the real data. The
  * tab is in the address (`tab=checks`), so a link opens the order on it. The
  * count beside a name is what its panel lists: lines, the documents the order
  * has (not the ones still to come), every check, and events. The Checks count
- * turns to an alert when one of them found a difference.
+ * turns to an alert when one of them found a difference. Versions has no count:
+ * it would need the list fetched before the tab is opened.
  */
 export function OrderTabs({
   orderNo,
@@ -64,7 +66,7 @@ export function OrderTabs({
   const asked = params.get("tab");
   const tab: Tab = isTab(asked) ? asked : "lines";
   const failed = timeline.checks.filter((check) => check.outcome !== "pass");
-  const counts: Record<Tab, number> = {
+  const counts: Record<Exclude<Tab, "versions">, number> = {
     lines: detail?.lines.length ?? 0,
     documents: documents.filter((row) => !row.pending).length,
     checks: timeline.checks.length,
@@ -84,7 +86,7 @@ export function OrderTabs({
           <TabsTrigger key={id} value={id} className="od-tab">
             <span className="fs-14">{t(`order.tabs.${id}`)}</span>
             {/* An order the tracker does not know has no steps to count. */}
-            {id === "activity" && !inWorkflow ? null : (
+            {id === "versions" || (id === "activity" && !inWorkflow) ? null : (
               <span
                 className="od-view-count numeral"
                 data-alert={
@@ -120,10 +122,14 @@ export function OrderTabs({
           matches={timeline.matches}
           priceMask={priceMask}
           typedHere={typedHere}
+          currentPoVersionNo={detail?.poVersionNo ?? null}
         />
       </TabsContent>
       <TabsContent value="activity">
         <ActivityTab orderNo={orderNo} steps={timeline.steps} />
+      </TabsContent>
+      <TabsContent value="versions">
+        <VersionsTab orderNo={orderNo} />
       </TabsContent>
     </Tabs>
   );

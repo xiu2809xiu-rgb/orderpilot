@@ -20,7 +20,7 @@ import { Amount } from "../orders/Amount";
  * and amounts are masked for a role that may not see them, each with the
  * reason, and the total is masked with them.
  */
-export function LinesTab({ detail }: { detail: SalesOrderDetail }) {
+function LinesTable({ detail }: { detail: SalesOrderDetail }) {
   const { t } = useTranslation("directions-orders");
   const currency = detail.currencyCode;
   return (
@@ -99,5 +99,25 @@ export function LinesTab({ detail }: { detail: SalesOrderDetail }) {
         </tfoot>
       </Table>
     </ScrollRegion>
+  );
+}
+
+/**
+ * The lines of the order, with one sentence above them once the order has taken
+ * a revised PO: these are the lines of the current PO version, and the earlier
+ * ones are on the Versions tab.
+ */
+export function LinesTab({ detail }: { detail: SalesOrderDetail }) {
+  const { t } = useTranslation("directions-orders");
+  const poVersionNo = detail.poVersionNo ?? 1;
+  return (
+    <div className="space-y-s2">
+      {poVersionNo > 1 ? (
+        <p className="fs-14 max-w-prose text-muted-foreground">
+          {t("order.lines.currentVersion", { n: poVersionNo })}
+        </p>
+      ) : null}
+      <LinesTable detail={detail} />
+    </div>
   );
 }
