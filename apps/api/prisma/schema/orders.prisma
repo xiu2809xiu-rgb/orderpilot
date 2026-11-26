@@ -65,11 +65,12 @@ model SalesOrderLine {
 }
 
 /// A PO version that a later one replaced, copied out at the moment it was replaced.
-/// Insert-only: triggers in the migration refuse UPDATE and DELETE, and the foreign
-/// keys refuse to delete the order or the version. The PO number, the customer and
+/// Insert-only: triggers in the migrations refuse UPDATE and DELETE, a deferred one
+/// refuses a line under a sealed copy, and the foreign keys refuse to delete the order
+/// or the version. The PO number, the customer and
 /// the Business Central number are the order's own and are read from it. A column
 /// added to SalesOrder or SalesOrderLine must be classified in the drift test
-/// (test/database/po-versions.test.ts) as copied here or left out with a reason.
+/// (test/database/po-version-drift.test.ts) as copied here or left out with a reason.
 model SalesOrderPoVersion {
   id                String                    @id @default(uuid(7)) @db.Uuid
   orderId           String                    @db.Uuid
@@ -82,6 +83,9 @@ model SalesOrderPoVersion {
   /// When the next version was confirmed, and by whom (a plain id, as `createdBy` is).
   supersededAt      DateTime                  @db.Timestamptz(3)
   supersededBy      String                    @db.Uuid
+  /// How many lines the copy was written with. A deferred trigger refuses, at
+  /// commit, a copy whose lines do not number this, so a sealed copy takes no new line.
+  lineCount         Int
   lines             SalesOrderPoVersionLine[]
 
   @@unique([orderId, poVersionNo])

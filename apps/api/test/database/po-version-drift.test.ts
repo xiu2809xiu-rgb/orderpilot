@@ -38,7 +38,7 @@ const ORDER_RULES: DriftRules = {
     updatedAt: "bookkeeping",
     version: "edit token",
   },
-  own: ["id", "orderId", "supersededAt", "supersededBy"],
+  own: ["id", "orderId", "supersededAt", "supersededBy", "lineCount"],
 };
 
 const LINE_RULES: DriftRules = {

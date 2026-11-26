@@ -145,6 +145,9 @@ export class PoVersionRepository {
             prepaymentPercent: head.prepaymentPercent,
             supersededAt: by.at,
             supersededBy: by.userId,
+            // The seal: a deferred trigger refuses the copy at commit when
+            // its lines do not number this, now or in a later transaction.
+            lineCount: head.lines.length,
             lines: {
               create: head.lines.map((line) => ({
                 lineNo: line.lineNo,
