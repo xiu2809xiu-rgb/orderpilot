@@ -112,11 +112,14 @@ describe("the Spark panel", () => {
     const answer = await within(dialog).findByText(/1,020 are available/);
     expect(must(answer.closest("p"))).toHaveClass("text-foreground");
     const line = must(
-      must(answer.closest("[data-spark-answer]")).querySelector(
+      must(answer.closest("[data-spark-answer]")).querySelector<HTMLElement>(
         "button[aria-expanded]",
       ),
     );
-    const [label, timer] = Array.from(line.querySelectorAll("span")).slice(1);
+    // Found by their words, so that an icon or a span added to the line does
+    // not move them.
+    const label = within(line).getByText("Looked up the stock");
+    const timer = within(line).getByText(/^\d+\.\d s$/);
     expect(label).toHaveClass("text-muted-foreground");
     expect(label).not.toHaveClass("text-foreground");
     expect(timer).toHaveClass("text-faint-foreground");

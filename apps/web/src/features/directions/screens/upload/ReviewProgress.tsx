@@ -19,8 +19,9 @@ interface ReviewProgressProps {
  * approve while a field waits (Finish review is off then, so it is an outline),
  * and Finish review once none does. It stays under the top bar for the whole
  * review (sticky), so the count and the buttons are never scrolled away from a
- * person working down the list. Its height is written to `--review-bar` on the review, which the page
- * and the rows use to stop below it: a field being approved is never behind it.
+ * person working down the list. Its height is written to `--review-bar` on
+ * the review, which the page and the rows use to stop below it: a field being
+ * approved is never behind it.
  */
 export function ReviewProgress({
   uncertainCount,

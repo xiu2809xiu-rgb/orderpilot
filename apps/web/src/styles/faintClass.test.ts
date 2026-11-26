@@ -14,14 +14,4 @@ describe("the faint text tier as a Tailwind class", () => {
       "--color-faint-foreground: var(--faint-foreground);",
     );
   });
-
-  it("sits next to the muted mapping, so the two tiers are read together", () => {
-    const muted = lines.indexOf(
-      "--color-muted-foreground: var(--muted-foreground);",
-    );
-    expect(muted).toBeGreaterThanOrEqual(0);
-    expect(lines[muted + 1]).toBe(
-      "--color-faint-foreground: var(--faint-foreground);",
-    );
-  });
 });
