@@ -72,7 +72,11 @@ export function PoDifferences({
             <p className="fs-14 max-w-prose">{t("order.versions.onlyMoved")}</p>
           ) : null}
           <ScrollRegion label={t("order.versions.region")}>
-            <Table id={tableId} className="od-table od-lines">
+            {/* The orders list cuts a long item name short; here the name wraps, or the longest one on the page would push the status off a phone before the person has read it. */}
+            <Table
+              id={tableId}
+              className="od-table od-lines [&_.od-customer-name]:whitespace-normal"
+            >
               <caption className="sr-only">
                 {t("order.versions.caption")}
               </caption>

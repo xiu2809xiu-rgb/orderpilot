@@ -62,6 +62,16 @@ describe("the differences between two PO versions", () => {
     ).toBeVisible();
   });
 
+  it("lets an item name wrap, so that a long one does not push the status off a narrow screen", () => {
+    const { container } = render(
+      <PoDifferences differences={differences()} currency="USD" />,
+    );
+    // jsdom lays nothing out, so the class that overrides the list's no-wrap is what is checked.
+    expect(container.querySelector("table")?.className).toContain(
+      "[&_.od-customer-name]:whitespace-normal",
+    );
+  });
+
   it("lists the header first", () => {
     render(<PoDifferences currency="USD" differences={differences()} />);
     const header = screen.getByText("Order date").closest("dl");
