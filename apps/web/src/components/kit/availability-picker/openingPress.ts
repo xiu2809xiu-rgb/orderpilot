@@ -6,7 +6,8 @@
  * after its release) lands on a choice that nobody chose. Two things kept
  * here, in a module, tell them apart: a clock that starts each time the menu
  * opens (however it was opened and whether or not Radix kept the pill mounted
- * through a fold), and the pointer press that opened it, with its place.
+ * through a fold), with a number for each opening, and the pointer press that
+ * opened it, with its place.
  *
  * - A press on a choice is refused in the first 250 ms of the clock
  *   (OPEN_GUARD_MS), and when it repeats the opening press: within 500 ms of
@@ -17,6 +18,12 @@
  *   a triple click picks nothing either.
  * - A refused press stays refused: its release and the click that belongs to
  *   it pick nothing, however long the button was held.
+ * - What a choice keeps of a press (that it may pick, or that it was refused)
+ *   counts only in the opening it was made in: each opening has a number, and
+ *   a mark from another opening is read as no press. Radix keeps the pill
+ *   mounted when the menu closes and opens again within the fold, and a press
+ *   that was slid away from and never finished must not make the next click
+ *   of that choice look like one that was pressed.
  * - A click made by a pointer (its `detail` is 1 or more) on a choice that was
  *   not pressed is the click of the tap that opened the pill, and is refused
  *   in the first second of the clock (OPENING_CLICK_MS). After that an input
@@ -51,10 +58,17 @@ interface PressPoint {
 
 let opening: Press | null = null;
 let openedAt: number | null = null;
+let openingCount = 0;
 
 /** The control calls this each time its menu opens, whoever opened it. */
 export function markOpened(): void {
   openedAt = performance.now();
+  openingCount += 1;
+}
+
+/** Which opening this is: a choice keeps it with its mark, and a mark of another opening is void. */
+export function openingNumber(): number {
+  return openingCount;
 }
 
 /** Milliseconds since the menu last opened; none has opened, none has passed. */

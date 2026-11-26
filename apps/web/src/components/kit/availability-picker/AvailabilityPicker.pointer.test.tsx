@@ -1,7 +1,11 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { loadPicker, renderPicker } from "./availabilityTestKit";
+import {
+  holdFoldingPills,
+  loadPicker,
+  renderPicker,
+} from "./availabilityTestKit";
 import {
   OPENING_CLICK_MS,
   OPEN_GUARD_MS,
@@ -428,6 +432,78 @@ describe("a press that repeats the opening press", () => {
     goTo(600 + REPEAT_WINDOW_MS + 50);
     tap(press(item("Available"), 100, 100));
     expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  // The pill stays mounted through a close and an opening within the fold
+  // (holdFoldingPills), so a choice keeps what it saw of a press.
+  const opener = () =>
+    screen.getByRole("button", { name: /^Your availability/, hidden: true });
+  const closeAndReopen = async (
+    choice: Element,
+    goTo: (ms: number) => void,
+    closeAt: number,
+    openAt: number,
+  ) => {
+    goTo(closeAt);
+    fireEvent.keyDown(choice, { key: "Escape" });
+    await waitFor(() => {
+      expect(opener()).toHaveAttribute("aria-expanded", "false");
+    });
+    expect(choice.isConnected).toBe(true);
+    goTo(openAt);
+    fireEvent.pointerDown(opener(), {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerType: "mouse",
+    });
+    await waitFor(() => {
+      expect(opener()).toHaveAttribute("aria-expanded", "true");
+    });
+    expect(choice.isConnected).toBe(true);
+  };
+  const slidAway = { clientX: 100, clientY: 100, pointerType: "touch" };
+
+  it("picks nothing for a click with no press on a choice whose press was slid away from in the opening before, and the next press and click pick once", async () => {
+    holdFoldingPills();
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    await open();
+    const first = item("Available");
+    // Pressed, and let go elsewhere: no click follows, so nothing clears the mark.
+    goTo(400);
+    fireEvent.pointerDown(first, slidAway);
+    fireEvent.pointerUp(item("Focusing"), slidAway);
+    expect(onPick).not.toHaveBeenCalled();
+    await closeAndReopen(first, goTo, 1000, 1100);
+    // The tap on the trigger sends its click to this choice, 120 ms in.
+    goTo(1100 + 120);
+    fireEvent.click(first, { ...slidAway, detail: 1 });
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+    // The refusal swallows nothing: a press and its click, away from the opening place.
+    goTo(1100 + 300);
+    tap(press(first, 300, 300));
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(onPick).toHaveBeenCalledWith("AVAILABLE");
+  });
+
+  it("picks for a click with no press 1.5 s into an opening, though a press in the opening before was refused and never finished", async () => {
+    holdFoldingPills();
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    await open();
+    const first = item("Available");
+    // Too soon to be a choice, so refused; the click that would have used the mark up never came.
+    goTo(100);
+    fireEvent.pointerDown(first, slidAway);
+    await closeAndReopen(first, goTo, 500, 600);
+    goTo(600 + 1500);
+    fireEvent.click(first, { ...slidAway, detail: 1 });
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(onPick).toHaveBeenCalledWith("AVAILABLE");
   });
 
   it("counts the quarter second from each opening, also when the pill stayed mounted through the fold", async () => {

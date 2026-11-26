@@ -17,6 +17,7 @@ import {
   OPENING_CLICK_MS,
   OPEN_GUARD_MS,
   msSinceOpened,
+  openingNumber,
   repeatsOpeningPress,
 } from "./openingPress";
 import { availabilityLook } from "./tones";
@@ -46,8 +47,17 @@ export function PickerOrb({
 }) {
   const Mark = availabilityLook[value].mark;
   // The mark outlives the release, and a touch screen's pointerleave comes
-  // before its click, so no leave clears it. It goes with a pick or a cancel.
-  const press = useRef<Press>("none");
+  // before its click, so no leave clears it. It goes with a pick or a cancel,
+  // and it is void in any other opening than the one it was made in.
+  const seen = useRef<{ press: Press; opening: number }>({
+    press: "none",
+    opening: 0,
+  });
+  const mark = (press: Press) => {
+    seen.current = { press, opening: openingNumber() };
+  };
+  const marked = (): Press =>
+    seen.current.opening === openingNumber() ? seen.current.press : "none";
   return (
     <MenuPrimitive.RadioItem
       value={value}
@@ -58,7 +68,7 @@ export function PickerOrb({
         // Both are asked, so that every repeat restarts the half second.
         const repeat = repeatsOpeningPress(event);
         const early = msSinceOpened() < OPEN_GUARD_MS;
-        press.current = repeat || early ? "refused" : "taken";
+        mark(repeat || early ? "refused" : "taken");
       }}
       // A release is never a pick: stopping it makes Radix skip its own click.
       onPointerUp={(event: PointerEvent<HTMLElement>) => {
@@ -66,15 +76,16 @@ export function PickerOrb({
       }}
       onClick={(event: MouseEvent<HTMLElement>) => {
         if (event.detail === 0) return;
+        const press = marked();
         const unpressed =
-          press.current === "none" && msSinceOpened() < OPENING_CLICK_MS;
-        if (press.current === "refused" || unpressed) {
-          press.current = "none";
+          press === "none" && msSinceOpened() < OPENING_CLICK_MS;
+        if (press === "refused" || unpressed) {
+          mark("none");
           event.preventDefault();
         }
       }}
       onPointerCancel={() => {
-        press.current = "none";
+        mark("none");
       }}
       // The key's own repeat is not a second pick: it would pick, close the
       // menu and give the focus back to the trigger, which the next repeat opens.
@@ -85,7 +96,7 @@ export function PickerOrb({
       }}
       // A repeat of the current value is a pick too: it renews the 12 hours.
       onSelect={() => {
-        press.current = "none";
+        mark("none");
         onPick(value);
       }}
     >
