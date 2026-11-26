@@ -77,6 +77,7 @@ The faint tier is for text on a card or a panel only. On the bare ground it meas
 The class is `text-faint-foreground` (Tailwind reads `--faint-foreground` through `--color-faint-foreground` in `styles/index.css`), for a label above a value, a setting's description, a timer and an empty line. Three rules:
 
 - **Cards, panels and popovers only.** Never on the bare ground: a page intro, a date line or a count beside a title stays in the body colour.
+- **Not under the pointer light or a hover fill, except on the work panel.** A spotlight tile (a KPI tile, a count tile) is lit with the ring colour, and a count tile takes the hover fill over its card. On a card both take the faint tier under 4.5:1 (dark: 3.81 and 3.92), so a tile's label stays in the body colour. `tokens.test.ts` measures the body colour on each, and the faint tier on the work panel under the 8% light of a home section.
 - **Never the only sign of a status.** A late order, a failure or a hold also has its words, its icon or its chip.
 - **Label quiet, value loud.** On a card the label is faint and the value is ink (or the 600 numeral), so a blurred card still shows where the answer is.
 
