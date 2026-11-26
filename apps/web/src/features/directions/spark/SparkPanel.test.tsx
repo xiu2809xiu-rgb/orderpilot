@@ -14,6 +14,7 @@ import i18n from "@/i18n";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
+import { must } from "@/test/must";
 import { STOCK_ANSWER } from "../data/index";
 import { availableNow, grouped, stockFacts } from "./sparkFacts";
 import SparkPanel from "./SparkPanel";
@@ -86,6 +87,40 @@ describe("the Spark panel", () => {
       }),
     ).toBeNull();
   });
+
+  it("left-aligns the welcome's heading and intro, as body text is never centred", async () => {
+    panel();
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    const heading = within(dialog).getByRole("heading", {
+      level: 3,
+      name: "Ask about stock or sales",
+    });
+    const block = must(heading.closest(".flex-col")?.parentElement);
+    expect(block).not.toHaveClass("text-center");
+    expect(heading.nextElementSibling).not.toHaveClass("mx-auto");
+  });
+
+  it("draws the working line quieter than the answer it leads to", async () => {
+    const user = userEvent.setup();
+    panel();
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: "How many HP monitors do we have?",
+      }),
+    );
+    const answer = await within(dialog).findByText(/1,020 are available/);
+    expect(must(answer.closest("p"))).toHaveClass("text-foreground");
+    const line = must(
+      must(answer.closest("[data-spark-answer]")).querySelector(
+        "button[aria-expanded]",
+      ),
+    );
+    const [label, timer] = Array.from(line.querySelectorAll("span")).slice(1);
+    expect(label).toHaveClass("text-muted-foreground");
+    expect(label).not.toHaveClass("text-foreground");
+    expect(timer).toHaveClass("text-faint-foreground");
+  }, 30_000);
 
   it("answers the stock question from the data, with a table, a source chip and a draft", async () => {
     const user = userEvent.setup();

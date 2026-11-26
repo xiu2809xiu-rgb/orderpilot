@@ -78,6 +78,7 @@ export function SparkTurnView({
           steps={steps}
           timer={seconds}
           toggleLabel={t("thought.toggle")}
+          quiet
         />
         {turn.phase === "thinking" ? null : (
           <>
