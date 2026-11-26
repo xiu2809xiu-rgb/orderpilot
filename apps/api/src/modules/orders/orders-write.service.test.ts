@@ -4,6 +4,16 @@ import type { AuditService } from "../../audit/audit.service.js";
 import type { Database } from "../../database/database.js";
 import type { CustomerLookup } from "../master-data/customer-lookup.js";
 import type { ItemLookup } from "../master-data/item-lookup.js";
+import {
+  ConflictError,
+  type DomainError,
+  ValidationFailedError,
+} from "../../common/domain-error.js";
+import type {
+  HandoffAnswer,
+  OrderHandoff,
+  OrderSubmitted,
+} from "./domain/order-handoff.js";
 import { SalesOrder } from "./domain/sales-order.js";
 import { OrderMasking } from "./domain/order-masking.js";
 import {
@@ -81,6 +91,7 @@ function build(options: { winner: string | null; insertFails: boolean }) {
     } as unknown as ItemLookup,
     new OrderMasking(),
     {} as unknown as OrdersService,
+    {} as unknown as OrderHandoff,
   );
   return { service, steps };
 }
@@ -171,6 +182,7 @@ describe("OrdersWriteService.update", () => {
       } as unknown as ItemLookup,
       new OrderMasking(),
       { one: () => Promise.resolve({}) } as unknown as OrdersService,
+      {} as unknown as OrderHandoff,
     );
     return { service, reads: () => reads };
   }
@@ -195,5 +207,305 @@ describe("OrdersWriteService.update", () => {
       info,
     );
     expect(reads()).toBe(1);
+  });
+});
+
+describe("OrdersWriteService.submitDraft", () => {
+  const draftInput = {
+    orderNo: "SO-20261110-0001",
+    navisionNo: null,
+    captureState: "draft" as const,
+    customerNo: "C-0001",
+    externalDocumentNo: "PO-1",
+    orderDate: "2026-11-10",
+    shipmentDate: null,
+    currencyCode: "USD",
+    prepaymentPercent: "30.00",
+    createdBy: actor.id,
+    version: 2,
+    lines: [
+      {
+        lineNo: 1,
+        itemNo: "I-0001",
+        description: "Item",
+        quantity: "3",
+        unitPrice: "31.97",
+        qtyToShip: "3",
+      },
+    ],
+  };
+  const draft = new SalesOrder(draftInput);
+  const submittedOrder = new SalesOrder({
+    ...draftInput,
+    captureState: "submitted",
+  });
+  const when = new Date("2026-11-26T03:00:00.000Z");
+  const send = { version: 2 };
+
+  interface Audited {
+    action: string;
+    changes: Record<string, unknown> | null | undefined;
+    insideTransaction: boolean;
+  }
+
+  function buildSubmit(
+    options: {
+      stored?: SalesOrder;
+      later?: SalesOrder;
+      marked?: boolean;
+      handoff?: () => Promise<HandoffAnswer>;
+      customerKnown?: boolean;
+      itemKnown?: boolean;
+    } = {},
+  ) {
+    const steps: string[] = [];
+    const audited: Audited[] = [];
+    const facts: OrderSubmitted[] = [];
+    let open = false;
+    let reads = 0;
+    const database = {
+      transaction: async <T>(work: () => Promise<T>): Promise<T> => {
+        steps.push("begin");
+        open = true;
+        try {
+          const done = await work();
+          steps.push("commit");
+          return done;
+        } catch (error) {
+          steps.push("rollback");
+          throw error;
+        } finally {
+          open = false;
+        }
+      },
+    };
+    const repository = {
+      findByNo: () => {
+        reads += 1;
+        return Promise.resolve(
+          reads === 1 ? (options.stored ?? draft) : (options.later ?? draft),
+        );
+      },
+      markSubmitted: () => {
+        steps.push("update");
+        return Promise.resolve(options.marked ?? true);
+      },
+    };
+    const handoff = {
+      submitted: (fact: OrderSubmitted) => {
+        steps.push("handoff");
+        facts.push(fact);
+        return (
+          options.handoff?.() ?? Promise.resolve({ effect: "none" as const })
+        );
+      },
+    };
+    const audit = {
+      record: (input: { action: string; changes?: Audited["changes"] }) => {
+        steps.push(`audit:${input.action}`);
+        audited.push({
+          action: input.action,
+          changes: input.changes,
+          insideTransaction: open,
+        });
+        return Promise.resolve({});
+      },
+    };
+    const service = new OrdersWriteService(
+      database as unknown as Database,
+      repository as unknown as SalesOrderRepository,
+      {} as unknown as OrderNumberAllocator,
+      audit as unknown as AuditService,
+      {
+        namesOf: () =>
+          Promise.resolve(
+            options.customerKnown === false
+              ? new Map()
+              : new Map([["C-0001", "Synthetic Co"]]),
+          ),
+      } as unknown as CustomerLookup,
+      {
+        detailsOf: () =>
+          Promise.resolve(
+            options.itemKnown === false
+              ? new Map()
+              : new Map([
+                  ["I-0001", { description: "Item", unitPrice: "31.97" }],
+                ]),
+          ),
+      } as unknown as ItemLookup,
+      new OrderMasking(),
+      {
+        one: () => {
+          steps.push("read-back");
+          return Promise.resolve({ orderNo: "SO-20261110-0001" });
+        },
+      } as unknown as OrdersService,
+      handoff as unknown as OrderHandoff,
+    );
+    return { service, steps, audited, facts };
+  }
+
+  it("runs the guarded update, then the handoff, then the audit row, all inside the transaction", async () => {
+    const { service, steps, audited } = buildSubmit();
+    await service.submitDraft(draft.orderNo, send, actor, info, when);
+    expect(steps).toEqual([
+      "begin",
+      "update",
+      "handoff",
+      "audit:order.submitted",
+      "commit",
+      "read-back",
+    ]);
+    expect(audited.map((a) => a.insideTransaction)).toEqual([true]);
+  });
+
+  it("hands the handoff the fact once, with the person and the request", async () => {
+    const { service, facts } = buildSubmit();
+    await service.submitDraft(
+      draft.orderNo,
+      send,
+      actor,
+      { ip: "203.0.113.9", traceId: "t-9" },
+      when,
+    );
+    expect(facts).toEqual([
+      {
+        orderNo: "SO-20261110-0001",
+        customerNo: "C-0001",
+        submittedBy: {
+          userId: actor.id,
+          name: "Synthetic Support",
+          role: "SUPPORT",
+        },
+        submittedAt: when,
+        total: "95.91",
+        prepaymentPercent: "30.00",
+        poVersionNo: 1,
+        request: { ip: "203.0.113.9", traceId: "t-9" },
+      },
+    ]);
+  });
+
+  it("puts the workflow effect in the audit row and no total, price or line", async () => {
+    const { service, audited } = buildSubmit({
+      handoff: () => Promise.resolve({ effect: "applied" }),
+    });
+    await service.submitDraft(draft.orderNo, send, actor, info, when);
+    expect(audited[0]?.changes).toEqual({
+      lines: 1,
+      version: { from: 2, to: 3 },
+      poVersionNo: 1,
+      workflowEffect: "applied",
+    });
+    const text = JSON.stringify(audited[0]);
+    for (const secret of ["95.91", "31.97", "I-0001", "C-0001", "PO-1"])
+      expect(text).not.toContain(secret);
+  });
+
+  it("refuses a submitted order with the state words, before it compares the version", async () => {
+    const { service, steps } = buildSubmit({ stored: submittedOrder });
+    const error: unknown = await service
+      .submitDraft(draft.orderNo, { version: 99 }, actor, info, when)
+      .catch((e: unknown) => e);
+    expect(error).toEqual(
+      new ConflictError("Order SO-20261110-0001 is already submitted."),
+    );
+    expect(steps).toEqual([]);
+  });
+
+  it("refuses a stale version without calling the handoff", async () => {
+    const { service, steps } = buildSubmit();
+    const error: unknown = await service
+      .submitDraft(draft.orderNo, { version: 1 }, actor, info, when)
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ConflictError);
+    expect((error as ConflictError).message).toContain(
+      "changed by someone else",
+    );
+    expect(steps).toEqual([]);
+  });
+
+  it("says the order is already submitted when the guarded update changes nothing and the order is submitted now", async () => {
+    const { service, steps } = buildSubmit({
+      marked: false,
+      later: submittedOrder,
+    });
+    await expect(
+      service.submitDraft(draft.orderNo, send, actor, info, when),
+    ).rejects.toThrow("Order SO-20261110-0001 is already submitted.");
+    expect(steps).toEqual(["begin", "update", "commit"]);
+  });
+
+  it("says the order was changed when the guarded update changes nothing and the order is still a draft", async () => {
+    const { service } = buildSubmit({ marked: false, later: draft });
+    await expect(
+      service.submitDraft(draft.orderNo, send, actor, info, when),
+    ).rejects.toThrow("changed by someone else");
+  });
+
+  it("lets the handoff's DomainError through unchanged, and writes one order.submit.refused row after the transaction, with its code and no message", async () => {
+    const refusal = new ConflictError(
+      "The order cannot start: synthetic reason.",
+    );
+    const { service, steps, audited } = buildSubmit({
+      handoff: () => Promise.reject(refusal),
+    });
+    const error: unknown = await service
+      .submitDraft(draft.orderNo, send, actor, info, when)
+      .catch((e: unknown) => e);
+    expect(error).toBe(refusal);
+    expect(steps).toEqual([
+      "begin",
+      "update",
+      "handoff",
+      "rollback",
+      "audit:order.submit.refused",
+    ]);
+    expect(audited).toEqual([
+      {
+        action: "order.submit.refused",
+        changes: { refusedBy: "workflow", code: "CONFLICT", version: 2 },
+        insideTransaction: false,
+      },
+    ]);
+    expect(JSON.stringify(audited)).not.toContain("synthetic reason");
+  });
+
+  it("does not write a refusal row for a plain Error from the handoff", async () => {
+    const { service, steps, audited } = buildSubmit({
+      handoff: () => Promise.reject(new Error("the workflow is down")),
+    });
+    await expect(
+      service.submitDraft(draft.orderNo, send, actor, info, when),
+    ).rejects.toThrow("the workflow is down");
+    expect(audited).toEqual([]);
+    expect(steps).toEqual(["begin", "update", "handoff", "rollback"]);
+  });
+
+  it("refuses an unknown customer and an unknown item with a 400 and calls nothing", async () => {
+    const noCustomer = buildSubmit({ customerKnown: false });
+    const first: unknown = await noCustomer.service
+      .submitDraft(draft.orderNo, send, actor, info, when)
+      .catch((e: unknown) => e);
+    expect(first).toBeInstanceOf(ValidationFailedError);
+    expect((first as DomainError).details).toEqual([
+      {
+        path: "customerNo",
+        message: "No customer has this Business Central number.",
+      },
+    ]);
+    const noItem = buildSubmit({ itemKnown: false });
+    const second: unknown = await noItem.service
+      .submitDraft(draft.orderNo, send, actor, info, when)
+      .catch((e: unknown) => e);
+    expect((second as DomainError).details).toEqual([
+      {
+        path: "lines.0.itemNo",
+        message: "No item has this Business Central number.",
+      },
+    ]);
+    expect(noCustomer.steps).toEqual([]);
+    expect(noItem.steps).toEqual([]);
   });
 });
