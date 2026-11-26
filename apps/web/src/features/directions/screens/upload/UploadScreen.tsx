@@ -3,7 +3,6 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useSessionStore } from "@/stores/session";
-import { LatticeLoader } from "@/components/kit/LatticeLoader";
 import {
   Alert,
   AlertAction,
@@ -12,6 +11,7 @@ import {
 } from "@/components/kit/Alert";
 import { PageHeader } from "@/components/parts/PageHeader";
 import { AddStage } from "./AddStage";
+import { DemoReviewSkeleton } from "./DemoReviewSkeleton";
 import { DEMO_NAME, useDemoDocument, type PreviewName } from "./demoDocument";
 import { ReadStage } from "./ReadStage";
 import { ReviewLeaveDialog } from "./ReviewLeaveDialog";
@@ -91,11 +91,7 @@ export default function UploadScreen() {
           </AlertAction>
         </Alert>
       ) : null}
-      {stage !== "add" && demo.isPending ? (
-        <div className="dx-card flex justify-center px-6 py-12">
-          <LatticeLoader label={t("review.loading")} />
-        </div>
-      ) : null}
+      {stage !== "add" && demo.isPending ? <DemoReviewSkeleton /> : null}
       {stage === "read" && demo.data ? (
         <ReadStage document={demo.data} onDone={reading} />
       ) : null}
