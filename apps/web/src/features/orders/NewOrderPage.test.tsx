@@ -174,7 +174,7 @@ describe("the New order page", () => {
     // True for a revised PO too: it promises nothing that is not built.
     expect(
       screen.getByText(
-        "This customer and PO number already have an order, SO-20261108-0007. Open it to make changes.",
+        "This customer and PO number already have an order, SO-20261108-0007. Open it to see it. A draft can be edited, and a submitted order cannot be changed here.",
       ),
     ).toBeVisible();
     expect(

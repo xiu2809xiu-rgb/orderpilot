@@ -139,4 +139,35 @@ describe("statusSentence", () => {
     ).toBe("");
     expect(statusSentence(t, input({}))).toBe("");
   });
+  it("words a shortage as stock information, with no team asked, when nothing holds the order", () => {
+    expect(statusSentence(t, input({ detail: SHORT, asStock: true }))).toBe(
+      "Stock today: 707 short on Samsung SSD 1 TB NVMe. No team has been asked to hold this order.",
+    );
+    const two = {
+      ...SHORT,
+      shortageCount: 3,
+    } as unknown as StatusInput["detail"];
+    expect(statusSentence(t, input({ detail: two, asStock: true }))).toBe(
+      "Stock today: 707 short on Samsung SSD 1 TB NVMe and 2 more items. No team has been asked to hold this order.",
+    );
+    const one = {
+      ...SHORT,
+      shortageCount: 2,
+    } as unknown as StatusInput["detail"];
+    expect(statusSentence(t, input({ detail: one, asStock: true }))).toBe(
+      "Stock today: 707 short on Samsung SSD 1 TB NVMe and 1 more item. No team has been asked to hold this order.",
+    );
+  });
+
+  it("says nothing as stock information when no line is short, and reads no check", () => {
+    expect(
+      statusSentence(
+        t,
+        input({
+          asStock: true,
+          checks: [check("mock.sample-quantity", "fail")],
+        }),
+      ),
+    ).toBe("");
+  });
 });

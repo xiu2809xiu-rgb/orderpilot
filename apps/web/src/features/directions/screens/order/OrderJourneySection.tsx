@@ -15,12 +15,15 @@ export function OrderJourneySection({
   journey,
   late,
   refused,
+  typedHere,
   tone,
 }: {
   journey: Journey | null;
   late: boolean;
   /** The role may not read the tracker, which holds the journey. */
   refused: boolean;
+  /** Entered here and submitted, held by no team: it has no journey and will not get one by waiting. */
+  typedHere: boolean;
   /** The order's health: colours the rail and the ship forecast's pill. */
   tone: RailTone;
 }) {
@@ -43,7 +46,13 @@ export function OrderJourneySection({
         <OrderJourney journey={journey} size="full" late={late} tone={tone} />
       ) : (
         <p className="fs-14 max-w-prose text-muted-foreground">
-          {t(refused ? "order.trackerRefused" : "peek.noJourney")}
+          {t(
+            refused
+              ? "order.trackerRefused"
+              : typedHere
+                ? "peek.noJourneyTypedHere"
+                : "peek.noJourney",
+          )}
         </p>
       )}
     </section>

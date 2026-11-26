@@ -27,6 +27,7 @@ export function OrderTabs({
   timeline,
   toConfirm,
   inWorkflow,
+  typedHere,
 }: {
   orderNo: string;
   detail: SalesOrderDetail | undefined;
@@ -34,15 +35,24 @@ export function OrderTabs({
   toConfirm: boolean;
   /** False for a draft or a void order, which the workflow does not know. */
   inWorkflow: boolean;
+  /** A submitted order no team holds: it has no documents or checks to read. */
+  typedHere: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
   const [params, setParams] = useSearchParams();
   // The workflow lists the documents received and still expected; a role that may not read it sees the ones the checks read.
   const flow = useOrderFlow(orderNo, inWorkflow).data?.data;
-  const documents = withPending(
-    withFlow(documentsOf(timeline.checks, { orderNo }), flow?.documents ?? []),
-    flow,
-  );
+  // The documents tab invents a Customer PO row for an order, so an order with
+  // no file of its own is given none and says so instead.
+  const documents = typedHere
+    ? []
+    : withPending(
+        withFlow(
+          documentsOf(timeline.checks, { orderNo }),
+          flow?.documents ?? [],
+        ),
+        flow,
+      );
   // The demo PDFs print prices, so a role whose prices the server masks on this
   // page is not offered them, and the Checks tab covers its price checks by the
   // same test. Until the order has answered nothing is offered or shown.
@@ -73,12 +83,17 @@ export function OrderTabs({
         {TABS.map((id) => (
           <TabsTrigger key={id} value={id} className="od-tab">
             <span className="fs-14">{t(`order.tabs.${id}`)}</span>
-            <span
-              className="od-view-count numeral"
-              data-alert={id === "checks" && failed.length > 0 ? "" : undefined}
-            >
-              {counts[id]}
-            </span>
+            {/* An order the tracker does not know has no steps to count. */}
+            {id === "activity" && !inWorkflow ? null : (
+              <span
+                className="od-view-count numeral"
+                data-alert={
+                  id === "checks" && failed.length > 0 ? "" : undefined
+                }
+              >
+                {counts[id]}
+              </span>
+            )}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -96,6 +111,7 @@ export function OrderTabs({
           externalDocumentNo={timeline.externalDocumentNo}
           toConfirm={toConfirm}
           priceMask={priceMask}
+          typedHere={typedHere}
         />
       </TabsContent>
       <TabsContent value="checks">
@@ -103,6 +119,7 @@ export function OrderTabs({
           checks={timeline.checks}
           matches={timeline.matches}
           priceMask={priceMask}
+          typedHere={typedHere}
         />
       </TabsContent>
       <TabsContent value="activity">

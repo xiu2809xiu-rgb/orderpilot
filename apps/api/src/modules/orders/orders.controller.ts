@@ -25,10 +25,12 @@ import {
   salesOrderListSchema,
   salesOrderQuerySchema,
   salesOrderResponseSchema,
+  submitSalesOrderSchema,
   voidSalesOrderSchema,
   type CreateSalesOrderBody,
   type PatchSalesOrderBody,
   type SalesOrderQuery,
+  type SubmitSalesOrderBody,
   type VoidSalesOrderBody,
 } from "@orderpilot/shared";
 import type { Request } from "express";
@@ -49,7 +51,7 @@ function infoOf(req: Request): WriteInfo {
 /**
  * Reads need `orders.read`. A write names its own permission on the handler,
  * and a handler's decorator wins over the class's, so a role that can only read
- * is refused there. Only drafts are written (ADR 0047).
+ * is refused there. A draft is written, then submitted (ADR 0047, 0073).
  */
 @ApiTags("Orders")
 @Controller("orders")
@@ -148,6 +150,33 @@ export class OrdersController {
   ) {
     return {
       data: await this.writes.voidDraft(orderNo, body, auth.user, infoOf(req)),
+    };
+  }
+
+  @Post(":orderNo/submit")
+  @HttpCode(200)
+  @RequirePermission("orders.edit")
+  @ApiParam({ name: "orderNo", schema: { type: "string" } })
+  @ApiOperation({
+    summary:
+      "Submit a draft order. Send the version you read. OrderPilot cannot change or cancel it afterwards",
+  })
+  @ApiBody({ schema: openApiSchema(submitSalesOrderSchema) })
+  @ApiOkResponse({ schema: openApiSchema(salesOrderResponseSchema) })
+  async submitDraft(
+    @Param("orderNo", orderNoParam) orderNo: string,
+    @Body(new ZodValidationPipe(submitSalesOrderSchema))
+    body: SubmitSalesOrderBody,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.writes.submitDraft(
+        orderNo,
+        body,
+        auth.user,
+        infoOf(req),
+      ),
     };
   }
 }

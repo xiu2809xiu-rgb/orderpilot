@@ -1,18 +1,10 @@
 import type { CheckResult, MasterMatch } from "@orderpilot/shared";
 import { CircleCheck, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ScrollRegion } from "@/components/common";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { StatusChip } from "@/components/kit/StatusChip";
 import { EmptyState } from "@/components/parts/EmptyState";
 import { MaskedValue } from "@/components/parts/MaskedValue";
+import { ChecksMatches } from "./ChecksMatches";
 import { isPriceCheck } from "./priceChecks";
 
 /**
@@ -89,65 +81,6 @@ function Result({
   );
 }
 
-function Matches({ matches }: { matches: readonly MasterMatch[] }) {
-  const { t } = useTranslation("order-tracker");
-  return (
-    <ScrollRegion
-      label={t("detail.matches.region")}
-      className="od-lines-scroll"
-    >
-      <Table className="od-table od-lines">
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead scope="col">{t("detail.matches.kind")}</TableHead>
-            <TableHead scope="col">{t("detail.matches.printed")}</TableHead>
-            <TableHead scope="col">{t("detail.matches.matched")}</TableHead>
-            <TableHead scope="col">{t("detail.matches.possible")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {matches.map((match) => (
-            <TableRow key={`${match.kind}-${match.printedNo}`}>
-              <TableCell>{t(`detail.matches.${match.kind}`)}</TableCell>
-              <TableCell>
-                <span className="od-customer">
-                  <span className="od-customer-name">{match.printedName}</span>
-                  <span className="numeral od-customer-no">
-                    {match.printedNo}
-                  </span>
-                </span>
-              </TableCell>
-              <TableCell>
-                {match.matchedNo ? (
-                  <span className="od-customer">
-                    <span className="od-customer-name">
-                      {match.matchedName}
-                    </span>
-                    <span className="numeral od-customer-no">
-                      {match.matchedNo}
-                    </span>
-                  </span>
-                ) : (
-                  <StatusChip kind="warning" icon={TriangleAlert}>
-                    {t("detail.matches.noMatch")}
-                  </StatusChip>
-                )}
-              </TableCell>
-              <TableCell className="fs-14 text-muted-foreground">
-                {match.possibleMatches.length === 0
-                  ? t("detail.matches.none")
-                  : match.possibleMatches
-                      .map((possible) => `${possible.no} ${possible.name}`)
-                      .join("; ")}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </ScrollRegion>
-  );
-}
-
 /**
  * What the rules found on this order: each check with what was expected, what
  * was found, the tolerance and the evidence, then the customer and items as
@@ -161,11 +94,14 @@ export function ChecksTab({
   checks,
   matches,
   priceMask,
+  typedHere,
 }: {
   checks: readonly CheckResult[];
   matches: readonly MasterMatch[];
   /** Why the order's amount is masked for this role, or null when it may see prices. */
   priceMask: string | null;
+  /** The order was typed in here: no document of it is read, so no check runs. */
+  typedHere: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
   return (
@@ -173,8 +109,12 @@ export function ChecksTab({
       {checks.length === 0 ? (
         <EmptyState
           icon={ShieldCheck}
-          title={t("order.checks.emptyTitle")}
-          description={t("order.checks.emptyBody")}
+          title={t(
+            `order.checks.${typedHere ? "typedHereTitle" : "emptyTitle"}`,
+          )}
+          description={t(
+            `order.checks.${typedHere ? "typedHereBody" : "emptyBody"}`,
+          )}
         />
       ) : (
         <ul className="od-check-list">
@@ -188,7 +128,7 @@ export function ChecksTab({
           <h3 id="od-matches" className="fs-14 font-semibold">
             {t("order.checks.matches")}
           </h3>
-          <Matches matches={matches} />
+          <ChecksMatches matches={matches} />
         </section>
       ) : null}
     </div>

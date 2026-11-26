@@ -31,7 +31,8 @@ export interface OrderFactsOverdue {
 /**
  * One order as everything else asks for it, whether it is a sample or a stored
  * row. Neither kind invents what it does not have: a sample has no capture
- * state, and a stored order has no workflow status and no owner yet.
+ * state, and a stored order has no owner and carries no workflow status: the
+ * orders service overlays area 2's label for a submitted one (ADR 0073).
  */
 export interface OrderFacts {
   readonly orderNo: string;

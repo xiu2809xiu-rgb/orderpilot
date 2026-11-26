@@ -7,6 +7,11 @@ export interface StatusInput {
   detail: Pick<SalesOrderDetail, "shortage" | "shortageCount" | "lines"> | null;
   /** The checks the tracker ran on the order. A failed one is what holds it. */
   checks: readonly CheckResult[];
+  /**
+   * The order is held by no team, so a shortage is stock information and not
+   * the reason it is held: it is worded as one, and no check is read.
+   */
+  asStock?: boolean;
 }
 
 /**
@@ -36,8 +41,16 @@ function whyFailed(
     : t("order.status.why.checkOther", { label: failed.ruleLabel });
 }
 
-/** The shortage in words, or null when the order's data names none. */
-function whyShort(t: TFunction, detail: StatusInput["detail"]): string | null {
+/**
+ * The shortage in words, or null when the order's data names none. `scope` is
+ * the group of keys: "why" says it as the reason for a hold, "stock" says it as
+ * a fact about stock that no team is acting on.
+ */
+function whyShort(
+  t: TFunction,
+  detail: StatusInput["detail"],
+  scope: "why" | "stock" = "why",
+): string | null {
   const gap = detail?.shortage;
   if (!detail || !gap) return null;
   // Items are matched on their Navision number, never on a name.
@@ -49,11 +62,11 @@ function whyShort(t: TFunction, detail: StatusInput["detail"]): string | null {
     item: line?.description ?? gap.itemNo,
   };
   return detail.shortageCount > 1
-    ? t("order.status.why.shortMore", {
+    ? t(`order.status.${scope}.shortMore`, {
         ...values,
         count: detail.shortageCount - 1,
       })
-    : t("order.status.why.short", values);
+    : t(`order.status.${scope}.short`, values);
 }
 
 /**
@@ -63,6 +76,8 @@ function whyShort(t: TFunction, detail: StatusInput["detail"]): string | null {
  * nothing left for it to add, so it says nothing.
  */
 export function statusSentence(t: TFunction, input: StatusInput): string {
+  // The stock sentence is whole: it already says that no team holds the order.
+  if (input.asStock) return whyShort(t, input.detail, "stock") ?? "";
   const why = whyShort(t, input.detail) ?? whyFailed(t, input.checks);
   return why ? t("order.status.whyOnly", { why }) : "";
 }

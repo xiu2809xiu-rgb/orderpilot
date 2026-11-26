@@ -3,12 +3,14 @@ import type {
   CreateSalesOrderBody,
   PatchSalesOrderBody,
   SalesOrderDetail,
+  SubmitSalesOrderBody,
   VoidSalesOrderBody,
 } from "@orderpilot/shared";
 import type { AuthUser } from "../../auth/auth-context.js";
 import { AuditService } from "../../audit/audit.service.js";
 import {
   ConflictError,
+  DomainError,
   NotFoundError,
   ValidationFailedError,
 } from "../../common/domain-error.js";
@@ -19,8 +21,15 @@ import { draftLines } from "./domain/draft-lines.js";
 import { OrderMasking } from "./domain/order-masking.js";
 import {
   DuplicateOrderError,
+  HandoffRefusedError,
   OrderConflictError,
 } from "./domain/order-errors.js";
+import {
+  OrderHandoff,
+  type HandoffEffect,
+  type OrderSubmitted,
+} from "./domain/order-handoff.js";
+import { submissionFact } from "./domain/order-submission.js";
 import { normalisePoNumber } from "./domain/po-number.js";
 import { SalesOrder, type SalesOrderChanges } from "./domain/sales-order.js";
 import { OrderNumberAllocator } from "./order-number.allocator.js";
@@ -38,10 +47,11 @@ export interface WriteInfo {
 const STALE = "This order was changed by someone else. Reload it to see it.";
 
 /**
- * Creates, changes and voids draft orders (ADR 0047). A person's click is the
- * only trigger: nothing here submits an order or posts to Business Central. The route's
- * permission guard has already decided who may call; the guard audits its own
- * refusals, so nothing here asks the policy again.
+ * Creates, changes, voids and submits draft orders (ADR 0047, 0073). A person's
+ * click is the only trigger. Submit hands the order to area 2 through
+ * OrderHandoff (ADR 0072, 0073) and posts nothing to Business Central. The
+ * route's permission guard has already decided who may call; the guard audits
+ * its own refusals, so nothing here asks the policy again.
  *
  * Duplicates are decided by the unique index, not by a read: the read only
  * gives a friendly answer early. When two requests race, the index refuses the
@@ -61,6 +71,7 @@ export class OrdersWriteService {
     @Inject(ItemLookup) private readonly items: ItemLookup,
     @Inject(OrderMasking) private readonly masking: OrderMasking,
     @Inject(OrdersService) private readonly orders: OrdersService,
+    @Inject(OrderHandoff) private readonly handoff: OrderHandoff,
   ) {}
 
   async create(
@@ -227,6 +238,90 @@ export class OrdersWriteService {
     return this.orders.one(orderNo, actor.role);
   }
 
+  /**
+   * One transaction, in this order: the guarded update, the handoff to area 2,
+   * the audit row. A refusal from the handoff rolls all of it back, so the
+   * refusal's own audit row is written afterwards, in a transaction of its own,
+   * with the code and never the words (ADR 0073).
+   */
+  async submitDraft(
+    orderNo: string,
+    body: SubmitSalesOrderBody,
+    actor: OrderWriter,
+    info: WriteInfo,
+    now: Date = new Date(),
+  ): Promise<SalesOrderDetail> {
+    const stored = await this.requireOrder(orderNo);
+    stored.requireSubmittable();
+    if (stored.version !== body.version) throw new ConflictError(STALE);
+    const submitted = stored.submitted();
+    await this.requireCustomer(stored.customerNo);
+    await this.requireItems(stored.lines.map((line) => line.itemNo));
+    const fact = submissionFact(
+      submitted,
+      { userId: actor.id, name: actor.displayName, role: actor.role },
+      now,
+      info,
+    );
+    let done: boolean;
+    try {
+      done = await this.database.transaction(async () => {
+        if (!(await this.repository.markSubmitted(orderNo, body.version)))
+          return false;
+        const effect = await this.handOver(fact);
+        await this.audit.record({
+          actor: { kind: "user", userId: actor.id, role: actor.role },
+          action: "order.submitted",
+          entityType: "Order",
+          entityId: orderNo,
+          summary: `${actor.displayName} submitted order ${orderNo}`,
+          changes: {
+            lines: stored.lines.length,
+            version: { from: body.version, to: body.version + 1 },
+            poVersionNo: fact.poVersionNo,
+            workflowEffect: effect,
+          },
+          ip: info.ip,
+          traceId: info.traceId,
+        });
+        return true;
+      });
+    } catch (error) {
+      if (!(error instanceof HandoffRefusedError)) throw error;
+      await this.audit.record({
+        actor: { kind: "user", userId: actor.id, role: actor.role },
+        action: "order.submit.refused",
+        entityType: "Order",
+        entityId: orderNo,
+        summary: `${actor.displayName}'s submit of order ${orderNo} was refused by the order flow`,
+        changes: {
+          refusedBy: "workflow",
+          code: error.refusal.code,
+          version: body.version,
+        },
+        ip: info.ip,
+        traceId: info.traceId,
+      });
+      throw error.refusal;
+    }
+    if (!done) throw await this.whySubmitRefused(orderNo);
+    return this.orders.one(orderNo, actor.role);
+  }
+
+  /**
+   * A DomainError from area 2 is wrapped so that, outside the transaction, it
+   * can be told from one of our own. Anything else is rethrown as it is.
+   */
+  private async handOver(fact: OrderSubmitted): Promise<HandoffEffect> {
+    try {
+      return (await this.handoff.submitted(fact)).effect;
+    } catch (error) {
+      throw error instanceof DomainError
+        ? new HandoffRefusedError(error)
+        : error;
+    }
+  }
+
   private async requireOrder(orderNo: string): Promise<SalesOrder> {
     // A sample is not stored, so it answers 404 here like any unknown number.
     const stored = await this.repository.findByNo(orderNo);
@@ -242,6 +337,22 @@ export class OrdersWriteService {
         message: "No customer has this Business Central number.",
       },
     ]);
+  }
+
+  /** Master data must still know every item by number, as a save requires. */
+  private async requireItems(itemNos: readonly string[]): Promise<void> {
+    const known = await this.items.detailsOf(itemNos);
+    const issues = itemNos.flatMap((itemNo, index) =>
+      known.has(itemNo)
+        ? []
+        : [
+            {
+              path: `lines.${String(index)}.itemNo`,
+              message: "No item has this Business Central number.",
+            },
+          ],
+    );
+    if (issues.length > 0) throw new ValidationFailedError(issues);
   }
 
   private async refuseDuplicate(
@@ -264,6 +375,20 @@ export class OrdersWriteService {
       return new ConflictError(
         `Order ${orderNo} is ${now.captureState}, so it cannot be changed. Only a draft can.`,
       );
+    return new ConflictError(STALE);
+  }
+
+  /** The guarded submit said no: someone submitted or voided it, or saved first. */
+  private async whySubmitRefused(orderNo: string): Promise<ConflictError> {
+    const now = await this.repository.findByNo(orderNo);
+    if (now && !now.isDraft) {
+      try {
+        now.requireSubmittable();
+      } catch (error) {
+        if (error instanceof ConflictError) return error;
+        throw error;
+      }
+    }
     return new ConflictError(STALE);
   }
 

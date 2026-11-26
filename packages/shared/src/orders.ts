@@ -72,7 +72,7 @@ export const salesOrderRowSchema = z.object({
   externalDocumentNo: z.string().min(1),
   orderDate: z.string().min(1),
   shipmentDate: z.string().nullable(),
-  /** Area 2's label as text. Null for a stored order: it has no workflow yet. */
+  /** Area 2's label as text. Null for a stored order the workflow does not hold. */
   workflowStatus: z.string().min(1).nullable(),
   /** Masked with the selling price: a total gives the prices away. */
   amount: maskedFieldSchema,
@@ -192,6 +192,10 @@ export const voidSalesOrderSchema = z.object({
   reason: z.string().trim().min(1).max(500),
 });
 export type VoidSalesOrderBody = z.infer<typeof voidSalesOrderSchema>;
+
+/** Submitting sends only the version the person read: the edit token of ADR 0047. */
+export const submitSalesOrderSchema = z.object({ version: z.int().min(1) });
+export type SubmitSalesOrderBody = z.infer<typeof submitSalesOrderSchema>;
 
 /**
  * The 409 for a repeated customer and PO number keeps the one error envelope.

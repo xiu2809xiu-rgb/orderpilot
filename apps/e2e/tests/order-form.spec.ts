@@ -1,11 +1,15 @@
 import { randomInt } from "node:crypto";
-import type {
-  CreateSalesOrderBody,
-  PatchSalesOrderBody,
-  VoidSalesOrderBody,
+import {
+  errorEnvelopeSchema,
+  salesOrderResponseSchema,
+  type CreateSalesOrderBody,
+  type PatchSalesOrderBody,
+  type SubmitSalesOrderBody,
+  type VoidSalesOrderBody,
 } from "@orderpilot/shared";
 import type { Page } from "@playwright/test";
 import {
+  callAs,
   checkPage,
   expect,
   expectNoButton,
@@ -336,5 +340,250 @@ test.describe("New order and draft editing", () => {
     await expect(
       page.getByRole("option", { name: "Start a new order" }),
     ).toHaveCount(0);
+  });
+});
+
+// P-114: Submit an order. These tests leave submitted orders behind, and a
+// submitted order cannot be voided or changed by anyone until P-50, so every
+// run uses a PO number no earlier run used (freshPo) and a stack that is
+// started clean by CI keeps none of them. On a persistent stack the customer
+// C-0001 simply gains open orders, which no other spec counts.
+//
+// These tests were written without being run: the builders had no browser or
+// Docker. The first run, on a Docker build, is the first time they are seen.
+
+/** Today on Singapore's calendar, as the form's date fields hold it. */
+function todayInSingapore(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Singapore" });
+}
+
+/**
+ * A submitted order made through the API, for a spec that only reads it. It is
+ * created and submitted by Support, exactly as the page does, so the order is
+ * the same one the page would have made.
+ */
+async function submittedOrderFor(po: string): Promise<string> {
+  const create = {
+    customerNo: "C-0001",
+    externalDocumentNo: po,
+    orderDate: todayInSingapore(),
+    shipmentDate: null,
+    prepaymentPercent: "100",
+    lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+  } satisfies CreateSalesOrderBody;
+  const made = await callAs("SUPPORT", "POST", "/orders", create);
+  expect(made.status, "the draft is created").toBe(201);
+  const draft = salesOrderResponseSchema.parse(made.body).data;
+  const body = { version: draft.version ?? 1 } satisfies SubmitSalesOrderBody;
+  const sent = await callAs(
+    "SUPPORT",
+    "POST",
+    `/orders/${draft.orderNo}/submit`,
+    body,
+  );
+  expect(sent.status, "the draft is submitted").toBe(200);
+  return draft.orderNo;
+}
+
+const SUBMITTED_NOTICE = "Submitted. No team has a task for it";
+
+/** Presses Submit order on the draft's form and returns the dialog it opens. */
+async function askToSubmit(page: Page) {
+  const submit = page.getByRole("button", {
+    name: "Submit order",
+    exact: true,
+  });
+  await expect(submit).toBeVisible();
+  // Right after a save the bar still says "Saving." and a press only explains.
+  await expect(submit).not.toHaveAttribute("aria-disabled", "true");
+  await submit.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+test.describe("Submit an order", () => {
+  test("Support submits a draft, the page says it is submitted and no team has a task, and nothing can change it", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const po = freshPo();
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, po);
+    // A clean saved draft: Submit order is the button to press.
+    const dialog = await askToSubmit(page);
+    await expect(
+      dialog.getByRole("heading", { name: `Submit order ${orderNo}?` }),
+    ).toBeVisible();
+    await expect(dialog.getByText(/You cannot undo this/)).toBeVisible();
+    // Enter must never submit by habit: focus starts on the safe button.
+    await expect(
+      dialog.getByRole("button", { name: "Keep editing" }),
+    ).toBeFocused();
+
+    await test.step("confirming ends with a short toast that has no Undo, and the notice holds focus", async () => {
+      await dialog.getByRole("button", { name: "Submit order" }).click();
+      await expect(page.getByText(`Order ${orderNo} submitted`)).toBeVisible();
+      await expect(page.getByRole("button", { name: "Undo" })).toHaveCount(0);
+      const notice = page.getByRole("region", { name: SUBMITTED_NOTICE });
+      await expect(notice).toBeVisible();
+      await expect(notice).toBeFocused();
+      await expect(notice).toContainText("It is not approved.");
+      await expect(
+        page.getByRole("heading", { level: 1, name: orderNo }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^Submitted\./ }),
+      ).toBeVisible();
+      // The status card says that nobody holds it, in its own words. It is
+      // found by what it holds, so no other match on the page can pass for it.
+      const card = page.locator("dl", { has: page.getByText("Current Stage") });
+      await expect(card.getByText("Not in the order flow")).toBeVisible();
+      await expect(card.getByText("Nobody", { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("table", { name: "Lines of the order" }),
+      ).toBeVisible();
+    });
+
+    await test.step("nothing on the page can change it", async () => {
+      for (const name of ["Save", "Void", "Submit order"]) {
+        await expect(
+          page.getByRole("button", { name, exact: true }),
+        ).toHaveCount(0);
+      }
+    });
+
+    await test.step("a reload keeps the page and does not take focus again", async () => {
+      await page.reload();
+      const notice = page.getByRole("region", { name: SUBMITTED_NOTICE });
+      await expect(notice).toBeVisible();
+      await expect(notice).not.toBeFocused();
+    });
+
+    await test.step("the orders list shows it with the stage word and Nobody, and its peek says the same", async () => {
+      await page.goto(`/orders?q=${orderNo}`);
+      const row = page.getByRole("row", { name: new RegExp(orderNo) });
+      await expect(row).toBeVisible();
+      await expect(row.getByText("Not in the order flow")).toBeVisible();
+      await expect(row.getByText("Nobody", { exact: true })).toBeVisible();
+      // The customer's cell opens the peek, as the orders spec does.
+      await row.getByRole("cell").nth(2).click();
+      const peek = page.getByRole("dialog");
+      await expect(peek.getByText(orderNo)).toBeVisible();
+      // The peek says it twice, in its facts and in the journey's sentence:
+      // the facts' words are the whole of their element.
+      await expect(
+        peek.getByText("Not in the order flow", { exact: true }),
+      ).toBeVisible();
+      await expect(peek.getByText("Nobody", { exact: true })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(peek).toHaveCount(0);
+    });
+
+    await test.step("the server refuses a second submit, saying it is already submitted", async () => {
+      const again = await callAs(
+        "SUPPORT",
+        "POST",
+        `/orders/${orderNo}/submit`,
+        {
+          version: 2,
+        } satisfies SubmitSalesOrderBody,
+      );
+      expect(again.status).toBe(409);
+      const envelope = errorEnvelopeSchema.parse(again.body);
+      expect(envelope.error.code).toBe("CONFLICT");
+      expect(envelope.error.message).toContain("is already submitted");
+    });
+
+    await test.step("the same PO number is a repeat, and the notice says what can be done", async () => {
+      await page.goto("/orders/new");
+      await fillNewOrder(page, po);
+      await saveButton(page).click();
+      await expect(page.getByText("This order already exists")).toBeVisible();
+      await expect(
+        page.getByText(
+          "A draft can be edited, and a submitted order cannot be changed here.",
+        ),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: `Open ${orderNo}` }),
+      ).toBeVisible();
+    });
+  });
+
+  test("Keep editing sends nothing, and the draft stays a draft with its button back in focus", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, freshPo());
+    const dialog = await askToSubmit(page);
+    await dialog.getByRole("button", { name: "Keep editing" }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Submit order", exact: true }),
+    ).toBeFocused();
+    await expect(
+      page.getByRole("heading", { name: `Sales order ${orderNo}` }),
+    ).toBeVisible();
+    await voidDraft(page, orderNo);
+  });
+
+  test("a Product Manager is offered Submit order on a draft too", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, "PRODUCT_MANAGER");
+    const orderNo = await createOrder(page, freshPo());
+    await expect(
+      page.getByRole("button", { name: "Submit order", exact: true }),
+    ).toBeVisible();
+    await voidDraft(page, orderNo);
+  });
+
+  test("Warehouse reads a submitted order with its prices hidden and cannot submit one", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const orderNo = await submittedOrderFor(freshPo());
+    await signInAs(page, "WAREHOUSE");
+    await page.goto(`/orders/${orderNo}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: orderNo }),
+    ).toBeVisible();
+    const notice = page.getByRole("region", { name: SUBMITTED_NOTICE });
+    await expect(notice).toBeVisible();
+    // Only a role that may edit orders reads what a mistake means.
+    await expect(page.getByText(/submitted by mistake/)).toHaveCount(0);
+    await expect(
+      page.getByRole("table", { name: "Lines of the order" }),
+    ).toBeVisible();
+    await expect(page.getByText(/USD\s?[\d,]+\.\d{2}/)).toHaveCount(0);
+    for (const name of ["Save", "Void", "Submit order"]) {
+      await expect(page.getByRole("button", { name, exact: true })).toHaveCount(
+        0,
+      );
+    }
+    await expectRefused("WAREHOUSE", "POST", `/orders/${orderNo}/submit`, {
+      version: 2,
+    } satisfies SubmitSalesOrderBody);
+  });
+
+  test("the open dialog and the submitted page fit and pass the accessibility check", async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    await signInAs(page, "SUPPORT");
+    const orderNo = await createOrder(page, freshPo());
+    const dialog = await askToSubmit(page);
+    await checkPage(page);
+    await dialog.getByRole("button", { name: "Submit order" }).click();
+    await expect(
+      page.getByRole("region", { name: SUBMITTED_NOTICE }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: orderNo }),
+    ).toBeVisible();
+    await checkPage(page);
   });
 });

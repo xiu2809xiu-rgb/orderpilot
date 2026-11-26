@@ -1,8 +1,9 @@
 ### Orders: the 120 sample orders and the orders OrderPilot stores itself.
 ### Each row says its source (sample or stored). A stored order has no workflow
 ### status, only a capture state (draft, submitted or void), which is not the
-### order's status. Support and the Product Manager start and change drafts;
-### nothing submits an order yet. A sample can be read but never written.
+### order's status. Support and the Product Manager start, change and submit
+### drafts. A submitted order is handed to the workflow, which today is a
+### stand-in that changes no status. A sample can be read but never written.
 ### Sign in first (see auth.http): REST Client keeps the cookies. The writes also
 ### need the CSRF header: paste the op_csrf cookie's value into @csrf, as auth.http says.
 @baseUrl = http://localhost:3000
@@ -210,7 +211,69 @@ X-CSRF-Token: {{csrf}}
 
 { "version": 1, "prepaymentPercent": "50" }
 
-### Warehouse holds neither orders.create nor orders.edit: 403, audited.
+### Submit a saved draft. Send the version you read (here a fresh draft, version 1).
+### 200: captureState submitted, the version up by one, workflowStatus null while the
+### stand-in is bound. OrderPilot cannot change or cancel the order afterwards.
+# @name toSubmit
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-submit",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
+###
+@submitNo = {{toSubmit.response.body.$.data.orderNo}}
+POST {{baseUrl}}/api/v1/orders/{{submitNo}}/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1 }
+
+### The same again: 409, "Order ... is already submitted."
+POST {{baseUrl}}/api/v1/orders/{{submitNo}}/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 2 }
+
+### A void order: 409, "... is void, so it cannot be submitted. Only a draft can."
+### (A draft sent with an old version is also 409: "changed by someone else".)
+POST {{baseUrl}}/api/v1/orders/{{orderNo}}/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1 }
+
+### A number that does not exist: 404.
+POST {{baseUrl}}/api/v1/orders/SO-20990101-0001/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1 }
+
+### A sample is not stored: 404.
+POST {{baseUrl}}/api/v1/orders/SO-0001/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1 }
+
+### No version: 400, with an issue on the path version.
+POST {{baseUrl}}/api/v1/orders/{{submitNo}}/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{}
+
+### Warehouse holds neither orders.create nor orders.edit: 403, audited. A
+### Warehouse submit is refused the same way.
 POST {{baseUrl}}/api/v1/auth/demo-login
 Content-Type: application/json
 
@@ -230,6 +293,13 @@ X-CSRF-Token: {{csrf}}
   "lines": [{ "itemNo": "I-0001", "quantity": "1" }]
 }
 
+###
+POST {{baseUrl}}/api/v1/orders/{{submitNo}}/submit
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 2 }
+
 ### No session: 401. Sign out first (see auth.http), then send the write.
 POST {{baseUrl}}/api/v1/auth/logout
 X-CSRF-Token: {{csrf}}
@@ -239,3 +309,9 @@ POST {{baseUrl}}/api/v1/orders
 Content-Type: application/json
 
 { "customerNo": "C-0001" }
+
+###
+POST {{baseUrl}}/api/v1/orders/{{submitNo}}/submit
+Content-Type: application/json
+
+{ "version": 2 }
