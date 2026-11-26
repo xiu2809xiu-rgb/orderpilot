@@ -171,10 +171,14 @@ describe.each(["light", "dark"] as const)(
   (scheme) => {
     const t = theme(scheme);
     const colour = (name: string): Rgba => parseColor(must(t[name]));
-    // The page and a panel: the two places a filter chip is drawn.
-    const grounds = [surface(t, ["background"]), surface(t, ["panel-strong"])];
+    // The page, a panel and a popover: the places a filter chip is drawn.
+    const grounds = [
+      surface(t, ["background"]),
+      surface(t, ["panel-strong"]),
+      surface(t, ["popover"]),
+    ];
 
-    it("keeps the label of a chip that is off at 4.5:1 and its border at 3:1, on the page and on a panel", () => {
+    it("keeps the label of a chip that is off at 4.5:1 and its border at 3:1, on the page, a panel and a popover", () => {
       for (const ground of grounds) {
         expect(
           contrast(colour("muted-foreground"), ground),
