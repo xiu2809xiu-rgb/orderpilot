@@ -1,0 +1,55 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import {
+  contrast,
+  flatten,
+  parseColor,
+  surface,
+  type Tokens,
+} from "@/styles/contrast";
+import { must } from "@/test/must";
+
+// Sign out is drawn in the destructive tokens. Its words and its border must
+// stand out of the card (4.5:1 for text, 3:1 for a boundary), and its words
+// from the hover fill, in light and in dark.
+
+const tokenFile = readFileSync(
+  path.join(import.meta.dirname, "..", "..", "..", "styles", "tokens.css"),
+  "utf8",
+);
+
+function block(selector: string): Tokens {
+  const start = tokenFile.indexOf(`\n${selector} {`);
+  expect(start, `${selector} is declared`).toBeGreaterThanOrEqual(0);
+  const body = tokenFile.slice(start, tokenFile.indexOf("\n}", start + 1));
+  const out: Tokens = {};
+  for (const m of body.matchAll(/--([\w-]+):\s*([^;]+);/g)) {
+    out[must(m[1])] = must(m[2]).replace(/\s+/g, " ").trim();
+  }
+  return out;
+}
+
+const light = block(":root");
+const SCHEMES = [
+  { name: "light", tokens: light },
+  { name: "dark", tokens: { ...light, ...block(".dark") } },
+] as const;
+
+describe.each(SCHEMES)("the destructive outline in $name", ({ tokens }) => {
+  const ink = parseColor(must(tokens.destructive));
+
+  it("keeps its words at 4.5:1 on the card, which also keeps its border at 3:1", () => {
+    expect(contrast(ink, surface(tokens, ["card"]))).toBeGreaterThanOrEqual(
+      4.5,
+    );
+  });
+
+  it("keeps its words at 4.5:1 on the hover fill", () => {
+    const fill = flatten(
+      parseColor(must(tokens["destructive-surface"])),
+      surface(tokens, ["card"]),
+    );
+    expect(contrast(ink, fill)).toBeGreaterThanOrEqual(4.5);
+  });
+});
