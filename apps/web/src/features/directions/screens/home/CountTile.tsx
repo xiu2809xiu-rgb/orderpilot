@@ -41,7 +41,7 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
       <div className={TILE} aria-busy="true">
         <span className={`${LABEL} text-trim-start`}>{label}</span>
         <Skeleton
-          className="h-9 w-16 animate-none"
+          className="h-9 w-16"
           role="status"
           aria-label={t("tiles.loading", { label })}
         />

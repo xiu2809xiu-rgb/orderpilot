@@ -99,14 +99,16 @@ export function DataTableBody<Row>({
                 )}
               >
                 <Skeleton
-                  className={`h-5 animate-none ${alignsEnd(column) ? "ml-auto w-16" : "w-3/4"}`}
+                  still
+                  className={`h-5 ${alignsEnd(column) ? "ml-auto w-16" : "w-3/4"}`}
                   aria-hidden="true"
                 />
                 {position === 0 ? (
                   // On a phone the first cell carries a second line, so the
                   // rows are as tall as the real ones and nothing jumps.
                   <Skeleton
-                    className="mt-1.5 h-4 w-1/2 animate-none md:hidden"
+                    still
+                    className="mt-1.5 h-4 w-1/2 md:hidden"
                     aria-hidden="true"
                   />
                 ) : null}

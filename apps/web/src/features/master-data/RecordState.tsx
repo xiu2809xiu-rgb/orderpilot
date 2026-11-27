@@ -45,10 +45,7 @@ export function RecordSkeleton() {
       <div role="status" aria-busy="true" className="contents">
         <span className="sr-only">{t("states.loading")}</span>
         <PageHeaderSkeleton />
-        <Skeleton
-          className="h-24 w-full animate-none rounded-xl"
-          aria-hidden="true"
-        />
+        <Skeleton className="h-24 w-full rounded-xl" aria-hidden="true" />
         <SectionCardSkeleton lines={4} />
         <SectionCardSkeleton lines={4} />
       </div>

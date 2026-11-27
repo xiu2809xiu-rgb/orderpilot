@@ -65,3 +65,42 @@
     animation: none;
   }
 }
+
+/* The shimmer of a page or card skeleton: a faint band sweeps left to right at
+   an even speed and repeats. Only transform moves, so it stays on the
+   compositor, and the colour is the text colour at a few percent, so it reads
+   in light and dark. Tables and lists never take this class (Skeleton still).
+   Under reduced motion the band is removed, not frozen: the global clamp in
+   index.css would leave it standing at the end of its one sweep. */
+@keyframes dx-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.dx-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.dx-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--foreground) 7%, transparent),
+    transparent
+  );
+  animation: dx-shimmer 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dx-shimmer::after {
+    display: none;
+    animation: none;
+  }
+}

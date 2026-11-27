@@ -46,7 +46,7 @@ export function TableSection() {
           aria-label={t("table.caption")}
         >
           {[0, 1, 2].map((row) => (
-            <Skeleton key={row} className="h-9" />
+            <Skeleton still key={row} className="h-9" />
           ))}
         </div>
       ) : list.isError ? (

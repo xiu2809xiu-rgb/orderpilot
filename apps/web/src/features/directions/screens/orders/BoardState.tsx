@@ -5,8 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * What the board shows in place of its columns while the orders load, or when
- * they cannot: columns of blank cards in the board's own shape (they do not
- * pulse), the error with its trace id and Retry, or permission denied.
+ * they cannot: columns of blank cards in the board's own shape (they stay
+ * still, as a board is worked in), the error with its trace id and Retry, or
+ * permission denied.
  */
 export function BoardState({
   status,
@@ -41,9 +42,9 @@ export function BoardState({
       <div className="od-board" aria-hidden="true">
         {Array.from({ length: 4 }, (_, column) => (
           <div key={column} className="od-column flex flex-col gap-2">
-            <Skeleton className="h-8 animate-none" />
+            <Skeleton still className="h-8" />
             {Array.from({ length: 3 }, (_, card) => (
-              <Skeleton key={card} className="h-[4.5rem] animate-none" />
+              <Skeleton still key={card} className="h-[4.5rem]" />
             ))}
           </div>
         ))}
