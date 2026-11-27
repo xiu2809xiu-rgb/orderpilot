@@ -15,7 +15,7 @@ Each file name ends with the theme and the width (1440 desktop, 390 phone with t
 
 ## What the pictures cannot show
 
-- Motion. The strips are frames cut from a screencast, about 10 ms apart except for the one gap of about 106 ms before the chip widened, picked about 25 to 40 ms apart. The timings are in the pull request.
+- Motion. The strips are frames cut from a screencast (its longest gap between frames was 113 ms, before the chip widened), picked about 25 to 40 ms apart. The timings are in the pull request.
 - Reduced motion. Nothing moves there, so a picture of it is a picture of the end state.
 - The slot's width does not ease: in an earlier build of this branch it did, and a fine sweep of Orders found the bar changing 22 to 122 ms after the pills row at every width it tried from 816 to 836 px, which wrapped the toggles part way through the fade and moved the table twice. It now changes at once and only the check fades. The label does not slide.
 - The table moving. At every width the applied-pills row appears or leaves in one step (44 px at 1440, 1100 and 900, 60 px at 390), and at 820 wide the toggles also wrap in that step (52 px more). Those are measured, not drawn.
