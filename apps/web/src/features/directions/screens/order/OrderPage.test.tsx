@@ -177,8 +177,6 @@ describe("the order page", () => {
 
     await user.click(within(tabs).getByRole("tab", { name: /^Checks/ }));
     expect(await screen.findByText("Rule quantity")).toBeVisible();
-    expect(screen.getByText("Matched to Business Central")).toBeVisible();
-    expect(screen.getByText("C-0009 Look-alike Ltd")).toBeVisible();
 
     await user.click(within(tabs).getByRole("tab", { name: /^Activity/ }));
     // Found by name: right after the click the Checks panel can still be the

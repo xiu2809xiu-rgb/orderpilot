@@ -9329,7 +9329,7 @@
                               },
                               "outcome": {
                                 "type": "string",
-                                "enum": ["pass", "fail"]
+                                "enum": ["pass", "fail", "pending", "overdue"]
                               },
                               "expected": {
                                 "type": "string"
@@ -9401,6 +9401,284 @@
                                 "type": "string",
                                 "format": "date-time",
                                 "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "statusLabel": {
+                                "type": "string"
+                              },
+                              "chipKind": {
+                                "type": "string",
+                                "enum": [
+                                  "success",
+                                  "warning",
+                                  "destructive",
+                                  "info"
+                                ]
+                              },
+                              "pair": {
+                                "type": "object",
+                                "properties": {
+                                  "from": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "shortLabel": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "number": {
+                                        "nullable": true,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "label",
+                                      "shortLabel",
+                                      "number"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "to": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "label": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "shortLabel": {
+                                        "type": "string",
+                                        "minLength": 1
+                                      },
+                                      "number": {
+                                        "nullable": true,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "label",
+                                      "shortLabel",
+                                      "number"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": ["from", "to"],
+                                "additionalProperties": false
+                              },
+                              "summary": {
+                                "type": "string"
+                              },
+                              "mismatches": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "fromLabel": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "fromValue": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "toLabel": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "toValue": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "note": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "unit": {
+                                      "type": "string",
+                                      "enum": ["money", "plain"]
+                                    }
+                                  },
+                                  "required": [
+                                    "fromLabel",
+                                    "fromValue",
+                                    "toLabel",
+                                    "toValue",
+                                    "note",
+                                    "unit"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "lines": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "fromItemNo": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "fromDescription": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "fromQuantity": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "fromPrice": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "toItemNo": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "toDescription": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "toQuantity": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "toPrice": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "matched": {
+                                      "type": "boolean"
+                                    },
+                                    "action": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "fromItemNo",
+                                    "fromDescription",
+                                    "fromQuantity",
+                                    "fromPrice",
+                                    "toItemNo",
+                                    "toDescription",
+                                    "toQuantity",
+                                    "toPrice",
+                                    "matched",
+                                    "action"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "lineValue": {
+                                "type": "string",
+                                "enum": ["qtyPrice", "amount", "price"]
+                              },
+                              "fields": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "label": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "fromValue": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "toValue": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "matched": {
+                                      "type": "boolean"
+                                    },
+                                    "action": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "resultLabel": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "itemNo": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "label",
+                                    "fromValue",
+                                    "toValue",
+                                    "matched",
+                                    "action"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "fieldColumns": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "from": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "to": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": ["label", "from", "to"],
+                                "additionalProperties": false
+                              },
+                              "upload": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "document": {
+                                    "type": "string",
+                                    "enum": [
+                                      "CUSTOMER_PO",
+                                      "PROFORMA_INVOICE",
+                                      "VENDOR_PI",
+                                      "VENDOR_INVOICE",
+                                      "SALES_INVOICE",
+                                      "CREDIT_NOTE",
+                                      "PACKING_LIST",
+                                      "DELIVERY_ORDER",
+                                      "AWB",
+                                      "BILL_OF_LADING",
+                                      "IMPORT_PERMIT",
+                                      "PAYMENT_ADVICE",
+                                      "SPR_FORM",
+                                      "OTHER"
+                                    ]
+                                  }
+                                },
+                                "required": ["label", "document"],
+                                "additionalProperties": false
                               }
                             },
                             "required": [

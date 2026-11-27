@@ -293,7 +293,9 @@ describe("the Checks tab", () => {
     const checks = within(tabs).getByRole("tab", { name: /^Checks\s*2$/ });
     await user.click(checks);
     const panel = await screen.findByRole("tabpanel", { name: /^Checks/ });
-    expect(within(panel).getAllByRole("heading", { level: 3 })).toHaveLength(3);
+    // One heading per check: the matches table, which used to add a third,
+    // moved to the Business Central verification checks instead.
+    expect(within(panel).getAllByRole("heading", { level: 3 })).toHaveLength(2);
     expect(within(panel).getByText("Rule customer")).toBeVisible();
     expect(within(panel).getByText("Rule quantity")).toBeVisible();
   });

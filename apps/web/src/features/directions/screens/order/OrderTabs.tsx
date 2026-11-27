@@ -99,11 +99,7 @@ export function OrderTabs({
         />
       </TabsContent>
       <TabsContent value="checks">
-        <ChecksTab
-          checks={timeline.checks}
-          matches={timeline.matches}
-          priceMask={priceMask}
-        />
+        <ChecksTab checks={timeline.checks} priceMask={priceMask} />
       </TabsContent>
       <TabsContent value="activity">
         <ActivityTab orderNo={orderNo} steps={timeline.steps} />

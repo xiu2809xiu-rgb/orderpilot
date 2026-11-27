@@ -12,4 +12,6 @@ export type TrackerTimeline200DataChecksItemOutcome = typeof TrackerTimeline200D
 export const TrackerTimeline200DataChecksItemOutcome = {
   pass: 'pass',
   fail: 'fail',
+  pending: 'pending',
+  overdue: 'overdue',
 } as const;

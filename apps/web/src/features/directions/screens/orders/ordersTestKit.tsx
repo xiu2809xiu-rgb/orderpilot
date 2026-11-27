@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { vi } from "vitest";
+import type { CheckOutcome } from "@orderpilot/shared";
 import { Toaster } from "@/components/common/Toaster";
 import i18n from "@/i18n";
 import { createQueryClient } from "@/lib/query";
@@ -215,7 +216,7 @@ export function timelineOf(spec: OrderSpec) {
     effect: `Effect of ${String(title)}`,
     current: index === all.length - 1,
   }));
-  const check = (id: string, outcome: "pass" | "fail", types: string[]) => ({
+  const check = (id: string, outcome: CheckOutcome, types: string[]) => ({
     id,
     ruleId: `mock.${id}`,
     ruleLabel: `Rule ${id}`,

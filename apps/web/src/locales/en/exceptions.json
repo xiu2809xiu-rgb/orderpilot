@@ -8,7 +8,7 @@
     "caption": "Exceptions waiting for a person",
     "emptyTitle": "No exceptions",
     "emptyDescription": "When a check finds a difference between documents, it is listed here with who should fix it.",
-    "emptyAction": "Open the order tracker",
+    "emptyAction": "Open orders",
     "columns": {
       "order": "Order No.",
       "customer": "Customer",
