@@ -1,7 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Section } from "@/components/parts/Section";
-import { SettingFootnote } from "@/components/parts/SettingRow";
+import {
+  SettingFootnote,
+  SettingList,
+  SettingRow,
+} from "@/components/parts/SettingRow";
 import { Button } from "@/components/ui/button";
 import { hasPermission, useSessionStore } from "@/stores/session";
 import { describeAccess } from "./accessGroups";
@@ -31,17 +35,21 @@ export function AccessCard() {
           {t("account.access.none")}
         </p>
       ) : (
-        <dl className="divide-y divide-border">
+        <SettingList>
           {groups.map((group) => (
-            <div
+            <SettingRow
               key={group.id}
-              className="grid gap-x-s4 gap-y-s1 py-s3 first:pt-0 last:pb-0 sm:grid-cols-[10rem_minmax(0,1fr)]"
-            >
-              <dt className="fs-14 font-medium">{group.title}</dt>
-              <dd className="fs-14 text-muted-foreground">{group.sentence}</dd>
-            </div>
+              label={group.title}
+              align="start"
+              control={
+                // A sentence is long: capped, so that the name keeps its column.
+                <p className="fs-14 max-w-sm text-muted-foreground">
+                  {group.sentence}
+                </p>
+              }
+            />
           ))}
-        </dl>
+        </SettingList>
       )}
       {hasPermission(session, "roles.read") ? (
         <Button asChild variant="link" className="mt-s3 -ml-s2 h-auto">

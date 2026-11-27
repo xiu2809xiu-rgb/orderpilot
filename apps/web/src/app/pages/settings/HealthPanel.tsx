@@ -80,29 +80,27 @@ export function HealthPanel() {
             <summary className="fs-14 w-fit cursor-pointer font-medium pointer-coarse:min-h-11">
               {t("health.details")}
             </summary>
-            <ul className="mt-s2 divide-y divide-border">
+            <SettingList className="mt-s2">
               {health.checks.map((check) => (
-                <li
+                <SettingRow
                   key={check.name}
-                  className="fs-14 flex items-center justify-between gap-s3 py-s2"
-                >
-                  <span className="min-w-0">
-                    {t(`health.names.${check.name}`, {
-                      defaultValue: check.name,
-                    })}
-                  </span>
-                  {check.status === "up" ? (
-                    <StatusChip kind="success" icon={CircleCheck}>
-                      {t("health.up", { ms: check.durationMs })}
-                    </StatusChip>
-                  ) : (
-                    <StatusChip kind="destructive" icon={CircleX}>
-                      {t("health.down")}
-                    </StatusChip>
-                  )}
-                </li>
+                  label={t(`health.names.${check.name}`, {
+                    defaultValue: check.name,
+                  })}
+                  control={
+                    check.status === "up" ? (
+                      <StatusChip kind="success" icon={CircleCheck}>
+                        {t("health.up", { ms: check.durationMs })}
+                      </StatusChip>
+                    ) : (
+                      <StatusChip kind="destructive" icon={CircleX}>
+                        {t("health.down")}
+                      </StatusChip>
+                    )
+                  }
+                />
               ))}
-            </ul>
+            </SettingList>
           </details>
           {health.allUp ? null : (
             <>

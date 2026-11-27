@@ -34,6 +34,8 @@ export function ThemeChoice() {
   }
 
   return (
+    // Full width on purpose: a preview needs the room, and a name-left,
+    // control-right row would squeeze three previews into half a card.
     <div
       ref={group}
       role="radiogroup"
