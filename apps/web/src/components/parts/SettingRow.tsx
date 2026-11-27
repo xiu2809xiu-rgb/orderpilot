@@ -7,16 +7,31 @@ export interface RowIds {
   descriptionId: string;
 }
 
-/** A card's rows: each is one thing that can be read or changed, with a line between. */
+/**
+ * A card's rows: each is one thing that can be read or changed, with a line
+ * between. `tight` takes the rows closer, so that the space inside a group is
+ * clearly less than the space between groups. It is a prop of the list, not of
+ * SettingRow, because other screens use the default row.
+ */
 export function SettingList({
   children,
   className,
+  tight = false,
 }: {
   children: ReactNode;
   className?: string;
+  tight?: boolean;
 }) {
   return (
-    <ul className={cn("divide-y divide-border", className)}>{children}</ul>
+    <ul
+      className={cn(
+        "divide-y divide-border",
+        tight && "[&>li]:py-s2",
+        className,
+      )}
+    >
+      {children}
+    </ul>
   );
 }
 

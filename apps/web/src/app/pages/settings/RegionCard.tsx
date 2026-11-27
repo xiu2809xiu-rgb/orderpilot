@@ -14,7 +14,7 @@ export function RegionCard() {
       title={t("appearance.region.title")}
       intro={t("appearance.region.intro")}
     >
-      <SettingList>
+      <SettingList tight>
         <SettingRow
           label={t("appearance.region.times")}
           value={t("appearance.region.timesValue")}

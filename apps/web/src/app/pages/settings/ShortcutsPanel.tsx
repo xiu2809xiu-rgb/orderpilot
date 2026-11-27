@@ -8,6 +8,7 @@ import {
 import { SHORTCUTS, type Shortcut } from "@/app/shell/shortcutRegistry";
 import { ShortcutKeys } from "@/app/shell/ShortcutKeys";
 import { useSparkPanel } from "@/app/shell/sparkPanel";
+import { PANEL_GROUPS } from "./panelLayout";
 
 const GROUPS = ["everywhere", "lists"] as const;
 
@@ -22,10 +23,10 @@ export function ShortcutsPanel() {
   const spark = useSparkPanel();
   const shown = (entry: Shortcut) => entry.needs !== "spark" || spark.available;
   return (
-    <div className="flex flex-col gap-s4">
+    <div className={PANEL_GROUPS}>
       {GROUPS.map((group) => (
         <Section key={group} title={t(`shortcuts.${group}`)}>
-          <SettingList>
+          <SettingList tight>
             {SHORTCUTS.filter(
               (entry) => entry.group === group && shown(entry),
             ).map((entry) => (
