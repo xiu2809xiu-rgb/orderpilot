@@ -89,7 +89,7 @@ export default function ExceptionsPage() {
         header: t("list.columns.order"),
         cell: (row) => (
           <RecordLink
-            to={`/order-tracker/${row.orderNo}`}
+            to={`/orders/${row.orderNo}`}
             className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
           >
             {row.orderNo}
@@ -214,7 +214,7 @@ export default function ExceptionsPage() {
         query={query}
         onQueryChange={setQuery}
         rowKey={(row) => row.id}
-        rowHref={(row) => `/order-tracker/${row.orderNo}`}
+        rowHref={(row) => `/orders/${row.orderNo}`}
         status={tableStatusOf(list)}
         error={list.error}
         onRetry={() => void list.refetch()}
@@ -223,7 +223,7 @@ export default function ExceptionsPage() {
           description: t("list.emptyDescription"),
           action: (
             <Button asChild variant="outline">
-              <Link to="/order-tracker">
+              <Link to="/orders">
                 <Truck aria-hidden="true" />
                 {t("list.emptyAction")}
               </Link>

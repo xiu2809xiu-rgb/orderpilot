@@ -73,7 +73,7 @@ describe("the exceptions queue", () => {
     expect(screen.getByText("Mock")).toBeVisible();
     expect(screen.getByRole("link", { name: "SO-0007" })).toHaveAttribute(
       "href",
-      "/order-tracker/SO-0007",
+      "/orders/SO-0007",
     );
     expect(
       screen.getByRole("columnheader", { name: /Order No\./ }),
@@ -204,9 +204,7 @@ describe("the exceptions queue", () => {
     await userEvent.click(await screen.findByText("10 units fewer"));
     // The tab logic loads on first use, so the move arrives a moment later.
     await waitFor(() => {
-      expect(screen.getByTestId("where")).toHaveTextContent(
-        "/order-tracker/SO-0007",
-      );
+      expect(screen.getByTestId("where")).toHaveTextContent("/orders/SO-0007");
     });
   });
 
@@ -238,9 +236,7 @@ describe("the exceptions queue", () => {
     server.use(getExceptionsListMockHandler(queue([])));
     renderPage();
     expect(await screen.findByText("No exceptions")).toBeVisible();
-    expect(
-      screen.getByRole("link", { name: "Open the order tracker" }),
-    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "Open orders" })).toBeVisible();
   });
 
   it("shows the error with its trace id", async () => {
