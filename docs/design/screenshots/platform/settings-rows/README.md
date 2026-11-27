@@ -45,12 +45,12 @@ The Account, AI, Controls, Health and Privacy panels were not given the wider gr
 
 ## Name and value columns
 
-| List              | Width | Before                                            | After                                                                                            |
-| ----------------- | ----- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| "What you can do" | 1440  | name at x 573, sentence at x 765 (a fixed column) | name at x 573 (302 px), sentence at x 907 (320 px, ends at the card's content edge), on one line |
-| "What you can do" | 390   | sentence under the name                           | sentence under the name, at the same x as the name, 16 px below it                               |
-| Health details    | 1440  | name at x 573, chip at x 1134 (92 px)             | the same: name at x 573, chip at x 1134, on one line                                             |
-| Health details    | 390   | name and chip on one line (chip at x 256)         | chip under the name, at x 41, 16 px below it                                                     |
+| List              | Width | Before                                                                                     | After                                                                                            |
+| ----------------- | ----- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| "What you can do" | 1440  | name at x 573, sentence at x 765 (a fixed column; computed from the old CSS, not measured) | name at x 573 (302 px), sentence at x 907 (320 px, ends at the card's content edge), on one line |
+| "What you can do" | 390   | sentence under the name                                                                    | sentence under the name, at the same x as the name, 16 px below it                               |
+| Health details    | 1440  | name at x 573, chip at x 1134 (92 px)                                                      | the same: name at x 573, chip at x 1134, on one line                                             |
+| Health details    | 390   | name and chip on one line (chip at x 256)                                                  | chip under the name, at x 41, 16 px below it                                                     |
 
 The accessibility tree of "What you can do" (Edge, `ariaSnapshot`) is a `list` with five `listitem`s, each holding two paragraphs: the name, then the sentence. The old `dl` pairing of name and sentence is by order only now.
 
