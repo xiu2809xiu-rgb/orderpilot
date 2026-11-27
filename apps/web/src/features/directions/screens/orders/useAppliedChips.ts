@@ -1,7 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
 import type { CustomerOption } from "./CustomerFilter";
-import { rangeReversed, type OrdersQuery } from "./ordersQuery";
+import { rangeReversed, statusCodes, type OrdersQuery } from "./ordersQuery";
+
+/** More statuses than this are named up to here, then counted: a pill that names twelve would fill the row. */
+const SHOWN_STATUSES = 3;
 
 export interface AppliedChip {
   id: string;
@@ -30,14 +33,20 @@ export function useAppliedChips(
     });
   }
   if (query.status) {
-    const codes = query.status.split(",");
+    const names = statusCodes(query.status).map((code) =>
+      tt(`list.statuses.${code}`, { defaultValue: code }),
+    );
+    const shown = names.slice(0, SHOWN_STATUSES).join(", ");
     chips.push({
       id: "status",
       label: t("applied.status", {
         value:
-          codes.length === 1
-            ? tt(`list.statuses.${codes[0] ?? ""}`, { defaultValue: codes[0] })
-            : t("applied.several", { count: codes.length }),
+          names.length > SHOWN_STATUSES
+            ? t("applied.statusMore", {
+                names: shown,
+                count: names.length - SHOWN_STATUSES,
+              })
+            : shown,
       }),
       clear: { status: null, stage: "all" },
     });

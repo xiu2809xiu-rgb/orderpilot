@@ -7,6 +7,7 @@ import {
 import { SlidersHorizontal, TriangleAlert } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
+import { CountBadge } from "@/components/common/CountBadge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -78,14 +79,11 @@ export function MoreFilters({
           >
             <SlidersHorizontal aria-hidden="true" />
             {t("filters.more")}
-            {count > 0 ? (
-              <span
-                className="numeral od-count"
-                aria-label={t("filters.moreOn", { count })}
-              >
-                {count}
-              </span>
-            ) : null}
+            <CountBadge
+              count={count}
+              className="numeral od-count"
+              label={t("filters.moreOn", { count })}
+            />
           </Button>
         </PopoverTrigger>
         {/* Radix measures the room under the button: the panel scrolls inside itself rather than run off a short window. */}

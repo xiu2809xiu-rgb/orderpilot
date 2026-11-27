@@ -1,8 +1,9 @@
 /* Lists of the app, drawn as the Orders workspace draws its own: labelled
    fields, toggle chips, a work card with a sticky head and 40 px rows, quiet
    record links. Plain rules with no layer, so they sit above Tailwind's
-   utilities on the same elements. Repeats .od-field, .od-control, .od-toggle,
-   .od-chip, .od-clear, .od-table and .od-foot of orders.css. */
+   utilities on the same elements. Repeats .od-field, .od-control, .od-chip,
+   .od-clear, .od-table and .od-foot of orders.css; the toggle chip is in
+   components/common/chip.css. */
 
 /* ---- Fields: the label above the control ---- */
 .dt-field {
@@ -122,45 +123,7 @@
   opacity: 0;
 }
 
-/* ---- Toggle chips ---- */
-.dt-toggle {
-  display: inline-flex;
-  height: 2.25rem;
-  align-items: center;
-  gap: 0.375rem;
-  padding-inline: 0.875rem;
-  border: 1px solid var(--dx-bar-btn-border);
-  border-radius: var(--radius-pill);
-  background: var(--dx-bar-btn-bg);
-  color: var(--foreground);
-  font-size: var(--type-14);
-  font-weight: 500;
-  white-space: nowrap;
-  transition:
-    background-color var(--motion-fast) var(--ease-out),
-    border-color var(--motion-fast) var(--ease-out);
-}
-
-.dt-toggle:hover {
-  background: var(--dx-bar-btn-hover);
-}
-
-.dt-toggle[aria-checked="true"],
-.dt-toggle[aria-pressed="true"] {
-  border-color: var(--ring);
-  background: var(--accent);
-}
-
-.dt-toggle:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-@media (pointer: coarse) {
-  .dt-toggle {
-    height: 2.75rem;
-  }
-}
+/* ---- Toggle chips: see ../chip.css, shared with the Orders chip ---- */
 
 /* ---- What is in force: pills with a way to take each off, and Clear ---- */
 .dt-applied {

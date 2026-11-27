@@ -1,6 +1,7 @@
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { ChipCheck } from "../ChipCheck";
 import "./data-table.css";
 
 /**
@@ -32,6 +33,7 @@ export function Field({
 /**
  * A yes or no filter as a chip that stays pressed. It is a switch for a
  * screen reader, and a tick shows it is on, so colour never says it alone.
+ * The tick has a slot of its own that eases open (see chip.css).
  */
 export function ToggleChip({
   checked,
@@ -55,7 +57,7 @@ export function ToggleChip({
         onCheckedChange(!checked);
       }}
     >
-      {checked ? <Check aria-hidden="true" className="size-4" /> : null}
+      <ChipCheck on={checked} />
       {children}
     </button>
   );
