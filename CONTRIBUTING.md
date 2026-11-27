@@ -375,7 +375,7 @@ If something destructive or irreversible seems necessary, ask Richie first.
 
 ## Settings rows and forms
 
-A setting that applies as soon as it is chosen is one row of `SettingList` and `SettingRow` (`components/parts/SettingRow`): the name, and one plain line if it needs one, on the left, and the control or the value on the right (under the name on a phone). Put what ends or undoes something (Sign out, Reset) in a last group of its own. A form that is filled in order is a different thing: it keeps the label above the field and its error under it, which the form kit below already does, so never build one from rows.
+A setting that applies as soon as it is chosen is one row of `SettingList` and `SettingRow` (`components/parts/SettingRow`): the name, and one plain line if it needs one, on the left, and the control or the value on the right (under the name on a phone). Put what ends or undoes something (Sign out, Reset) in a last group of its own, drawn as a quiet destructive outline with its icon (`QUIET_DESTRUCTIVE`, in `app/pages/settings`). A form that is filled in order is a different thing: it keeps the label above the field and its error under it, which the form kit below already does, so never build one from rows.
 
 ## Building a form
 

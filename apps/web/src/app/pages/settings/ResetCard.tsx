@@ -1,3 +1,4 @@
+import { RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/components/common/toast";
 import { Section } from "@/components/parts/Section";
@@ -5,6 +6,7 @@ import { SettingList, SettingRow } from "@/components/parts/SettingRow";
 import { Button } from "@/components/ui/button";
 import { clearTablePrefs, restoreTablePrefs } from "@/lib/localPrefs";
 import { useSessionStore } from "@/stores/session";
+import { QUIET_DESTRUCTIVE } from "./quietDestructive";
 
 /**
  * The last group of Appearance: what undoes saved choices stands apart from
@@ -31,16 +33,18 @@ export function ResetCard() {
 
   return (
     <Section title={t("appearance.reset.title")}>
-      <SettingList tight>
+      <SettingList>
         <SettingRow
           label={t("appearance.layout.tables.label")}
           description={t("appearance.layout.tables.description")}
           control={({ descriptionId }) => (
             <Button
               variant="outline"
+              className={QUIET_DESTRUCTIVE}
               onClick={resetTables}
               aria-describedby={descriptionId}
             >
+              <RotateCcw aria-hidden="true" />
               {t("appearance.layout.tables.reset")}
             </Button>
           )}

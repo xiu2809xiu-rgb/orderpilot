@@ -54,6 +54,17 @@ describe("the Reset group", () => {
     expect(button).toHaveFocus();
   });
 
+  it("is a quiet destructive outline with its icon, like Sign out", () => {
+    renderSettings(<ResetCard />);
+    const button = screen.getByRole("button", { name: "Reset" });
+    expect(button).toHaveAttribute("data-variant", "outline");
+    expect(button).toHaveClass("border-destructive", "text-destructive");
+    expect(button).toHaveClass("dark:border-destructive", "dark:bg-background");
+    expect(button).not.toHaveClass("dark:bg-input/30");
+    expect(button).not.toHaveClass("bg-destructive");
+    expect(button.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  });
+
   it("is headed Reset, and the button is described by the row's line", () => {
     renderSettings(<ResetCard />);
     expect(screen.getByRole("heading", { name: "Reset" })).toBeVisible();
