@@ -81,11 +81,13 @@ describe("the chips' motion", () => {
     }
   });
 
-  it("opens the check's slot in width and opacity over a token", () => {
+  it("fades the check in over a token and opens its slot at once", () => {
     const slot = declarations(".chip-slot");
     const transition = must(slot.get("transition"));
-    expect(transition).toContain("width var(--motion-fast) var(--ease-out)");
-    expect(transition).toContain("opacity var(--motion-fast) var(--ease-out)");
+    expect(transition).toBe("opacity var(--motion-fast) var(--ease-out)");
+    // A width that eased open wrapped the filter bar part way through the fade
+    // and moved the table twice, so the width is never in a transition.
+    expect(transition).not.toMatch(/width/);
     // Closed it is a width of 0 and open a fixed one, so nothing else moves.
     expect(slot.get("width")).toBe("0");
     expect(declarations('.chip-slot[data-on="true"]').get("width")).toBe(
