@@ -25,7 +25,7 @@ export function LayoutCard() {
 
   return (
     <Section title={t("appearance.layout.title")}>
-      <SettingList tight>
+      <SettingList>
         <SettingRow
           label={t("appearance.layout.menu.label")}
           description={t("appearance.layout.menu.description")}

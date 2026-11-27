@@ -9,9 +9,11 @@ export interface RowIds {
 
 /**
  * A card's rows: each is one thing that can be read or changed, with a line
- * between. `tight` takes the rows closer, so that the space inside a group is
- * clearly less than the space between groups. It is a prop of the list, not of
- * SettingRow, because other screens use the default row.
+ * between. `tight` sets 16 px above and below each row instead of 24, but the
+ * first row keeps no space above and the last none below, so it shows only
+ * between two rows (32 px apart instead of 48) and never in a list of one. It
+ * is a prop of the list, not of SettingRow, because other screens use the
+ * default row.
  */
 export function SettingList({
   children,
