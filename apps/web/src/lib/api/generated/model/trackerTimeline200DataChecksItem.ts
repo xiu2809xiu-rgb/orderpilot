@@ -5,9 +5,17 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
+import type { TrackerTimeline200DataChecksItemChipKind } from './trackerTimeline200DataChecksItemChipKind.ts';
 import type { TrackerTimeline200DataChecksItemEvidenceItem } from './trackerTimeline200DataChecksItemEvidenceItem.ts';
+import type { TrackerTimeline200DataChecksItemFieldColumns } from './trackerTimeline200DataChecksItemFieldColumns.ts';
+import type { TrackerTimeline200DataChecksItemFieldsItem } from './trackerTimeline200DataChecksItemFieldsItem.ts';
+import type { TrackerTimeline200DataChecksItemLinesItem } from './trackerTimeline200DataChecksItemLinesItem.ts';
+import type { TrackerTimeline200DataChecksItemLineValue } from './trackerTimeline200DataChecksItemLineValue.ts';
+import type { TrackerTimeline200DataChecksItemMismatchesItem } from './trackerTimeline200DataChecksItemMismatchesItem.ts';
 import type { TrackerTimeline200DataChecksItemOutcome } from './trackerTimeline200DataChecksItemOutcome.ts';
+import type { TrackerTimeline200DataChecksItemPair } from './trackerTimeline200DataChecksItemPair.ts';
 import type { TrackerTimeline200DataChecksItemTolerance } from './trackerTimeline200DataChecksItemTolerance.ts';
+import type { TrackerTimeline200DataChecksItemUpload } from './trackerTimeline200DataChecksItemUpload.ts';
 
 export type TrackerTimeline200DataChecksItem = {
   /** @minLength 1 */
@@ -25,4 +33,15 @@ export type TrackerTimeline200DataChecksItem = {
   evidence: TrackerTimeline200DataChecksItemEvidenceItem[];
   /** @pattern ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$ */
   checkedAt: string;
+  group?: string;
+  statusLabel?: string;
+  chipKind?: TrackerTimeline200DataChecksItemChipKind;
+  pair?: TrackerTimeline200DataChecksItemPair;
+  summary?: string;
+  mismatches?: TrackerTimeline200DataChecksItemMismatchesItem[];
+  lines?: TrackerTimeline200DataChecksItemLinesItem[];
+  lineValue?: TrackerTimeline200DataChecksItemLineValue;
+  fields?: TrackerTimeline200DataChecksItemFieldsItem[];
+  fieldColumns?: TrackerTimeline200DataChecksItemFieldColumns;
+  upload?: TrackerTimeline200DataChecksItemUpload;
 };
