@@ -157,6 +157,9 @@
       "timesValue": "Singapore time",
       "amounts": "Amounts",
       "amountsValue": "US dollars"
+    },
+    "reset": {
+      "title": "Reset"
     }
   },
   "shortcuts": {
