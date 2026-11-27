@@ -56,7 +56,10 @@ export class AuthController {
   @Public()
   @SkipCsrf()
   @StrictRateLimit()
-  @ApiOperation({ summary: "Sign in with an email and a password" })
+  @ApiOperation({
+    summary:
+      "Sign in with an email and a password. With two-step on it answers 401 TWO_STEP_REQUIRED and a challenge cookie instead of a session",
+  })
   @ApiBody({ schema: openApiSchema(loginRequestSchema) })
   @ApiOkResponse({ schema: openApiSchema(authRoutes.login.response) })
   async login(
@@ -64,7 +67,21 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.respond(res, await this.auth.login(req, body));
+    const result = await this.auth.login(req, body);
+    if (result.kind === "session") return this.respond(res, result.signedIn);
+    // No session yet: the challenge cookie names the step that finishes this
+    // sign-in. A 401 with a code of its own fails closed for a caller that
+    // does not know about two-step: it sees no session cookie and no 200. The
+    // cookie set here survives into the error response, as in refresh.
+    this.cookies.setChallenge(
+      res,
+      result.challenge.token,
+      result.challenge.ttlSeconds,
+    );
+    throw new DomainError(
+      "TWO_STEP_REQUIRED",
+      "Enter the code from your authenticator app to finish signing in.",
+    );
   }
 
   @Post("refresh")

@@ -42,6 +42,7 @@ Who decides what, and how the decisions stay visible.
 | A tamper-evident audit trail, append-only and hash-chained              | Silent changes to the record             | P-9, F-2       |
 | Every refusal audited                                                   | Probing that nobody sees                 | P-10, F-1      |
 | Synthetic data only, labelled                                           | Real data leaking through demos or tests | Every story    |
+| Two-step sign-in: a code from an authenticator app, used once           | A stolen password signing in alone       | #380           |
 
 ### GRS in the UI
 

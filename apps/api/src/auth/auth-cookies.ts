@@ -1,5 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COOKIES, REFRESH_COOKIE_PATH } from "@orderpilot/shared";
+import {
+  COOKIES,
+  REFRESH_COOKIE_PATH,
+  TWO_STEP_COOKIE_PATH,
+} from "@orderpilot/shared";
 import type { CookieOptions, Request, Response } from "express";
 import { AppConfig } from "../config/app-config.js";
 
@@ -36,7 +40,11 @@ export function readCookie(req: Request, name: string): string | undefined {
  *   the X-CSRF-Token header. It lasts as long as the refresh token, which also
  *   tells the web app after a reload that a session may be open.
  *
- * All three are SameSite=Strict (the web app and the API share a site behind
+ * - op_two_step: the sign-in challenge between the password and the second
+ *   step. httpOnly, five minutes, and its Path is exactly the verify route, so
+ *   no other route ever receives it.
+ *
+ * All of them are SameSite=Strict (the web app and the API share a site behind
  * the proxy) and Secure, except on a laptop with COOKIE_SECURE=false, which
  * only APP_ENV=local may choose.
  */
@@ -63,6 +71,22 @@ export class AuthCookies {
     });
   }
 
+  /** The challenge of a password sign-in that waits for its second step. */
+  setChallenge(res: Response, token: string, ttlSeconds: number): void {
+    res.cookie(COOKIES.twoStep, token, {
+      ...this.base(TWO_STEP_COOKIE_PATH),
+      httpOnly: true,
+      maxAge: ttlSeconds * 1000,
+    });
+  }
+
+  clearChallenge(res: Response): void {
+    res.clearCookie(COOKIES.twoStep, {
+      ...this.base(TWO_STEP_COOKIE_PATH),
+      httpOnly: true,
+    });
+  }
+
   /** The Path and flags must match the ones that set a cookie, or the browser keeps it. */
   clear(res: Response): void {
     res.clearCookie(COOKIES.access, { ...this.base("/"), httpOnly: true });
@@ -71,6 +95,7 @@ export class AuthCookies {
       httpOnly: true,
     });
     res.clearCookie(COOKIES.csrf, { ...this.base("/"), httpOnly: false });
+    this.clearChallenge(res);
   }
 
   private base(path: string): CookieOptions {

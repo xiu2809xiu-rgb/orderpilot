@@ -9,6 +9,16 @@ export const userSchema = userRefSchema.extend({
 });
 export type UserView = z.infer<typeof userSchema>;
 
+/** What a reset did: whether two-step was on, and how many sessions it ended. */
+export const twoStepResetSchema = z.object({
+  wasOn: z.boolean(),
+  sessionsEnded: z.number().int().nonnegative(),
+});
+export type TwoStepReset = z.infer<typeof twoStepResetSchema>;
+export const twoStepResetResponseSchema = z.object({
+  data: twoStepResetSchema,
+});
+
 export const userParamsSchema = z.object({ id: z.uuid() });
 
 export const userResponseSchema = z.object({ data: userSchema });

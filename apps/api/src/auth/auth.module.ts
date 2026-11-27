@@ -1,8 +1,12 @@
 import { Module, type DynamicModule } from "@nestjs/common";
 import { AuditModule } from "../audit/audit.module.js";
+import { Clock, SystemClock } from "../common/clock.js";
 import { AppConfig } from "../config/app-config.js";
 import { GovernancePermissionPolicy } from "../modules/governance/governance-permission-policy.js";
 import { SessionsModule } from "../sessions/sessions.module.js";
+import { SecretBox, deriveKey } from "../two-step/domain/secret-box.js";
+import { Totp } from "../two-step/domain/totp.js";
+import { TwoStepStoreModule } from "../two-step/two-step-store.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { AuthAuditor } from "./auth-auditor.js";
 import { AuthCookies } from "./auth-cookies.js";
@@ -17,6 +21,10 @@ import { CsrfGuard } from "./guards/csrf.guard.js";
 import { PermissionsGuard } from "./guards/permissions.guard.js";
 import { PermissionPolicy } from "./permission-policy.js";
 import { RolePermissionRepository } from "./role-permission.repository.js";
+import { TwoStepProofService } from "./two-step-proof.service.js";
+import { TwoStepSettingsService } from "./two-step-settings.service.js";
+import { TwoStepSignInService } from "./two-step-sign-in.service.js";
+import { TwoStepController } from "./two-step.controller.js";
 
 /**
  * Sign-in, sessions and the guards. AppModule registers the guards globally
@@ -29,16 +37,28 @@ export class AuthModule {
   static register(config: AppConfig): DynamicModule {
     return {
       module: AuthModule,
-      imports: [AuditModule, UsersModule, SessionsModule],
+      imports: [AuditModule, UsersModule, SessionsModule, TwoStepStoreModule],
       controllers: config.demoMode
-        ? [AuthController, DemoAuthController]
-        : [AuthController],
+        ? [AuthController, TwoStepController, DemoAuthController]
+        : [AuthController, TwoStepController],
       providers: [
         AuthService,
         AuthCookies,
         AuthAuditor,
         RolePermissionRepository,
         PasswordHasher,
+        { provide: Clock, useClass: SystemClock },
+        Totp,
+        {
+          // Sealed under a key derived from the JWT secret: no new variable.
+          provide: SecretBox,
+          useFactory: (c: AppConfig) =>
+            new SecretBox(deriveKey(c.auth.jwtSecret)),
+          inject: [AppConfig],
+        },
+        TwoStepProofService,
+        TwoStepSignInService,
+        TwoStepSettingsService,
         {
           provide: AccessTokens,
           useFactory: (c: AppConfig) =>
