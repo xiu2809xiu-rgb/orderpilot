@@ -984,14 +984,47 @@
   gap: 0.375rem;
 }
 
-/* Open by default: the body sits under a rule, so a closed card still reads
-   as the same card with its detail folded away, not a different shape. */
+/* Open by default only when the check found a problem: a closed card still
+   reads as the same card with its detail folded away, not a different
+   shape. The row collapses to nothing with a grid track, the one way to
+   animate a height nobody has measured; its border and padding fade with
+   it, so a closed card never keeps a bare rule where its table was. */
 .od-check-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-rows: 1fr;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
+  transition:
+    grid-template-rows var(--motion-base) var(--ease-out),
+    padding-top var(--motion-base) var(--ease-out),
+    border-top-color var(--motion-base) var(--ease-out),
+    opacity var(--motion-fast) var(--ease-out);
+  opacity: 1;
+}
+
+.od-check-body[data-open="false"] {
+  grid-template-rows: 0fr;
+  padding-top: 0;
+  border-top-color: transparent;
+  opacity: 0;
+}
+
+.od-check-body-inner {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+/* The Details button's own chevron turns to say which way it opens, instead
+   of swapping for a different icon. */
+.od-check-chevron {
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.od-check-chevron[data-open="true"] {
+  transform: rotate(180deg);
 }
 
 /* The fallback, for a check with no item-by-item table: one row of expected,

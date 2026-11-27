@@ -178,7 +178,12 @@ export class TrackerService {
       ownerRole: status.ownerRole,
       overdue: mockOverdue(order, this.repo.asOf()),
       steps: mockTimeline(order, this.repo.asOf()),
-      checks: mockChecks(order, this.repo.asOf()),
+      checks: mockChecks(
+        order,
+        this.repo.asOf(),
+        this.repo.customers(),
+        this.repo.items(),
+      ),
       matches: mockMatches(order, this.repo.customers(), this.repo.items()),
     };
   }

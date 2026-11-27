@@ -51,14 +51,18 @@ export const CHECK_CHIP_KINDS = [
 export const checkChipKindSchema = z.enum(CHECK_CHIP_KINDS);
 export type CheckChipKind = z.infer<typeof checkChipKindSchema>;
 
-/** One of the two documents a document cross-check compares, by its own number. */
+/**
+ * One of the two sides a cross-check compares, by its own number: a real
+ * document (`type` is one of `DOCUMENT_TYPES`), or a system of record such as
+ * Business Central, which prints no document and carries no number.
+ */
 export const checkDocumentRefSchema = z.object({
-  type: documentTypeSchema,
-  /** What it is, in words, such as "Customer PO". */
+  type: z.string().min(1),
+  /** What it is, in words, such as "Customer PO" or "Business Central". */
   label: z.string().min(1),
   /** The short form a table column heading uses, such as "PO". */
   shortLabel: z.string().min(1),
-  /** The number printed on it, or null while it has not come. */
+  /** The number printed on it, or null for a system, or while it has not come. */
   number: z.string().nullable(),
 });
 export type CheckDocumentRef = z.infer<typeof checkDocumentRefSchema>;
@@ -110,8 +114,28 @@ export const checkFieldResultSchema = z.object({
   matched: z.boolean(),
   /** What a person should do about a field that does not match, such as "Check Carrier". */
   action: z.string().nullable(),
+  /**
+   * Overrides the Result column's own word for a matched row, such as
+   * "Covered" for live inventory, where "Match" says nothing about what was
+   * checked. Null keeps the usual "Match".
+   */
+  resultLabel: z.string().nullable().optional(),
+  /**
+   * Set when `label` is an item's own description, not a field's name: the
+   * Checks tab then prints the number under it, the way a document
+   * cross-check's own item columns do, rather than as plain text.
+   */
+  itemNo: z.string().nullable().optional(),
 });
 export type CheckFieldResult = z.infer<typeof checkFieldResultSchema>;
+
+/** The field table's own column headings, when the usual "Field / On X / On Y" do not fit a check. */
+export const checkFieldColumnsSchema = z.object({
+  label: z.string().min(1),
+  from: z.string().min(1),
+  to: z.string().min(1),
+});
+export type CheckFieldColumns = z.infer<typeof checkFieldColumnsSchema>;
 
 /** Asks the Checks tab to put the document missing (`upload.document`) before this check's own action button. */
 export const checkUploadSchema = z.object({
@@ -173,13 +197,17 @@ export const checkResultSchema = z.object({
   /** One row per item, when the check compares two documents line by line. */
   lines: z.array(checkLineResultSchema).optional(),
   /**
-   * "amount" prints `lines`' money column over its quantity one (a check
-   * that compares documents by what they bill, not by what they ship).
-   * Absent keeps the usual quantity, and price where a line carries one.
+   * Which of `lines`' value columns to print: the usual quantity (and price,
+   * where a line carries one); "amount" prints only the money column, for a
+   * check that compares what two documents bill, not what they ship;
+   * "price" prints only the money column too, for a check against a
+   * catalogue price rather than a quantity.
    */
-  lineValue: z.enum(["qtyPrice", "amount"]).optional(),
+  lineValue: z.enum(["qtyPrice", "amount", "price"]).optional(),
   /** A field-by-field table, for a check that compares two documents by what each prints, not by item. */
   fields: z.array(checkFieldResultSchema).optional(),
+  /** Overrides the field table's own column headings. */
+  fieldColumns: checkFieldColumnsSchema.optional(),
   /** Shown instead of a result table while a document this check needs has not come. */
   upload: checkUploadSchema.optional(),
 });

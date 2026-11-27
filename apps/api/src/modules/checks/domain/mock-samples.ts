@@ -31,6 +31,14 @@ export const MOCK_TOLERANCE: Tolerance = {
   value: "0",
 };
 
+/** The Checks tab's own group for the three checks against Business Central's master data. */
+const BC_GROUP = "business-central-verification";
+
+/** A failed check's own chip: how many lines differ, not what kind of line it is. */
+function mismatchCountLabel(count: number): string {
+  return `${String(count)} mismatch${count === 1 ? "" : "es"}`;
+}
+
 /** "5.00" and "25" print the same way: no trailing zero decimals. */
 function plainQuantity(value: string): string {
   return value.replace(/\.0+$/, "");
@@ -191,9 +199,9 @@ function docRef(type: DocumentType, number: string | null): CheckDocumentRef {
 }
 
 /** How many item lines a document carries, and the label the summary line uses for them. */
-function skuSummary(order: SampleOrder): string {
+function itemSummary(order: SampleOrder): string {
   const count = order.lines.filter((line) => line.type === "Item").length;
-  return `${String(count)} SKU${count === 1 ? "" : "s"}`;
+  return `${String(count)} Item${count === 1 ? "" : "s"}`;
 }
 
 /**
@@ -385,6 +393,267 @@ function lineTotals(order: SampleOrder): {
   };
 }
 
+/** A side of a Business Central verification check that is the system itself, not a document. */
+function bcRef(label: string, shortLabel: string): CheckDocumentRef {
+  return { type: "BUSINESS_CENTRAL", label, shortLabel, number: null };
+}
+
+/**
+ * The customer's own name, account standing and payment terms as the PO
+ * prints them against Business Central's record of the same customer
+ * number. Credit standing is a real comparison, the order's own total
+ * against the customer's credit limit less its balance; the other two
+ * fields have nothing in the sample data to vary them, so they can only
+ * ever match.
+ */
+function customerRecordCheck(
+  order: SampleOrder,
+  customer: Customer | undefined,
+  checkedAt: string,
+): CheckResult | null {
+  if (!customer) return null;
+  const no = order.header.no;
+  const printedName = customer.name.toUpperCase();
+  const overLimit =
+    Number(customer.balanceLcy) + Number(order.total) >
+    Number(customer.creditLimitLcy);
+  const terms =
+    Number(order.header.prepaymentPercent) > 0
+      ? `${order.header.prepaymentPercent}% prepayment`
+      : customer.paymentTermsCode;
+  const fields: CheckFieldResult[] = [
+    {
+      label: "Customer Name",
+      fromValue: printedName,
+      toValue: customer.name,
+      matched: true,
+      action: null,
+    },
+    {
+      label: "Account & Credit Standing",
+      fromValue: `${customer.no} \u00b7 USD ${order.total}`,
+      toValue: `${customer.no} \u00b7 ${overLimit ? "Over limit" : "Active (Within limit)"}`,
+      matched: !overLimit,
+      action: overLimit ? "Hold for Finance" : null,
+    },
+    {
+      label: "Payment Terms",
+      fromValue: terms,
+      toValue: terms,
+      matched: true,
+      action: null,
+    },
+  ];
+  const failed = fields.some((field) => !field.matched);
+  const pair = {
+    from: { ...bcRef("Customer Record", "PO"), number: customer.no },
+    to: bcRef("Business Central", "BC"),
+  };
+  return {
+    id: `mock-${no}-customer-record`,
+    ruleId: "mock.bc.customer-record",
+    ruleLabel: "Customer Record against Business Central (sample result)",
+    orderNo: no,
+    outcome: failed ? "fail" : "pass",
+    statusLabel: failed ? "Over limit" : undefined,
+    chipKind: failed ? "destructive" : "success",
+    group: BC_GROUP,
+    pair,
+    summary: failed ? undefined : `${customer.name} \u00b7 ${terms}`,
+    mismatches: failed
+      ? [
+          {
+            fromLabel: "PO",
+            fromValue: `${customer.no} \u00b7 USD ${order.total}`,
+            toLabel: "BC",
+            toValue: "Over limit",
+            note: `${customer.no} exceeds its credit limit`,
+            unit: "plain" as const,
+          },
+        ]
+      : undefined,
+    fields,
+    fieldColumns: {
+      label: "Field",
+      from: `On ${order.header.externalDocumentNo}`,
+      to: "In Business Central",
+    },
+    expected: customer.name,
+    actual: printedName,
+    tolerance: { label: "Exact match on the number", value: "0" },
+    evidence: [
+      {
+        documentId: `${no}-customer-po`,
+        documentType: "CUSTOMER_PO",
+        location: "header: sell-to customer",
+        value: customer.no,
+      },
+    ],
+    checkedAt,
+  };
+}
+
+/**
+ * Every item line's own unit price, as agreed with this customer, against
+ * the item's catalogue price in Business Central. The dataset's own
+ * negotiated price runs 8 percent under the catalogue price to 6 percent
+ * over it, so the two are almost never the same figure: the line is out of
+ * catalogue exactly when they differ, with no tolerance to call a different
+ * price a match.
+ */
+function itemCatalogCheck(
+  order: SampleOrder,
+  items: readonly Item[],
+  checkedAt: string,
+): CheckResult | null {
+  const no = order.header.no;
+  const itemLines = order.lines.filter(
+    (orderLine) => orderLine.type === "Item",
+  );
+  if (itemLines.length === 0) return null;
+  const lines: CheckLineResult[] = itemLines.map((orderLine) => {
+    const item = items.find((candidate) => candidate.no === orderLine.no);
+    const catalogPrice = item?.unitPrice ?? orderLine.unitPrice;
+    const matched = Number(catalogPrice) === Number(orderLine.unitPrice);
+    return {
+      fromItemNo: orderLine.no,
+      fromDescription: orderLine.description,
+      fromQuantity: null,
+      fromPrice: orderLine.unitPrice,
+      toItemNo: orderLine.no,
+      toDescription: orderLine.description,
+      toQuantity: null,
+      toPrice: catalogPrice,
+      matched,
+      action: matched ? null : "Apply BC Price",
+    };
+  });
+  const failed = lines.some((checkLine) => !checkLine.matched);
+  const pair = {
+    from: bcRef("Item Catalog & Unit Pricing", "PO"),
+    to: bcRef("Business Central", "BC"),
+  };
+  const mismatches = failed
+    ? mismatchesFromLines(lines, pair.from, pair.to)
+    : undefined;
+  return {
+    id: `mock-${no}-item-catalog`,
+    ruleId: "mock.bc.item-catalog",
+    ruleLabel:
+      "Item Catalog and Unit Pricing against Business Central (sample result)",
+    orderNo: no,
+    outcome: failed ? "fail" : "pass",
+    statusLabel: mismatches ? mismatchCountLabel(mismatches.length) : undefined,
+    chipKind: failed ? "warning" : "success",
+    group: BC_GROUP,
+    pair,
+    summary: failed
+      ? undefined
+      : `${itemSummary(order)} \u00b7 Catalog & prices matched`,
+    mismatches,
+    lines,
+    lineValue: "price",
+    expected: order.total,
+    actual: order.total,
+    tolerance: {
+      label: "Price difference in USD (sample value)",
+      value: "0.00",
+    },
+    evidence: itemLines.map((orderLine) => ({
+      documentId: `${no}-customer-po`,
+      documentType: "CUSTOMER_PO",
+      location: `item ${orderLine.no}: unit price`,
+      value: orderLine.unitPrice,
+    })),
+    checkedAt,
+  };
+}
+
+/**
+ * Every item line's quantity against the item's own inventory in Business
+ * Central: can what is on hand cover what the order wants. The sample
+ * dataset's own short-stock scenario is the one case where it cannot.
+ */
+function liveInventoryCheck(
+  order: SampleOrder,
+  items: readonly Item[],
+  checkedAt: string,
+): CheckResult | null {
+  const no = order.header.no;
+  const itemLines = order.lines.filter(
+    (orderLine) => orderLine.type === "Item",
+  );
+  if (itemLines.length === 0) return null;
+  const rows = itemLines.map((orderLine) => {
+    const item = items.find((candidate) => candidate.no === orderLine.no);
+    const ordered = Number(orderLine.quantity);
+    const onHand = item ? Number(item.inventory) : ordered;
+    return {
+      itemNo: orderLine.no,
+      description: orderLine.description,
+      ordered,
+      onHand,
+      matched: onHand >= ordered,
+    };
+  });
+  const fields: CheckFieldResult[] = rows.map((row) => ({
+    label: row.description,
+    itemNo: row.itemNo,
+    fromValue: plainQuantity(String(row.ordered)),
+    toValue: plainQuantity(String(row.onHand)),
+    matched: row.matched,
+    action: row.matched ? null : "Raise PR",
+    // "Match" says nothing about what was checked; "Covered" says the stock
+    // on hand is enough for what the order wants.
+    resultLabel: row.matched ? "Covered" : null,
+  }));
+  const failed = rows.some((row) => !row.matched);
+  const mismatches: CheckMismatch[] = rows
+    .filter((row) => !row.matched)
+    .map((row) => ({
+      fromLabel: "Ordered",
+      fromValue: plainQuantity(String(row.ordered)),
+      toLabel: "On hand",
+      toValue: `${plainQuantity(String(row.onHand))} (${String(row.onHand - row.ordered)})`,
+      note: `${row.itemNo} shortfall`,
+      unit: "plain" as const,
+    }));
+  const { ordered } = lineTotals(order);
+  const pair = {
+    from: bcRef("Live Inventory Availability", "Ordered"),
+    to: bcRef("Business Central", "On hand"),
+  };
+  return {
+    id: `mock-${no}-live-inventory`,
+    ruleId: "mock.bc.live-inventory",
+    ruleLabel:
+      "Live Inventory Availability against Business Central (sample result)",
+    orderNo: no,
+    outcome: failed ? "fail" : "pass",
+    statusLabel: failed ? "Shortage" : undefined,
+    chipKind: failed ? "warning" : "success",
+    group: BC_GROUP,
+    pair,
+    summary: failed ? undefined : `${ordered} units \u00b7 All lines covered`,
+    mismatches: failed ? mismatches : undefined,
+    fields,
+    fieldColumns: { label: "Item", from: "Ordered", to: "On Hand in BC" },
+    expected: ordered,
+    actual: ordered,
+    tolerance: {
+      label: "Available stock at least the quantity ordered",
+      value: "0",
+    },
+    evidence: itemLines.map((orderLine) => ({
+      documentId: `${no}-customer-po`,
+      documentType: "CUSTOMER_PO",
+      location: `item ${orderLine.no}: quantity`,
+      value: orderLine.quantity,
+    })),
+    checkedAt,
+  };
+}
+
 /**
  * Area 3's four document cross-checks, each run only once both documents of
  * its pair are on the order's file: the customer PO against the proforma
@@ -393,8 +662,17 @@ function lineTotals(order: SampleOrder): {
  * and the packing list against the bill of lading or air waybill. A pair
  * whose second document has not come, and is not yet overdue, runs no check:
  * there is nothing yet to compare it against.
+ *
+ * Ahead of them, the three Business Central verification checks: the
+ * customer record, the item catalogue and unit pricing, and live inventory
+ * availability, each against Business Central's own master data.
  */
-export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
+export function mockChecks(
+  order: SampleOrder,
+  asOf: string,
+  customers: readonly Customer[],
+  items: readonly Item[],
+): CheckResult[] {
   const no = order.header.no;
   const index = SAMPLE_STEPS.findIndex(
     (entry) => entry.state === order.sampleScreenState,
@@ -402,10 +680,17 @@ export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
   const checkedAt = stepTime(order, Math.max(index, 0), index + 1, asOf);
   const results: CheckResult[] = [];
 
-  // Whether the customer is in master data is the Business Central
-  // verification group's own check, not a document cross-check: it belongs
-  // beside the other Business Central checks (area 3's next story), not
-  // duplicated here.
+  const customer = customers.find(
+    (candidate) => candidate.no === order.header.sellToCustomerNo,
+  );
+  for (const check of [
+    customerRecordCheck(order, customer, checkedAt),
+    itemCatalogCheck(order, items, checkedAt),
+    liveInventoryCheck(order, items, checkedAt),
+  ]) {
+    if (check) results.push(check);
+  }
+
   const GROUP = "document-cross-check";
   const poRef = docRef("CUSTOMER_PO", order.header.externalDocumentNo);
 
@@ -420,22 +705,25 @@ export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
       from: poRef,
       to: docRef("PROFORMA_INVOICE", piDoc.number),
     };
+    const poPiMismatches = failed
+      ? mismatchesFromLines(lines, poPiPair.from, poPiPair.to)
+      : undefined;
     results.push({
       id: `mock-${no}-po-pi`,
       ruleId: "mock.doc.po-pi",
       ruleLabel: "Customer PO against Proforma Invoice (sample result)",
       orderNo: no,
       outcome: failed ? "fail" : "pass",
-      statusLabel: failed ? "Mismatch" : undefined,
+      statusLabel: poPiMismatches
+        ? mismatchCountLabel(poPiMismatches.length)
+        : undefined,
       chipKind: failed ? "warning" : "success",
       group: GROUP,
       pair: poPiPair,
       summary: failed
         ? undefined
-        : `${order.header.currencyCode} ${order.total} \u00b7 ${skuSummary(order)}`,
-      mismatches: failed
-        ? mismatchesFromLines(lines, poPiPair.from, poPiPair.to)
-        : undefined,
+        : `${order.header.currencyCode} ${order.total} \u00b7 ${itemSummary(order)}`,
+      mismatches: poPiMismatches,
       lines,
       expected: mismatch ? mismatch.poPrice : order.total,
       actual: mismatch ? mismatch.piPrice : order.total,
@@ -470,22 +758,25 @@ export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
     const failed = lines.some((line) => !line.matched);
     const { ordered, shipped } = lineTotals(order);
     const poPlPair = { from: poRef, to: docRef("PACKING_LIST", plDoc.number) };
+    const poPlMismatches = failed
+      ? mismatchesFromLines(lines, poPlPair.from, poPlPair.to)
+      : undefined;
     results.push({
       id: `mock-${no}-po-pl`,
       ruleId: "mock.doc.po-pl",
       ruleLabel: "Customer PO against Packing List (sample result)",
       orderNo: no,
       outcome: failed ? "fail" : "pass",
-      statusLabel: failed ? "Item mismatch" : undefined,
+      statusLabel: poPlMismatches
+        ? mismatchCountLabel(poPlMismatches.length)
+        : undefined,
       chipKind: failed ? "warning" : "success",
       group: GROUP,
       pair: poPlPair,
       summary: failed
         ? undefined
-        : `${ordered} units \u00b7 ${skuSummary(order)}`,
-      mismatches: failed
-        ? mismatchesFromLines(lines, poPlPair.from, poPlPair.to)
-        : undefined,
+        : `${ordered} units \u00b7 ${itemSummary(order)}`,
+      mismatches: poPlMismatches,
       lines,
       expected: ordered,
       actual: mismatch ? plainQuantity(mismatch.packed) : shipped,
@@ -529,7 +820,7 @@ export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
         chipKind: "success",
         group: GROUP,
         pair,
-        summary: `${order.header.currencyCode} ${order.total} \u00b7 ${skuSummary(order)}`,
+        summary: `${order.header.currencyCode} ${order.total} \u00b7 ${itemSummary(order)}`,
         lines: compareInvoiceLines(order),
         lineValue: "amount",
         expected: order.total,
@@ -649,7 +940,7 @@ export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
           chipKind: "success",
           group: GROUP,
           pair,
-          summary: `${shipped} units \u00b7 ${skuSummary(order)}`,
+          summary: `${shipped} units \u00b7 ${itemSummary(order)}`,
           fields: compareShippingFields(order),
           expected: ordered,
           actual: shipped,

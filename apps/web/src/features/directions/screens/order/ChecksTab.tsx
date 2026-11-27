@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import type { CheckResult, MasterMatch } from "@orderpilot/shared";
+import type { CheckResult } from "@orderpilot/shared";
 import {
   ArrowLeftRight,
   ChevronDown,
-  ChevronUp,
   CircleCheck,
   Hourglass,
   ShieldCheck,
   TriangleAlert,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ScrollRegion } from "@/components/common";
 import {
   Table,
   TableBody,
@@ -191,10 +189,11 @@ function LineTable({
   const { t } = useTranslation("order-tracker");
   const lines = check.lines ?? [];
   const pair = check.pair;
-  const isAmount = check.lineValue === "amount";
-  const showQuantity = !isAmount;
-  const showPrice = isAmount || lines.some((line) => line.fromPrice !== null);
-  const valueKey = isAmount ? "amount" : "price";
+  const mode = check.lineValue ?? "qtyPrice";
+  const showQuantity = mode === "qtyPrice";
+  const showPrice =
+    mode !== "qtyPrice" || lines.some((line) => line.fromPrice !== null);
+  const valueKey = mode === "amount" ? "amount" : "price";
   const hidden = priceMask !== null && isPriceCheck(check);
   const fromShort = pair?.from.shortLabel ?? "";
   const toShort = pair?.to.shortLabel ?? "";
@@ -249,27 +248,36 @@ function LineTable({
   );
 }
 
-/** The field-by-field table a check that compares two documents by what each prints, not by item, shows. */
+/**
+ * The field-by-field table a check that compares two documents (or a
+ * document against a system of record) by what each prints, not by item,
+ * shows. `fieldColumns` overrides the three headings, for a check whose
+ * rows are not "Field" at all, such as live inventory's "SKU & Item".
+ */
 function FieldTable({ check }: { check: CheckResult }) {
   const { t } = useTranslation("order-tracker");
   const fields = check.fields ?? [];
   const pair = check.pair;
+  const columns = check.fieldColumns;
+  const labelHeader = columns?.label ?? t("detail.checks.field");
+  const fromHeader =
+    columns?.from ??
+    t("detail.checks.onDoc", {
+      doc: pair?.from.number ?? pair?.from.label ?? "",
+    });
+  const toHeader =
+    columns?.to ??
+    t("detail.checks.onDoc", {
+      doc: pair?.to.number ?? pair?.to.label ?? "",
+    });
   return (
     <div className="od-check-table-scroll">
       <Table className="od-table od-check-table">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead scope="col">{t("detail.checks.field")}</TableHead>
-            <TableHead scope="col">
-              {t("detail.checks.onDoc", {
-                doc: pair?.from.number ?? pair?.from.label ?? "",
-              })}
-            </TableHead>
-            <TableHead scope="col">
-              {t("detail.checks.onDoc", {
-                doc: pair?.to.number ?? pair?.to.label ?? "",
-              })}
-            </TableHead>
+            <TableHead scope="col">{labelHeader}</TableHead>
+            <TableHead scope="col">{fromHeader}</TableHead>
+            <TableHead scope="col">{toHeader}</TableHead>
             <TableHead scope="col">{t("detail.checks.result")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -279,7 +287,20 @@ function FieldTable({ check }: { check: CheckResult }) {
               key={field.label}
               data-outcome={field.matched ? "pass" : "fail"}
             >
-              <TableCell className="font-medium">{field.label}</TableCell>
+              <TableCell
+                className={field.itemNo ? "od-check-item-cell" : "font-medium"}
+              >
+                {field.itemNo ? (
+                  <>
+                    <span className="od-check-item-name">{field.label}</span>
+                    <span className="numeral od-check-item-no">
+                      {field.itemNo}
+                    </span>
+                  </>
+                ) : (
+                  field.label
+                )}
+              </TableCell>
               <TableCell>{field.fromValue}</TableCell>
               <TableCell
                 className={
@@ -294,9 +315,10 @@ function FieldTable({ check }: { check: CheckResult }) {
                 }
                 data-outcome={field.matched ? "pass" : "fail"}
               >
-                {field.matched
-                  ? t("detail.checks.lineMatch")
-                  : (field.action ?? t("detail.checks.lineMismatch"))}
+                {field.resultLabel ??
+                  (field.matched
+                    ? t("detail.checks.lineMatch")
+                    : (field.action ?? t("detail.checks.lineMismatch")))}
               </TableCell>
             </TableRow>
           ))}
@@ -447,9 +469,11 @@ function MismatchLines({
  * either a "Details" disclosure or, while a document it needs has not come
  * and this role may upload one, an upload button in its place. A role with
  * no upload permission sees the chip alone: offering an action nobody but
- * someone who can use it would see it as broken, not as an invitation. The
- * figures stay in the markup whether a card is open or closed, open by
- * default, so collapsing one never drops its evidence or its mask.
+ * someone who can use it would see it as broken, not as an invitation.
+ * Details opens by default only when the check found a problem: a pass is
+ * already said by its chip and summary, so its table stays folded until
+ * asked for; a fail, a pending copy or an overdue document opens straight
+ * away, so what wants attention is on screen without a click.
  */
 function Result({
   check,
@@ -460,7 +484,7 @@ function Result({
 }) {
   const { t } = useTranslation("order-tracker");
   const canUpload = useUploadEntry();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(check.outcome !== "pass");
   const Icon = OUTCOME_ICON[check.outcome];
   const kind = check.chipKind ?? OUTCOME_KIND[check.outcome];
   const label = check.statusLabel ?? t(`detail.checks.${check.outcome}`);
@@ -508,7 +532,7 @@ function Result({
               }}
             >
               {t("detail.checks.details")}
-              {open ? <ChevronUp /> : <ChevronDown />}
+              <ChevronDown className="od-check-chevron" data-open={open} />
             </Button>
           )}
         </div>
@@ -517,109 +541,60 @@ function Result({
         <div
           id={panelId}
           className="od-check-body"
-          hidden={!open}
           data-open={open}
+          // Closed, the table is still in the markup (so a screen reader
+          // never meets a check with no evidence) but takes no tab stop and
+          // is never read: the same thing `hidden` did, kept here only
+          // because `hidden` cannot also collapse its height with a
+          // transition.
+          inert={!open}
         >
-          {check.fields && check.fields.length > 0 ? (
-            <FieldTable check={check} />
-          ) : check.lines && check.lines.length > 0 ? (
-            <LineTable check={check} priceMask={priceMask} />
-          ) : (
-            <LegacyTable check={check} priceMask={priceMask} />
-          )}
+          <div className="od-check-body-inner">
+            {check.fields && check.fields.length > 0 ? (
+              <FieldTable check={check} />
+            ) : check.lines && check.lines.length > 0 ? (
+              <LineTable check={check} priceMask={priceMask} />
+            ) : (
+              <LegacyTable check={check} priceMask={priceMask} />
+            )}
+          </div>
         </div>
       )}
     </li>
   );
 }
 
-function Matches({ matches }: { matches: readonly MasterMatch[] }) {
-  const { t } = useTranslation("order-tracker");
-  return (
-    <ScrollRegion
-      label={t("detail.matches.region")}
-      className="od-lines-scroll"
-    >
-      <Table className="od-table od-lines">
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead scope="col">{t("detail.matches.kind")}</TableHead>
-            <TableHead scope="col">{t("detail.matches.printed")}</TableHead>
-            <TableHead scope="col">{t("detail.matches.matched")}</TableHead>
-            <TableHead scope="col">{t("detail.matches.possible")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {matches.map((match) => (
-            <TableRow key={`${match.kind}-${match.printedNo}`}>
-              <TableCell>{t(`detail.matches.${match.kind}`)}</TableCell>
-              <TableCell>
-                <span className="od-customer">
-                  <span className="od-customer-name">{match.printedName}</span>
-                  <span className="numeral od-customer-no">
-                    {match.printedNo}
-                  </span>
-                </span>
-              </TableCell>
-              <TableCell>
-                {match.matchedNo ? (
-                  <span className="od-customer">
-                    <span className="od-customer-name">
-                      {match.matchedName}
-                    </span>
-                    <span className="numeral od-customer-no">
-                      {match.matchedNo}
-                    </span>
-                  </span>
-                ) : (
-                  <StatusChip kind="warning" icon={TriangleAlert}>
-                    {t("detail.matches.noMatch")}
-                  </StatusChip>
-                )}
-              </TableCell>
-              <TableCell className="fs-14 text-muted-foreground">
-                {match.possibleMatches.length === 0
-                  ? t("detail.matches.none")
-                  : match.possibleMatches
-                      .map((possible) => `${possible.no} ${possible.name}`)
-                      .join("; ")}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </ScrollRegion>
-  );
-}
-
 /**
  * What the rules found on this order: each check with what was expected, what
- * was found, the tolerance and the evidence, then the customer and items as
- * printed on the documents beside the Business Central record with the same
- * number. A check in the "document-cross-check" group compares two documents
- * by number and, where the data has it, item by item; those group under their
- * own "Document Cross-Checks" heading, the rest stay a flat list. Names are
- * shown and never matched on: a look-alike is a possible match for a person
- * to look at. Both come from the tracker, as the old order page showed them.
- * For a role whose prices are masked, a price check shows the mask in place
- * of its figures (see `Result`).
+ * was found, the tolerance and the evidence. A check in the
+ * "business-central-verification" group compares the order against Business
+ * Central's own master data (the customer record, the item catalogue and
+ * live inventory) and replaces what the old customer-and-item matches table
+ * showed; one in "document-cross-check" compares two documents, by number
+ * and, where the data has it, item by item. Each group sits under its own
+ * heading, after the document cross-checks, the rest stay a flat list. For a
+ * role whose prices are masked, a price check shows the mask in place of its
+ * figures (see `Result`).
  */
 export function ChecksTab({
   checks,
-  matches,
   priceMask,
 }: {
   checks: readonly CheckResult[];
-  matches: readonly MasterMatch[];
   /** Why the order's amount is masked for this role, or null when it may see prices. */
   priceMask: string | null;
 }) {
   const { t } = useTranslation("directions-orders");
+  const businessCentralChecks = checks.filter(
+    (check) => check.group === "business-central-verification",
+  );
   const documentCrossChecks = checks.filter(
     (check) => check.group === "document-cross-check",
   );
   const otherChecks = checks.filter(
-    (check) => check.group !== "document-cross-check",
+    (check) =>
+      check.group !== "document-cross-check" &&
+      check.group !== "business-central-verification",
   );
   return (
     <div className="od-checks">
@@ -653,18 +628,23 @@ export function ChecksTab({
               </ul>
             </section>
           ) : null}
+          {businessCentralChecks.length > 0 ? (
+            <section aria-labelledby="od-business-central-verification">
+              <h3
+                id="od-business-central-verification"
+                className="fs-14 font-semibold od-checks-group-title"
+              >
+                {t("order.checks.businessCentralVerification")}
+              </h3>
+              <ul className="od-check-list">
+                {businessCentralChecks.map((check) => (
+                  <Result key={check.id} check={check} priceMask={priceMask} />
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </>
       )}
-      {matches.length > 0 ? (
-        <section aria-labelledby="od-matches" className="od-matches">
-          <div className="od-check-head">
-            <h3 id="od-matches" className="fs-14 font-semibold od-check-title">
-              {t("order.checks.matches")}
-            </h3>
-          </div>
-          <Matches matches={matches} />
-        </section>
-      ) : null}
     </div>
   );
 }
