@@ -23,12 +23,13 @@ describe("Sign out on the Account panel", () => {
     expect(button).toHaveAccessibleDescription(/^You are signed in as /);
   });
 
-  it("is a quiet destructive outline: the destructive border and words, with no fill", () => {
+  it("uses the destructive border and words, not the destructive fill", () => {
     renderSettings(<SessionCard />);
     const button = screen.getByRole("button", { name: "Sign out" });
     expect(button).toHaveAttribute("data-variant", "outline");
     expect(button).toHaveClass("border-destructive", "text-destructive");
-    expect(button).toHaveClass("dark:border-destructive");
+    expect(button).toHaveClass("dark:border-destructive", "dark:bg-background");
+    expect(button).not.toHaveClass("dark:bg-input/30");
     expect(button).not.toHaveClass("bg-destructive");
   });
 
