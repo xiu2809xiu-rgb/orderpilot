@@ -42,8 +42,9 @@ export function AccessCard() {
               label={group.title}
               align="start"
               control={
-                // A sentence is long: capped, so that the name keeps its column.
-                <p className="fs-14 max-w-sm text-muted-foreground">
+                // A sentence is long: one fixed width for every row, so that the
+                // sentences share a left edge and the name keeps its column.
+                <p className="fs-14 text-muted-foreground sm:w-80">
                   {group.sentence}
                 </p>
               }

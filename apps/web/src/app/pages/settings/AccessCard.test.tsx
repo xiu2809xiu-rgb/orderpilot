@@ -27,4 +27,14 @@ describe("the What you can do card", () => {
     const row = within(screen.getByRole("list")).getAllByRole("listitem")[0];
     expect(row).toHaveClass("grid", "sm:grid-cols-[minmax(0,1fr)_auto]");
   });
+
+  it("gives every sentence the same width, so that they share a left edge", () => {
+    renderSettings(<AccessCard />, { role: "SUPPORT" });
+    const rows = within(screen.getByRole("list")).getAllByRole("listitem");
+    expect(rows.length).toBeGreaterThan(1);
+    for (const row of rows) {
+      const sentence = row.querySelector("p.text-muted-foreground");
+      expect(sentence).toHaveClass("sm:w-80");
+    }
+  });
 });
