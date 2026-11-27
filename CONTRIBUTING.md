@@ -373,6 +373,10 @@ If something destructive or irreversible seems necessary, ask Richie first.
 7. **Test it** with Testing Library, and add its screenshots in light and dark to the pull request.
 8. **Stay in your area.** Shared components need a review from their owners, listed in [module ownership](docs/team/module-ownership.md#shared-files-and-who-reviews-them).
 
+## Settings rows and forms
+
+A setting that applies as soon as it is chosen is one row of `SettingList` and `SettingRow` (`components/parts/SettingRow`): the name, and one plain line if it needs one, on the left, and the control or the value on the right (under the name on a phone). Put what ends or undoes something (Sign out, Reset) in a last group of its own, drawn as a quiet destructive outline with its icon (`QUIET_DESTRUCTIVE`, in `app/pages/settings`). A form that is filled in order is a different thing: it keeps the label above the field and its error under it, which the form kit below already does, so never build one from rows.
+
 ## Building a form
 
 Every form is built from the kit in `apps/web/src/components/form`, imported from `@/components/form`. Never hand-roll a field, a save or an error box. `/gallery` shows the whole kit on a sales order header with a faked save, in demo mode and in development.

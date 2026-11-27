@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -138,5 +138,37 @@ describe("the system health section", () => {
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByText("Everything is working")).toBeVisible();
     expect(calls).toBe(2);
+  });
+});
+
+describe("the service details", () => {
+  it("is a list with one row for each service: its name, then its state", async () => {
+    server.use(
+      http.get(STATUS, () =>
+        HttpResponse.json({
+          data: [
+            UP[0],
+            { name: "redis", status: "down", durationMs: 0 },
+            UP[2],
+          ],
+        }),
+      ),
+    );
+    renderSettings(<HealthPanel />, { role: "SYSTEM_ADMIN" });
+    await screen.findByText("1 service is not answering");
+    const list = details()?.querySelector("ul");
+    expect(list).not.toBeNull();
+    if (!list) return;
+    const rows = within(list).getAllByRole("listitem");
+    expect(rows.map((row) => row.textContent)).toEqual([
+      "DatabaseUp, 3 ms",
+      "Cache and job queueDown",
+      "Document storageUp, 9 ms",
+    ]);
+    for (const row of rows) {
+      // A SettingRow: the name is its first line, in the row's grid.
+      expect(row).toHaveClass("grid", "sm:grid-cols-[minmax(0,1fr)_auto]");
+      expect(row.querySelector("p")).toHaveClass("font-medium");
+    }
   });
 });

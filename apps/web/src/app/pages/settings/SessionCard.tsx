@@ -5,6 +5,7 @@ import { Section } from "@/components/parts/Section";
 import { SettingList, SettingRow } from "@/components/parts/SettingRow";
 import { Button } from "@/components/ui/button";
 import { useSessionStore } from "@/stores/session";
+import { QUIET_DESTRUCTIVE } from "./quietDestructive";
 
 /** Signing out, from the page where a person looks for it. It asks first when a form has unsaved changes. */
 export function SessionCard() {
@@ -20,6 +21,7 @@ export function SessionCard() {
           control={({ descriptionId }) => (
             <Button
               variant="outline"
+              className={QUIET_DESTRUCTIVE}
               onClick={requestSignOut}
               disabled={signingOut}
               aria-describedby={descriptionId}

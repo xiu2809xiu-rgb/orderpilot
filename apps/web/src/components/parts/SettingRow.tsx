@@ -7,16 +7,33 @@ export interface RowIds {
   descriptionId: string;
 }
 
-/** A card's rows: each is one thing that can be read or changed, with a line between. */
+/**
+ * A card's rows: each is one thing that can be read or changed, with a line
+ * between. `tight` sets 16 px above and below each row instead of 24, but the
+ * first row keeps no space above and the last none below, so it shows only
+ * between two rows (32 px apart instead of 48) and never in a list of one. It
+ * is a prop of the list, not of SettingRow, because other screens use the
+ * default row.
+ */
 export function SettingList({
   children,
   className,
+  tight = false,
 }: {
   children: ReactNode;
   className?: string;
+  tight?: boolean;
 }) {
   return (
-    <ul className={cn("divide-y divide-border", className)}>{children}</ul>
+    <ul
+      className={cn(
+        "divide-y divide-border",
+        tight && "[&>li]:py-s2",
+        className,
+      )}
+    >
+      {children}
+    </ul>
   );
 }
 
