@@ -12,6 +12,8 @@ export class ApiError extends Error {
     readonly details: FieldIssue[] = [],
     /** False for an answer that was not our envelope, such as a proxy's page. */
     readonly fromEnvelope = true,
+    /** From the Retry-After header of a 429, in whole seconds; null when absent. */
+    readonly retryAfterSeconds: number | null = null,
   ) {
     super(message);
   }

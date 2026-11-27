@@ -45,5 +45,43 @@
     "label": "Animated preview of OrderPilot",
     "pause": "Pause the hero animation",
     "play": "Play the hero animation"
+  },
+  "twoStep": {
+    "title": "Enter your code",
+    "intro": "Open your authenticator app and enter the 6-digit code for OrderPilot.",
+    "field": {
+      "group": "6-digit code",
+      "input": "6-digit code",
+      "hint": "The code changes every 30 seconds.",
+      "verifying": "Verifying",
+      "verified": "Verified",
+      "statusVerifying": "Verifying code",
+      "statusVerified": "Code verified",
+      "statusWrong": "That code did not work.",
+      "short": "Enter all 6 digits."
+    },
+    "submit": "Verify",
+    "useRecovery": "Use a recovery code instead",
+    "useApp": "Use the authenticator app instead",
+    "recovery": {
+      "label": "Recovery code",
+      "hint": "Each recovery code works once, for example ABCDE-FGHJK-LMNPQ.",
+      "required": "Enter one of your recovery codes.",
+      "wrong": "That recovery code did not work. Check it and try again.",
+      "verifying": "Verifying recovery code",
+      "verified": "Recovery code verified"
+    },
+    "back": "Back to sign in",
+    "loading": "Loading the second step",
+    "loadFailed": "The second step could not be loaded. Check your connection, go back and sign in again.",
+    "lockedIn_one": "Too many wrong codes. Try again in {{count}} minute, or use a recovery code.",
+    "lockedIn_other": "Too many wrong codes. Try again in {{count}} minutes, or use a recovery code.",
+    "lockedInHours_one": "Too many wrong codes. Try again in {{count}} hour, or use a recovery code.",
+    "lockedInHours_other": "Too many wrong codes. Try again in {{count}} hours, or use a recovery code.",
+    "recentLock": "Too many wrong codes were entered for your account in the last 7 days. If that was not you, someone may know your password.",
+    "recoveryUsed_one": "You signed in with a recovery code. {{count}} is left.",
+    "recoveryUsed_other": "You signed in with a recovery code. {{count}} are left.",
+    "recoveryUsedLast": "You signed in with your last recovery code. Make new ones in Settings.",
+    "shown": "Two-step verification. Enter your code."
   }
 }

@@ -31,6 +31,13 @@ const day = (daysFromNow: number) =>
   new Date(NOW + daysFromNow * 86_400_000).toISOString();
 const dateOnly = (daysFromNow: number) => day(daysFromNow).slice(0, 10);
 
+/**
+ * The calendar day so many days before today, as the sample orders are dated.
+ * A test that filters by date counts its range with this. A range of fixed
+ * calendar days holds a sample order only until the date moves on.
+ */
+export const daysAgo = (days: number) => dateOnly(-days);
+
 /** Singapore keeps one offset all year: eight hours ahead of UTC. */
 const SINGAPORE_AHEAD_MS = 8 * 3_600_000;
 

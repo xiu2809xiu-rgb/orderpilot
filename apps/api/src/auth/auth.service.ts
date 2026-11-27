@@ -19,10 +19,33 @@ import { PasswordHasher } from "./domain/password-hasher.js";
 import { hashRefreshToken, newRefreshToken } from "./domain/refresh-token.js";
 import { judgeRefreshToken } from "./domain/refresh-rotation.js";
 import { RolePermissionRepository } from "./role-permission.repository.js";
+import type { Proof } from "./two-step-proof.service.js";
+import {
+  TwoStepSignInService,
+  type IssuedChallenge,
+} from "./two-step-sign-in.service.js";
 
 export interface SignedIn {
   readonly session: Session;
   readonly cookies: IssuedCookies;
+}
+
+/**
+ * A password sign-in either opens a session or, when the person has two-step
+ * on, makes a challenge and opens nothing: the second step finishes it.
+ */
+export type LoginResult =
+  | { readonly kind: "session"; readonly signedIn: SignedIn }
+  | { readonly kind: "challenge"; readonly challenge: IssuedChallenge };
+
+/** A finished second step: the session, and what the page tells the person. */
+export interface VerifiedSignIn {
+  readonly signedIn: SignedIn;
+  readonly meta: {
+    readonly method: "code" | "recovery-code";
+    readonly recoveryCodesLeft: number;
+    readonly lockedRecently: boolean;
+  };
 }
 
 type Outcome =
@@ -51,6 +74,8 @@ export class AuthService {
     @Inject(CsrfTokens) private readonly csrf: CsrfTokens,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(AuthAuditor) private readonly auditor: AuthAuditor,
+    @Inject(TwoStepSignInService)
+    private readonly twoStep: TwoStepSignInService,
   ) {}
 
   /** What the sign-in page needs to know. */
@@ -69,7 +94,7 @@ export class AuthService {
   async login(
     req: Request,
     credentials: { email: string; password: string },
-  ): Promise<SignedIn> {
+  ): Promise<LoginResult> {
     const user = await this.users.findByEmail(credentials.email);
     // Always verify, against a dummy hash when there is nothing to check, so
     // an unknown user and a wrong password cost the same.
@@ -86,7 +111,52 @@ export class AuthService {
       await this.refuseLogin(req, "auth.login.refused", reason, user);
       throw new DomainError("INVALID_CREDENTIALS", INVALID_CREDENTIALS);
     }
-    return this.startSession(req, user, false);
+    // Only after the password is right and the account is enabled, so a wrong
+    // password and an unknown user answer exactly as before.
+    const challenge = await this.twoStep.challengeFor(req, user);
+    if (challenge) return { kind: "challenge", challenge };
+    return {
+      kind: "session",
+      signedIn: await this.startSession(req, user, false),
+    };
+  }
+
+  /**
+   * Finishes a password sign-in that asked for a second step. The proof check
+   * and the session start in one transaction, so a code is spent only if the
+   * session is issued. A refused step is returned from the transaction and
+   * thrown after it commits, so its counter and its audit row survive.
+   */
+  async verifyTwoStep(
+    req: Request,
+    token: string | undefined,
+    proof: Proof,
+  ): Promise<VerifiedSignIn> {
+    const outcome = await this.database.transaction(
+      async (): Promise<
+        | { readonly ok: true; readonly verified: VerifiedSignIn }
+        | { readonly ok: false; readonly error: DomainError }
+      > => {
+        const checked = await this.twoStep.check(req, token, proof);
+        if (!checked.ok) return checked;
+        const signedIn = await this.startSession(req, checked.user, false, {
+          secondStep: checked.method,
+        });
+        return {
+          ok: true,
+          verified: {
+            signedIn,
+            meta: {
+              method: checked.method,
+              recoveryCodesLeft: checked.recoveryCodesLeft,
+              lockedRecently: checked.lockedRecently,
+            },
+          },
+        };
+      },
+    );
+    if (!outcome.ok) throw outcome.error;
+    return outcome.verified;
   }
 
   async demoLogin(req: Request, role: Role): Promise<SignedIn> {
@@ -267,6 +337,7 @@ export class AuthService {
     req: Request,
     user: UserRecord,
     demo: boolean,
+    changes: Record<string, unknown> = {},
   ): Promise<SignedIn> {
     return this.database.transaction(async () => {
       const signedIn = await this.issue(req, user, demo, randomUUID(), null);
@@ -276,7 +347,7 @@ export class AuthService {
         entityType: "User",
         entityId: user.id,
         summary: `${user.displayName} signed in${demo ? " (demo)" : ""}`,
-        changes: { demo },
+        changes: { demo, ...changes },
         ip: req.ip ?? null,
         traceId: requestIdOf(req),
       });
