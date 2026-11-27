@@ -31,9 +31,94 @@ export function mockPageEnvelope<T extends z.ZodType>(item: T) {
 
 // ---- Check results ---------------------------------------------------------
 
-export const CHECK_OUTCOMES = ["pass", "fail"] as const;
+/**
+ * `pending` and `overdue` are for a document cross-check whose second
+ * document has not come: there is nothing yet to compare, so the check is
+ * neither a pass nor a fail. `overdue` is `pending` past the document's due
+ * date.
+ */
+export const CHECK_OUTCOMES = ["pass", "fail", "pending", "overdue"] as const;
 export const checkOutcomeSchema = z.enum(CHECK_OUTCOMES);
 export type CheckOutcome = z.infer<typeof checkOutcomeSchema>;
+
+/** The colour a check's chip draws in, when its outcome's own colour is not the right word for it. */
+export const CHECK_CHIP_KINDS = [
+  "success",
+  "warning",
+  "destructive",
+  "info",
+] as const;
+export const checkChipKindSchema = z.enum(CHECK_CHIP_KINDS);
+export type CheckChipKind = z.infer<typeof checkChipKindSchema>;
+
+/** One of the two documents a document cross-check compares, by its own number. */
+export const checkDocumentRefSchema = z.object({
+  type: documentTypeSchema,
+  /** What it is, in words, such as "Customer PO". */
+  label: z.string().min(1),
+  /** The short form a table column heading uses, such as "PO". */
+  shortLabel: z.string().min(1),
+  /** The number printed on it, or null while it has not come. */
+  number: z.string().nullable(),
+});
+export type CheckDocumentRef = z.infer<typeof checkDocumentRefSchema>;
+
+/** One item line of a document cross-check's table: what each side prints for it. */
+export const checkLineResultSchema = z.object({
+  fromItemNo: z.string().min(1),
+  fromDescription: z.string().min(1),
+  fromQuantity: z.string().nullable(),
+  fromPrice: z.string().nullable(),
+  toItemNo: z.string().min(1),
+  toDescription: z.string().min(1),
+  toQuantity: z.string().nullable(),
+  toPrice: z.string().nullable(),
+  matched: z.boolean(),
+  /** What a person should do about a line that does not match, such as "Revise PI". */
+  action: z.string().nullable(),
+});
+export type CheckLineResult = z.infer<typeof checkLineResultSchema>;
+
+/**
+ * One line under a failed document cross-check's title that names what
+ * differs: the two sides' own values, and a short note of which item and
+ * which field, such as "I-0256 unit price variance". A check with more than
+ * one unmatched line carries one of these for each, so every mismatch is
+ * named, not only the first. `unit` is "money" for a value the Checks tab
+ * prints with its currency code; any other value prints as it came.
+ */
+export const checkMismatchSchema = z.object({
+  fromLabel: z.string().min(1),
+  fromValue: z.string().min(1),
+  toLabel: z.string().min(1),
+  toValue: z.string().min(1),
+  note: z.string().min(1),
+  unit: z.enum(["money", "plain"]),
+});
+export type CheckMismatch = z.infer<typeof checkMismatchSchema>;
+
+/**
+ * One row of a document cross-check's table, when it compares two documents
+ * by what each prints rather than item by item, such as a packing list's
+ * carton count against a bill of lading's. Takes the Checks tab's table over
+ * `lines`, when a check sets both.
+ */
+export const checkFieldResultSchema = z.object({
+  label: z.string().min(1),
+  fromValue: z.string().min(1),
+  toValue: z.string().min(1),
+  matched: z.boolean(),
+  /** What a person should do about a field that does not match, such as "Check Carrier". */
+  action: z.string().nullable(),
+});
+export type CheckFieldResult = z.infer<typeof checkFieldResultSchema>;
+
+/** Asks the Checks tab to put the document missing (`upload.document`) before this check's own action button. */
+export const checkUploadSchema = z.object({
+  label: z.string().min(1),
+  document: documentTypeSchema,
+});
+export type CheckUpload = z.infer<typeof checkUploadSchema>;
 
 /** A tolerance is configuration, and its value is shown in every result. */
 export const toleranceSchema = z.object({
@@ -71,6 +156,32 @@ export const checkResultSchema = z.object({
   tolerance: toleranceSchema,
   evidence: z.array(evidenceRefSchema),
   checkedAt: z.iso.datetime(),
+  /** The Checks tab's own grouping, such as "document-cross-check". Absent for a check with no group. */
+  group: z.string().optional(),
+  /** Overrides the outcome's own word on the chip, such as "Mismatch" for a failed document cross-check. */
+  statusLabel: z.string().optional(),
+  /** Overrides the outcome's own colour, when the outcome's colour is not the right word for this check. */
+  chipKind: checkChipKindSchema.optional(),
+  /** The two documents a document cross-check compares, by number, for the Checks tab's title. */
+  pair: z
+    .object({ from: checkDocumentRefSchema, to: checkDocumentRefSchema })
+    .optional(),
+  /** The line under the title: a total, a unit count, or why the pair cannot be compared yet. */
+  summary: z.string().optional(),
+  /** In its place, for a failed document cross-check: every line that differs between the two sides. */
+  mismatches: z.array(checkMismatchSchema).optional(),
+  /** One row per item, when the check compares two documents line by line. */
+  lines: z.array(checkLineResultSchema).optional(),
+  /**
+   * "amount" prints `lines`' money column over its quantity one (a check
+   * that compares documents by what they bill, not by what they ship).
+   * Absent keeps the usual quantity, and price where a line carries one.
+   */
+  lineValue: z.enum(["qtyPrice", "amount"]).optional(),
+  /** A field-by-field table, for a check that compares two documents by what each prints, not by item. */
+  fields: z.array(checkFieldResultSchema).optional(),
+  /** Shown instead of a result table while a document this check needs has not come. */
+  upload: checkUploadSchema.optional(),
 });
 export type CheckResult = z.infer<typeof checkResultSchema>;
 

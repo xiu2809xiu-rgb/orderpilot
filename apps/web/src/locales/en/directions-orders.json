@@ -268,7 +268,8 @@
     "checks": {
       "emptyTitle": "No checks have run yet",
       "emptyBody": "Checks run once the documents of this order have been read.",
-      "matches": "Matched to Business Central"
+      "matches": "Matched to Business Central",
+      "documentCrossChecks": "Document Cross-Checks"
     },
     "activity": {
       "emptyTitle": "Nothing has happened yet",
